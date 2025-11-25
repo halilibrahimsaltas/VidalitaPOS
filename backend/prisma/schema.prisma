@@ -51,3 +51,37 @@ model Branch {
   @@map("branches")
 }
 
+model Category {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String     @unique
+  description String?
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  products    Product[]
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("categories")
+}
+
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  barcode     String?   @unique
+  sku         String?   @unique
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  price       Decimal   @db.Decimal(10, 2)
+  costPrice   Decimal?  @db.Decimal(10, 2)
+  imageUrl    String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("products")
+}
+

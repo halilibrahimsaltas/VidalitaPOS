@@ -32,6 +32,12 @@ const Dashboard = () => {
                 >
                   Şubeler
                 </Link>
+                <Link
+                  to="/products"
+                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Ürünler
+                </Link>
               </nav>
             </div>
             <div className="flex items-center space-x-4">
@@ -66,12 +72,18 @@ const Dashboard = () => {
               <li>Rol: {user?.role}</li>
             </ul>
           </div>
-          <div className="mt-6">
+          <div className="mt-6 flex gap-4">
             <Link
               to="/branches"
               className="inline-block btn btn-primary"
             >
-              Şube Yönetimine Git →
+              Şube Yönetimi →
+            </Link>
+            <Link
+              to="/products"
+              className="inline-block btn btn-primary"
+            >
+              Ürün Yönetimi →
             </Link>
           </div>
         </div>
