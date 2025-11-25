@@ -18,21 +18,22 @@ enum UserRole {
 }
 
 model User {
-  id                  String            @id @default(uuid())
-  username            String            @unique
-  email               String            @unique
+  id                  String                @id @default(uuid())
+  username            String                @unique
+  email               String                @unique
   password            String
   fullName            String
-  role                UserRole          @default(USER)
-  isActive            Boolean           @default(true)
+  role                UserRole              @default(USER)
+  isActive            Boolean               @default(true)
   branchId            String?
-  branch              Branch?           @relation("UserBranch", fields: [branchId], references: [id])
-  createdBranches     Branch[]          @relation("BranchCreatedBy")
-  createdStockTransfers StockTransfer[] @relation("StockTransferCreatedBy")
+  branch              Branch?               @relation("UserBranch", fields: [branchId], references: [id])
+  createdBranches     Branch[]              @relation("BranchCreatedBy")
+  createdStockTransfers StockTransfer[]      @relation("StockTransferCreatedBy")
   createdStockAdjustments StockAdjustment[] @relation("StockAdjustmentCreatedBy")
-  salesAsCashier      Sale[]            @relation("SaleCashier")
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  salesAsCashier      Sale[]                @relation("SaleCashier")
+  customerTransactions CustomerTransaction[] @relation("CustomerTransactionCreatedBy")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 
   @@map("users")
 }
@@ -166,18 +167,41 @@ model StockAdjustment {
 }
 
 model Customer {
-  id          String   @id @default(uuid())
-  name        String
-  phone       String?
-  email       String?
-  address     String?
-  taxNumber   String?
-  isActive    Boolean  @default(true)
-  sales       Sale[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String                @id @default(uuid())
+  name          String
+  phone         String?
+  email         String?
+  address       String?
+  taxNumber     String?
+  isActive      Boolean               @default(true)
+  sales         Sale[]
+  transactions  CustomerTransaction[]
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
 
   @@map("customers")
+}
+
+enum TransactionType {
+  SALE
+  PAYMENT
+  ADJUSTMENT
+}
+
+model CustomerTransaction {
+  id            String          @id @default(uuid())
+  customerId    String
+  customer      Customer        @relation(fields: [customerId], references: [id])
+  type          TransactionType
+  amount        Decimal         @db.Decimal(10, 2)
+  description   String?
+  saleId        String?
+  sale          Sale?           @relation(fields: [saleId], references: [id])
+  createdById   String
+  createdBy     User            @relation("CustomerTransactionCreatedBy", fields: [createdById], references: [id])
+  createdAt     DateTime        @default(now())
+
+  @@map("customer_transactions")
 }
 
 enum PaymentMethod {
@@ -195,26 +219,27 @@ enum SaleStatus {
 }
 
 model Sale {
-  id            String      @id @default(uuid())
-  saleNumber    String      @unique
-  branchId      String
-  branch        Branch      @relation(fields: [branchId], references: [id])
-  customerId    String?
-  customer      Customer?   @relation(fields: [customerId], references: [id])
-  cashierId     String
-  cashier       User        @relation("SaleCashier", fields: [cashierId], references: [id])
-  paymentMethod PaymentMethod
-  status        SaleStatus  @default(COMPLETED)
-  subtotal      Decimal     @db.Decimal(10, 2)
-  discount      Decimal     @default(0) @db.Decimal(10, 2)
-  tax           Decimal     @default(0) @db.Decimal(10, 2)
-  total         Decimal     @db.Decimal(10, 2)
-  paidAmount    Decimal     @db.Decimal(10, 2)
-  changeAmount  Decimal     @default(0) @db.Decimal(10, 2)
-  notes         String?
-  items         SaleItem[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id                  String                @id @default(uuid())
+  saleNumber          String                @unique
+  branchId            String
+  branch              Branch                @relation(fields: [branchId], references: [id])
+  customerId          String?
+  customer            Customer?             @relation(fields: [customerId], references: [id])
+  cashierId           String
+  cashier             User                  @relation("SaleCashier", fields: [cashierId], references: [id])
+  paymentMethod       PaymentMethod
+  status              SaleStatus            @default(COMPLETED)
+  subtotal            Decimal               @db.Decimal(10, 2)
+  discount            Decimal               @default(0) @db.Decimal(10, 2)
+  tax                 Decimal               @default(0) @db.Decimal(10, 2)
+  total               Decimal               @db.Decimal(10, 2)
+  paidAmount          Decimal               @db.Decimal(10, 2)
+  changeAmount        Decimal               @default(0) @db.Decimal(10, 2)
+  notes               String?
+  items               SaleItem[]
+  customerTransactions CustomerTransaction[]
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 
   @@map("sales")
 }

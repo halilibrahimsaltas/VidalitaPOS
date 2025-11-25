@@ -50,6 +50,12 @@ const Dashboard = () => {
                 >
                   POS
                 </Link>
+                <Link
+                  to="/customers"
+                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Müşteriler
+                </Link>
               </nav>
             </div>
             <div className="flex items-center space-x-4">

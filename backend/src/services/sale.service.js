@@ -120,6 +120,12 @@ export const saleService = {
       await inventoryService.updateQuantity(branchId, item.productId, -item.quantity);
     }
 
+    // Create customer transaction if credit sale
+    if (customerId && (paymentMethod === 'CREDIT' || paymentMethod === 'MIXED')) {
+      const { customerTransactionService } = await import('./customerTransaction.service.js');
+      await customerTransactionService.createSaleTransaction(sale.id, customerId);
+    }
+
     return sale;
   },
 
