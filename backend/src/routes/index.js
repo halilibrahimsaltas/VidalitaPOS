@@ -8,6 +8,7 @@ import stockTransferRoutes from './stockTransfer.routes.js';
 import stockAdjustmentRoutes from './stockAdjustment.routes.js';
 import saleRoutes from './sale.routes.js';
 import customerRoutes from './customer.routes.js';
+import reportRoutes from './report.routes.js';
 
 const router = express.Router();
 
@@ -20,6 +21,7 @@ router.use('/stock-transfers', stockTransferRoutes);
 router.use('/stock-adjustments', stockAdjustmentRoutes);
 router.use('/sales', saleRoutes);
 router.use('/customers', customerRoutes);
+router.use('/reports', reportRoutes);
 
 export default router;
 
