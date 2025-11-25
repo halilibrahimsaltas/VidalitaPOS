@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useBranches, useDeleteBranch } from '../../hooks/useBranches';
 import Button from '../common/Button';
 import Input from '../common/Input';
 
 const BranchList = ({ onEdit, onCreate }) => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [isActiveFilter, setIsActiveFilter] = useState('');
@@ -18,12 +20,12 @@ const BranchList = ({ onEdit, onCreate }) => {
   const deleteBranch = useDeleteBranch();
 
   const handleDelete = async (id, name) => {
-    if (window.confirm(`"${name}" şubesini silmek istediğinize emin misiniz?`)) {
+    if (window.confirm(`"${name}" ${t('branches.deleteConfirm')}`)) {
       try {
         await deleteBranch.mutateAsync(id);
-        alert('Şube başarıyla silindi');
+        alert(t('common.success'));
       } catch (error) {
-        alert(error.response?.data?.message || 'Şube silinirken bir hata oluştu');
+        alert(error.response?.data?.message || t('common.error'));
       }
     }
   };
@@ -31,7 +33,7 @@ const BranchList = ({ onEdit, onCreate }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Yükleniyor...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -39,7 +41,7 @@ const BranchList = ({ onEdit, onCreate }) => {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-        Şubeler yüklenirken bir hata oluştu
+        {t('common.error')}
       </div>
     );
   }
@@ -52,7 +54,7 @@ const BranchList = ({ onEdit, onCreate }) => {
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <Input
-            placeholder="Şube adı, kodu veya adres ile ara..."
+            placeholder={t('branches.searchPlaceholder')}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -68,12 +70,12 @@ const BranchList = ({ onEdit, onCreate }) => {
           }}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
-          <option value="">Tümü</option>
-          <option value="true">Aktif</option>
-          <option value="false">Pasif</option>
+          <option value="">{t('common.all')}</option>
+          <option value="true">{t('common.active')}</option>
+          <option value="false">{t('common.inactive')}</option>
         </select>
         <Button onClick={onCreate} variant="primary">
-          + Yeni Şube
+          + {t('branches.create')}
         </Button>
       </div>
 
@@ -83,22 +85,22 @@ const BranchList = ({ onEdit, onCreate }) => {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Şube Adı
+                {t('branches.name')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Kod
+                {t('branches.code')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Adres
+                {t('branches.address')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Telefon
+                {t('branches.phone')}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Durum
+                {t('common.active')}
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                İşlemler
+                {t('common.edit')}
               </th>
             </tr>
           </thead>
@@ -106,7 +108,7 @@ const BranchList = ({ onEdit, onCreate }) => {
             {branches.length === 0 ? (
               <tr>
                 <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                  Şube bulunamadı
+                  {t('branches.noBranches')}
                 </td>
               </tr>
             ) : (
@@ -132,7 +134,7 @@ const BranchList = ({ onEdit, onCreate }) => {
                           : 'bg-red-100 text-red-800'
                       }`}
                     >
-                      {branch.isActive ? 'Aktif' : 'Pasif'}
+                      {branch.isActive ? t('common.active') : t('common.inactive')}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -140,14 +142,14 @@ const BranchList = ({ onEdit, onCreate }) => {
                       onClick={() => onEdit(branch)}
                       className="text-primary-600 hover:text-primary-900 mr-4"
                     >
-                      Düzenle
+                      {t('common.edit')}
                     </button>
                     <button
                       onClick={() => handleDelete(branch.id, branch.name)}
                       className="text-red-600 hover:text-red-900"
                       disabled={deleteBranch.isLoading}
                     >
-                      Sil
+                      {t('common.delete')}
                     </button>
                   </td>
                 </tr>
@@ -161,7 +163,7 @@ const BranchList = ({ onEdit, onCreate }) => {
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Toplam {pagination.total} şube, Sayfa {pagination.page} / {pagination.totalPages}
+            {t('common.total')} {pagination.total} {t('branches.title')}, {t('common.page')} {pagination.page} / {pagination.totalPages}
           </div>
           <div className="flex space-x-2">
             <Button
@@ -170,7 +172,7 @@ const BranchList = ({ onEdit, onCreate }) => {
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
             >
-              Önceki
+              {t('common.previous')}
             </Button>
             <Button
               variant="outline"
@@ -178,7 +180,7 @@ const BranchList = ({ onEdit, onCreate }) => {
               onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
               disabled={page === pagination.totalPages}
             >
-              Sonraki
+              {t('common.next')}
             </Button>
           </div>
         </div>
@@ -188,4 +190,3 @@ const BranchList = ({ onEdit, onCreate }) => {
 };
 
 export default BranchList;
-

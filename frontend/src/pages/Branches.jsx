@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCreateBranch, useUpdateBranch } from '../hooks/useBranches';
 import BranchList from '../components/branches/BranchList';
 import BranchForm from '../components/branches/BranchForm';
 import Modal from '../components/common/Modal';
 
 const Branches = () => {
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState(null);
 
@@ -48,9 +50,9 @@ const Branches = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Şube Yönetimi</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('branches.title')}</h1>
           <p className="mt-2 text-sm text-gray-600">
-            Şubeleri görüntüleyin, oluşturun ve yönetin
+            {t('branches.subtitle')}
           </p>
         </div>
 
@@ -59,7 +61,7 @@ const Branches = () => {
         <Modal
           isOpen={isModalOpen}
           onClose={handleClose}
-          title={editingBranch ? 'Şube Düzenle' : 'Yeni Şube Oluştur'}
+          title={editingBranch ? t('branches.edit') : t('branches.create')}
           size="lg"
         >
           <BranchForm

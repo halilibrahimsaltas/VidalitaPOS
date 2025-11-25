@@ -1,11 +1,14 @@
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDashboardOverview, useTopProducts, useSalesSummary } from '../hooks/useReports';
 import StatCard from '../components/dashboard/StatCard';
 import SalesChart from '../components/dashboard/SalesChart';
 import TopProductsChart from '../components/dashboard/TopProductsChart';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -51,49 +54,50 @@ const Dashboard = () => {
                   to="/dashboard"
                   className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Dashboard
+                  {t('navigation.dashboard')}
                 </Link>
                 <Link
                   to="/branches"
                   className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Şubeler
+                  {t('navigation.branches')}
                 </Link>
                 <Link
                   to="/products"
                   className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Ürünler
+                  {t('navigation.products')}
                 </Link>
                 <Link
                   to="/inventory"
                   className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Stok
+                  {t('navigation.inventory')}
                 </Link>
                 <Link
                   to="/pos"
                   className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  POS
+                  {t('navigation.pos')}
                 </Link>
                 <Link
                   to="/customers"
                   className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Müşteriler
+                  {t('navigation.customers')}
                 </Link>
               </nav>
             </div>
             <div className="flex items-center space-x-4">
+              <LanguageSwitcher />
               <span className="text-sm text-gray-700">
-                Hoş geldiniz, <strong>{user?.fullName || user?.username}</strong>
+                {t('auth.welcome')}, <strong>{user?.fullName || user?.username}</strong>
               </span>
               <button
                 onClick={handleLogout}
                 className="btn btn-secondary text-sm"
               >
-                Çıkış
+                {t('auth.logout')}
               </button>
             </div>
           </div>
@@ -102,47 +106,47 @@ const Dashboard = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
+          <h2 className="text-3xl font-bold text-gray-900">{t('dashboard.title')}</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Genel bakış ve istatistikler
+            {t('dashboard.overview')}
           </p>
         </div>
 
         {overviewLoading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="text-gray-500">Yükleniyor...</div>
+            <div className="text-gray-500">{t('common.loading')}</div>
           </div>
         ) : (
           <>
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <StatCard
-                title="Bugünkü Gelir"
+                title={t('dashboard.todayRevenue')}
                 value={`₺${(sales.today?.revenue || 0).toFixed(2)}`}
-                subtitle={`${sales.today?.count || 0} satış`}
+                subtitle={`${sales.today?.count || 0} ${t('dashboard.sales')}`}
                 icon="💰"
                 color="green"
                 trend={revenueTrend && parseFloat(revenueTrend) > 0 ? 'up' : revenueTrend && parseFloat(revenueTrend) < 0 ? 'down' : null}
                 trendValue={revenueTrend ? `${Math.abs(parseFloat(revenueTrend))}%` : null}
               />
               <StatCard
-                title="Son 7 Gün"
+                title={t('dashboard.last7Days')}
                 value={`₺${(sales.last7Days?.revenue || 0).toFixed(2)}`}
-                subtitle={`${sales.last7Days?.count || 0} satış`}
+                subtitle={`${sales.last7Days?.count || 0} ${t('dashboard.sales')}`}
                 icon="📊"
                 color="blue"
               />
               <StatCard
-                title="Düşük Stok"
+                title={t('dashboard.lowStock')}
                 value={inventory.lowStockCount || 0}
-                subtitle={`${inventory.totalProducts || 0} toplam ürün`}
+                subtitle={`${inventory.totalProducts || 0} ${t('dashboard.totalProducts')}`}
                 icon="⚠️"
                 color="red"
               />
               <StatCard
-                title="Toplam Borç"
+                title={t('dashboard.totalDebt')}
                 value={`₺${(customers.totalDebt || 0).toFixed(2)}`}
-                subtitle={`${customers.debtorsCount || 0} müşteri`}
+                subtitle={`${customers.debtorsCount || 0} ${t('dashboard.customers')}`}
                 icon="💳"
                 color="yellow"
               />
@@ -152,10 +156,10 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* Sales Chart */}
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Son 7 Gün Satış Trendi</h3>
+                <h3 className="text-lg font-semibold mb-4">{t('dashboard.salesTrend')}</h3>
                 {overviewLoading ? (
                   <div className="flex items-center justify-center h-64 text-gray-500">
-                    Yükleniyor...
+                    {t('common.loading')}
                   </div>
                 ) : (
                   <SalesChart data={salesChartData} />
@@ -164,10 +168,10 @@ const Dashboard = () => {
 
               {/* Top Products Chart */}
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">En Çok Satan Ürünler</h3>
+                <h3 className="text-lg font-semibold mb-4">{t('dashboard.topProducts')}</h3>
                 {topProductsLoading ? (
                   <div className="flex items-center justify-center h-64 text-gray-500">
-                    Yükleniyor...
+                    {t('common.loading')}
                   </div>
                 ) : (
                   <TopProductsChart data={topProducts} />
@@ -177,37 +181,37 @@ const Dashboard = () => {
 
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold mb-4">Hızlı İşlemler</h3>
+              <h3 className="text-lg font-semibold mb-4">{t('dashboard.quickActions')}</h3>
               <div className="flex flex-wrap gap-4">
                 <Link
                   to="/pos"
                   className="inline-block btn btn-primary text-lg px-6 py-3"
                 >
-                  🛒 POS Ekranına Git →
+                  🛒 {t('pos.title')} →
                 </Link>
                 <Link
                   to="/branches"
                   className="inline-block btn btn-secondary"
                 >
-                  Şube Yönetimi →
+                  {t('branches.title')} →
                 </Link>
                 <Link
                   to="/products"
                   className="inline-block btn btn-secondary"
                 >
-                  Ürün Yönetimi →
+                  {t('products.title')} →
                 </Link>
                 <Link
                   to="/inventory"
                   className="inline-block btn btn-secondary"
                 >
-                  Stok Yönetimi →
+                  {t('inventory.title')} →
                 </Link>
                 <Link
                   to="/customers"
                   className="inline-block btn btn-secondary"
                 >
-                  Müşteri Yönetimi →
+                  {t('customers.title')} →
                 </Link>
               </div>
             </div>
