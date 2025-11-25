@@ -38,6 +38,12 @@ const Dashboard = () => {
                 >
                   Ürünler
                 </Link>
+                <Link
+                  to="/inventory"
+                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Stok
+                </Link>
               </nav>
             </div>
             <div className="flex items-center space-x-4">
@@ -72,7 +78,7 @@ const Dashboard = () => {
               <li>Rol: {user?.role}</li>
             </ul>
           </div>
-          <div className="mt-6 flex gap-4">
+          <div className="mt-6 flex flex-wrap gap-4">
             <Link
               to="/branches"
               className="inline-block btn btn-primary"
@@ -84,6 +90,12 @@ const Dashboard = () => {
               className="inline-block btn btn-primary"
             >
               Ürün Yönetimi →
+            </Link>
+            <Link
+              to="/inventory"
+              className="inline-block btn btn-primary"
+            >
+              Stok Yönetimi →
             </Link>
           </div>
         </div>

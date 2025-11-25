@@ -18,35 +18,41 @@ enum UserRole {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  username     String   @unique
-  email        String   @unique
-  password     String
-  fullName     String
-  role         UserRole @default(USER)
-  isActive     Boolean  @default(true)
-  branchId     String?
-  branch       Branch?  @relation("UserBranch", fields: [branchId], references: [id])
-  createdBranches Branch[] @relation("BranchCreatedBy")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                  String            @id @default(uuid())
+  username            String            @unique
+  email               String            @unique
+  password            String
+  fullName            String
+  role                UserRole          @default(USER)
+  isActive            Boolean           @default(true)
+  branchId            String?
+  branch              Branch?           @relation("UserBranch", fields: [branchId], references: [id])
+  createdBranches     Branch[]          @relation("BranchCreatedBy")
+  createdStockTransfers StockTransfer[] @relation("StockTransferCreatedBy")
+  createdStockAdjustments StockAdjustment[] @relation("StockAdjustmentCreatedBy")
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 
   @@map("users")
 }
 
 model Branch {
-  id          String   @id @default(uuid())
-  name        String
-  code        String   @unique
-  address     String?
-  phone       String?
-  email       String?
-  isActive    Boolean  @default(true)
-  createdById String?
-  createdBy   User?    @relation("BranchCreatedBy", fields: [createdById], references: [id])
-  users       User[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String            @id @default(uuid())
+  name              String
+  code              String            @unique
+  address           String?
+  phone             String?
+  email             String?
+  isActive          Boolean           @default(true)
+  createdById       String?
+  createdBy         User?             @relation("BranchCreatedBy", fields: [createdById], references: [id])
+  users             User[]
+  inventory         Inventory[]
+  stockTransfersFrom StockTransfer[]  @relation("StockTransferFrom")
+  stockTransfersTo   StockTransfer[]  @relation("StockTransferTo")
+  stockAdjustments   StockAdjustment[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@map("branches")
 }
@@ -68,20 +74,91 @@ model Category {
 }
 
 model Product {
-  id          String    @id @default(uuid())
-  name        String
-  description String?
-  barcode     String?   @unique
-  sku         String?   @unique
-  categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
-  price       Decimal   @db.Decimal(10, 2)
-  costPrice   Decimal?  @db.Decimal(10, 2)
-  imageUrl    String?
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id                String            @id @default(uuid())
+  name              String
+  description       String?
+  barcode           String?           @unique
+  sku               String?           @unique
+  categoryId        String?
+  category          Category?         @relation(fields: [categoryId], references: [id])
+  price             Decimal           @db.Decimal(10, 2)
+  costPrice         Decimal?          @db.Decimal(10, 2)
+  imageUrl          String?
+  isActive          Boolean           @default(true)
+  inventory         Inventory[]
+  stockTransferItems StockTransferItem[]
+  stockAdjustments  StockAdjustment[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
   @@map("products")
+}
+
+model Inventory {
+  id            String   @id @default(uuid())
+  branchId      String
+  branch        Branch   @relation(fields: [branchId], references: [id])
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id])
+  quantity      Int      @default(0)
+  minStockLevel Int      @default(0)
+  maxStockLevel Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([branchId, productId])
+  @@map("inventory")
+}
+
+model StockTransfer {
+  id            String            @id @default(uuid())
+  fromBranchId  String
+  fromBranch    Branch            @relation("StockTransferFrom", fields: [fromBranchId], references: [id])
+  toBranchId    String
+  toBranch      Branch            @relation("StockTransferTo", fields: [toBranchId], references: [id])
+  status        TransferStatus    @default(PENDING)
+  notes         String?
+  createdById   String
+  createdBy     User              @relation("StockTransferCreatedBy", fields: [createdById], references: [id])
+  items         StockTransferItem[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("stock_transfers")
+}
+
+enum TransferStatus {
+  PENDING
+  IN_TRANSIT
+  COMPLETED
+  CANCELLED
+}
+
+model StockTransferItem {
+  id              String        @id @default(uuid())
+  transferId      String
+  transfer        StockTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product       @relation(fields: [productId], references: [id])
+  quantity        Int
+  createdAt       DateTime      @default(now())
+
+  @@map("stock_transfer_items")
+}
+
+model StockAdjustment {
+  id          String   @id @default(uuid())
+  branchId    String
+  branch      Branch   @relation(fields: [branchId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int
+  reason      String?
+  notes       String?
+  createdById String
+  createdBy   User     @relation("StockAdjustmentCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@map("stock_adjustments")
 }
 
