@@ -44,6 +44,12 @@ const Dashboard = () => {
                 >
                   Stok
                 </Link>
+                <Link
+                  to="/pos"
+                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  POS
+                </Link>
               </nav>
             </div>
             <div className="flex items-center space-x-4">
@@ -80,20 +86,26 @@ const Dashboard = () => {
           </div>
           <div className="mt-6 flex flex-wrap gap-4">
             <Link
+              to="/pos"
+              className="inline-block btn btn-primary text-lg px-6 py-3"
+            >
+              🛒 POS Ekranına Git →
+            </Link>
+            <Link
               to="/branches"
-              className="inline-block btn btn-primary"
+              className="inline-block btn btn-secondary"
             >
               Şube Yönetimi →
             </Link>
             <Link
               to="/products"
-              className="inline-block btn btn-primary"
+              className="inline-block btn btn-secondary"
             >
               Ürün Yönetimi →
             </Link>
             <Link
               to="/inventory"
-              className="inline-block btn btn-primary"
+              className="inline-block btn btn-secondary"
             >
               Stok Yönetimi →
             </Link>

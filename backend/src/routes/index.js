@@ -6,6 +6,7 @@ import productRoutes from './product.routes.js';
 import inventoryRoutes from './inventory.routes.js';
 import stockTransferRoutes from './stockTransfer.routes.js';
 import stockAdjustmentRoutes from './stockAdjustment.routes.js';
+import saleRoutes from './sale.routes.js';
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ router.use('/products', productRoutes);
 router.use('/inventory', inventoryRoutes);
 router.use('/stock-transfers', stockTransferRoutes);
 router.use('/stock-adjustments', stockAdjustmentRoutes);
+router.use('/sales', saleRoutes);
 
 export default router;
 

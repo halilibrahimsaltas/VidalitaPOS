@@ -30,6 +30,7 @@ model User {
   createdBranches     Branch[]          @relation("BranchCreatedBy")
   createdStockTransfers StockTransfer[] @relation("StockTransferCreatedBy")
   createdStockAdjustments StockAdjustment[] @relation("StockAdjustmentCreatedBy")
+  salesAsCashier      Sale[]            @relation("SaleCashier")
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 
@@ -51,6 +52,7 @@ model Branch {
   stockTransfersFrom StockTransfer[]  @relation("StockTransferFrom")
   stockTransfersTo   StockTransfer[]  @relation("StockTransferTo")
   stockAdjustments   StockAdjustment[]
+  sales             Sale[]
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -88,6 +90,7 @@ model Product {
   inventory         Inventory[]
   stockTransferItems StockTransferItem[]
   stockAdjustments  StockAdjustment[]
+  saleItems         SaleItem[]
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -160,5 +163,74 @@ model StockAdjustment {
   createdAt   DateTime @default(now())
 
   @@map("stock_adjustments")
+}
+
+model Customer {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String?
+  email       String?
+  address     String?
+  taxNumber   String?
+  isActive    Boolean  @default(true)
+  sales       Sale[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("customers")
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  CREDIT
+  MIXED
+}
+
+enum SaleStatus {
+  COMPLETED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  CANCELLED
+}
+
+model Sale {
+  id            String      @id @default(uuid())
+  saleNumber    String      @unique
+  branchId      String
+  branch        Branch      @relation(fields: [branchId], references: [id])
+  customerId    String?
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+  cashierId     String
+  cashier       User        @relation("SaleCashier", fields: [cashierId], references: [id])
+  paymentMethod PaymentMethod
+  status        SaleStatus  @default(COMPLETED)
+  subtotal      Decimal     @db.Decimal(10, 2)
+  discount      Decimal     @default(0) @db.Decimal(10, 2)
+  tax           Decimal     @default(0) @db.Decimal(10, 2)
+  total         Decimal     @db.Decimal(10, 2)
+  paidAmount    Decimal     @db.Decimal(10, 2)
+  changeAmount  Decimal     @default(0) @db.Decimal(10, 2)
+  notes         String?
+  items         SaleItem[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("sales")
+}
+
+model SaleItem {
+  id          String   @id @default(uuid())
+  saleId      String
+  sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  discount    Decimal  @default(0) @db.Decimal(10, 2)
+  total       Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+
+  @@map("sale_items")
 }
 

@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Branches from './pages/Branches';
 import Products from './pages/Products';
 import Inventory from './pages/Inventory';
+import POS from './pages/POS';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 const queryClient = new QueryClient({
@@ -53,6 +54,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Inventory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pos"
+              element={
+                <ProtectedRoute>
+                  <POS />
                 </ProtectedRoute>
               }
             />
