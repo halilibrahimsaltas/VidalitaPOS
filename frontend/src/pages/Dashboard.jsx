@@ -1,5 +1,5 @@
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -15,10 +15,24 @@ const Dashboard = () => {
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center">
+            <div className="flex items-center space-x-8">
               <h1 className="text-xl font-bold text-gray-900">
                 🛍️ Vidalita Retail Manager
               </h1>
+              <nav className="hidden md:flex space-x-4">
+                <Link
+                  to="/dashboard"
+                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/branches"
+                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Şubeler
+                </Link>
+              </nav>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">
@@ -51,6 +65,14 @@ const Dashboard = () => {
               <li>Email: {user?.email}</li>
               <li>Rol: {user?.role}</li>
             </ul>
+          </div>
+          <div className="mt-6">
+            <Link
+              to="/branches"
+              className="inline-block btn btn-primary"
+            >
+              Şube Yönetimine Git →
+            </Link>
           </div>
         </div>
       </main>

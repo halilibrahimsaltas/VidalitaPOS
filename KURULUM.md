@@ -46,6 +46,9 @@ DATABASE_URL="postgresql://postgres:ŞİFRENİZ@localhost:5432/vidalita_retail?s
 # JWT - Güvenli rastgele stringler oluşturun
 JWT_SECRET=your_super_secret_jwt_key_change_in_production
 JWT_REFRESH_SECRET=your_refresh_secret_change_in_production
+
+
+
 JWT_ACCESS_EXPIRATION=15m
 JWT_REFRESH_EXPIRATION=7d
 
