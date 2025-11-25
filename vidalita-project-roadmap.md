@@ -1,0 +1,790 @@
+# 🛍️ Vidalita Retail Manager - Tam Proje Yol Haritası
+
+## 📋 İçindekiler
+- [Proje Özeti](#proje-özeti)
+- [Teknoloji Stack](#teknoloji-stack)
+- [Proje Yapısı](#proje-yapısı)
+- [Kurulum Adımları](#kurulum-adımları)
+- [Geliştirme Roadmap](#geliştirme-roadmap)
+- [Tamamlanan Adımlar](#tamamlanan-adımlar)
+- [Gelecek Adımlar](#gelecek-adımlar)
+- [API Endpoints Checklist](#api-endpoints-checklist)
+- [Veritabanı Schema](#veritabanı-schema)
+- [Testing Strategy](#testing-strategy)
+- [Deployment Guide](#deployment-guide)
+
+---
+
+## 🎯 Proje Özeti
+
+**Vidalita Retail Manager** - Çok şubeli perakende satış yönetimi için monolit web uygulaması
+
+### Ana Özellikler
+- ✅ Çok şubeli stok takibi
+- ✅ Barkod destekli POS sistemi
+- ✅ Personel yönetimi ve yetkilendirme
+- ✅ Cari hesap (veresiye) yönetimi
+- ✅ Detaylı raporlama ve dashboard
+- ✅ Bulut yedekleme
+- ✅ Fiş yazdırma (ESC/POS)
+- ✅ 4 dil desteği (TR, EN, RU, UZ)
+
+
+---
+
+## 🛠️ Teknoloji Stack
+
+### Backend
+- **Runtime**: Node.js v20 LTS
+- **Framework**: Express.js
+- **ORM**: Prisma
+- **Database**: PostgreSQL 15+
+- **Authentication**: JWT (access + refresh tokens)
+- **File Upload**: Multer + AWS S3
+
+### Frontend
+- **Framework**: React 18+
+- **Routing**: React Router DOM v6
+- **Styling**: TailwindCSS + shadcn/ui
+- **State Management**: React Query + Zustand
+- **Forms**: React Hook Form + Zod
+- **i18n**: react-i18next
+- **Charts**: Recharts
+- **HTTP Client**: Axios
+
+### DevOps & Infrastructure
+- **Containerization**: Docker + Docker Compose
+- **CI/CD**: GitHub Actions
+- **Monitoring**: Prometheus + Grafana
+- **Logging**: Winston + ELK Stack
+- **Cloud Storage**: AWS S3 / DigitalOcean Spaces
+- **Reverse Proxy**: Nginx
+
+---
+
+## 📁 Proje Yapısı
+
+```
+vidalita-retail-manager/
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── database.js
+│   │   │   ├── jwt.js
+│   │   │   └── s3.js
+│   │   ├── controllers/
+│   │   │   ├── auth.controller.js
+│   │   │   ├── branch.controller.js
+│   │   │   ├── product.controller.js
+│   │   │   ├── inventory.controller.js
+│   │   │   ├── sales.controller.js
+│   │   │   ├── customer.controller.js
+│   │   │   ├── report.controller.js
+│   │   │   └── user.controller.js
+│   │   ├── services/
+│   │   │   ├── auth.service.js
+│   │   │   ├── branch.service.js
+│   │   │   ├── product.service.js
+│   │   │   ├── inventory.service.js
+│   │   │   ├── sales.service.js
+│   │   │   ├── customer.service.js
+│   │   │   └── report.service.js
+│   │   ├── repositories/
+│   │   │   ├── user.repository.js
+│   │   │   ├── branch.repository.js
+│   │   │   ├── product.repository.js
+│   │   │   ├── inventory.repository.js
+│   │   │   ├── sales.repository.js
+│   │   │   └── customer.repository.js
+│   │   ├── middleware/
+│   │   │   ├── auth.middleware.js
+│   │   │   ├── validation.middleware.js
+│   │   │   ├── error.middleware.js
+│   │   │   └── rateLimit.middleware.js
+│   │   ├── routes/
+│   │   │   ├── auth.routes.js
+│   │   │   ├── branch.routes.js
+│   │   │   ├── product.routes.js
+│   │   │   ├── inventory.routes.js
+│   │   │   ├── sales.routes.js
+│   │   │   ├── customer.routes.js
+│   │   │   ├── report.routes.js
+│   │   │   └── index.js
+│   │   ├── utils/
+│   │   │   ├── logger.js
+│   │   │   ├── ApiError.js
+│   │   │   ├── ApiResponse.js
+│   │   │   └── helpers.js
+│   │   ├── locales/
+│   │   │   └── messages.js
+│   │   ├── app.js
+│   │   └── server.js
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   ├── migrations/
+│   │   └── seed.js
+│   ├── tests/
+│   │   ├── unit/
+│   │   ├── integration/
+│   │   └── e2e/
+│   ├── .env.example
+│   ├── .eslintrc.js
+│   ├── .prettierrc
+│   ├── Dockerfile
+│   └── package.json
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── common/
+│   │   │   │   ├── Button.jsx
+│   │   │   │   ├── Input.jsx
+│   │   │   │   ├── Modal.jsx
+│   │   │   │   ├── Table.jsx
+│   │   │   │   └── Loader.jsx
+│   │   │   ├── layout/
+│   │   │   │   ├── Sidebar.jsx
+│   │   │   │   ├── Header.jsx
+│   │   │   │   └── Footer.jsx
+│   │   │   ├── auth/
+│   │   │   │   └── LoginForm.jsx
+│   │   │   ├── dashboard/
+│   │   │   │   ├── SalesCard.jsx
+│   │   │   │   ├── StockAlerts.jsx
+│   │   │   │   └── RecentTransactions.jsx
+│   │   │   ├── products/
+│   │   │   │   ├── ProductList.jsx
+│   │   │   │   ├── ProductForm.jsx
+│   │   │   │   └── ProductCard.jsx
+│   │   │   ├── sales/
+│   │   │   │   ├── POSScreen.jsx
+│   │   │   │   ├── Cart.jsx
+│   │   │   │   └── PaymentModal.jsx
+│   │   │   └── reports/
+│   │   │       └── ReportViewer.jsx
+│   │   ├── pages/
+│   │   │   ├── Login.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── Products.jsx
+│   │   │   ├── Inventory.jsx
+│   │   │   ├── Sales.jsx
+│   │   │   ├── Customers.jsx
+│   │   │   ├── Reports.jsx
+│   │   │   └── Settings.jsx
+│   │   ├── services/
+│   │   │   ├── api.js
+│   │   │   ├── auth.service.js
+│   │   │   ├── product.service.js
+│   │   │   ├── sales.service.js
+│   │   │   └── customer.service.js
+│   │   ├── hooks/
+│   │   │   ├── useAuth.js
+│   │   │   ├── useProducts.js
+│   │   │   ├── useSales.js
+│   │   │   └── useDebounce.js
+│   │   ├── contexts/
+│   │   │   ├── AuthContext.jsx
+│   │   │   └── ThemeContext.jsx
+│   │   ├── locales/
+│   │   │   ├── tr.json
+│   │   │   ├── en.json
+│   │   │   ├── ru.json
+│   │   │   └── uz.json
+│   │   ├── utils/
+│   │   │   ├── constants.js
+│   │   │   ├── helpers.js
+│   │   │   └── validators.js
+│   │   ├── styles/
+│   │   │   └── globals.css
+│   │   ├── App.jsx
+│   │   ├── i18n.js
+│   │   └── main.jsx
+│   ├── .env.example
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   ├── tailwind.config.js
+│   ├── vite.config.js
+│   └── package.json
+├── scripts/
+│   ├── backup-db.sh
+│   ├── restore-db.sh
+│   └── seed-data.sh
+├── docker-compose.yml
+├── docker-compose.monitoring.yml
+├── nginx.conf
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       └── deploy.yml
+├── .gitignore
+├── README.md
+└── LICENSE
+```
+
+---
+
+## 🚀 Kurulum Adımları
+
+### Ön Gereksinimler
+- Node.js v20+ LTS
+- PostgreSQL 15+
+- Docker & Docker Compose (production için)
+- Git
+- AWS Account (S3 için) veya DigitalOcean Spaces
+
+### 1️⃣ Repository Klonlama
+```bash
+git clone https://github.com/your-org/vidalita-retail-manager.git
+cd vidalita-retail-manager
+```
+
+### 2️⃣ Backend Kurulumu
+```bash
+cd backend
+
+# Bağımlılıkları yükle
+npm install
+
+# .env dosyası oluştur
+cp .env.example .env
+
+# .env dosyasını düzenle
+nano .env
+```
+
+**`.env` Örnek:**
+```env
+NODE_ENV=development
+PORT=3000
+
+# Database
+DATABASE_URL="postgresql://vrm_user:password@localhost:5432/vidalita_retail"
+
+# JWT
+JWT_SECRET=your_super_secret_jwt_key_here
+JWT_REFRESH_SECRET=your_refresh_secret_here
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+
+# AWS S3
+AWS_S3_BUCKET=vidalita-retail-storage
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION=us-east-1
+
+# Redis (optional)
+REDIS_URL=redis://localhost:6379
+
+# CORS
+FRONTEND_URL=http://localhost:5173
+```
+
+```bash
+# Prisma migrate
+npx prisma migrate dev --name init
+
+# Prisma generate
+npx prisma generate
+
+# Seed data (optional)
+npm run seed
+
+# Backend başlat
+npm run dev
+```
+
+### 3️⃣ Frontend Kurulumu
+```bash
+cd ../frontend
+
+# Bağımlılıkları yükle
+npm install
+
+# .env dosyası oluştur
+cp .env.example .env
+
+# .env dosyasını düzenle
+nano .env
+```
+
+**`.env` Örnek:**
+```env
+VITE_API_URL=http://localhost:3000/api
+VITE_APP_NAME=Vidalita Retail Manager
+```
+
+```bash
+# Frontend başlat
+npm run dev
+```
+
+### 4️⃣ Tarayıcıda Aç
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3000/api
+
+**Default Admin Hesabı:**
+- Username: `admin`
+- Password: `admin123` (ilk girişte değiştirin!)
+
+---
+
+## 📅 Geliştirme Roadmap
+
+### ✅ FAZ 1: Temel Altyapı (Tamamlandı)
+**Tahmini Süre**: 2 hafta
+**Durum**: ✅ %100 Tamamlandı
+
+- [x] Proje yapısı oluşturuldu
+- [x] Docker & Docker Compose yapılandırması
+- [x] PostgreSQL kurulumu
+- [x] Prisma ORM entegrasyonu
+- [x] Express.js backend başlangıç
+- [x] React + Vite frontend başlangıç
+- [x] Temel middleware'ler (auth, error handling)
+- [x] JWT authentication sistemi
+- [x] Veritabanı şeması tasarımı (ER diyagram)
+- [x] API endpoint yapısı planlaması
+
+### ✅ FAZ 2: Authentication & User Management (Tamamlandı)
+**Tahmini Süre**: 1 hafta
+**Durum**: ✅ %100 Tamamlandı
+
+- [x] User model ve migration
+- [x] Register endpoint
+- [x] Login endpoint
+- [x] JWT token generation & validation
+- [x] Refresh token mekanizması
+- [x] Password hashing (bcrypt)
+- [x] Role-based access control (RBAC)
+- [x] Login page UI
+- [x] Protected route yapısı
+- [x] Auth context & hooks
+
+### 🔄 FAZ 3: Branch Management (Devam Ediyor)
+**Tahmini Süre**: 1 hafta
+**Durum**: 🔄 %60 Tamamlandı
+
+- [x] Branch model ve migration
+- [x] CRUD API endpoints
+- [x] Branch service layer
+- [ ] Branch list UI
+- [ ] Branch create/edit form
+- [ ] Branch selection component
+- [ ] Branch-based data filtering
+
+### ⏳ FAZ 4: Product Management (Başlanacak)
+**Tahmini Süre**: 2 hafta
+**Durum**: ⏳ Bekliyor
+
+- [ ] Product model ve migration
+- [ ] Category model ve migration (hiyerarşik)
+- [ ] Product CRUD API
+- [ ] Barcode generation/validation
+- [ ] Image upload (S3)
+- [ ] Product list UI (pagination, search, filter)
+- [ ] Product form (create/edit)
+- [ ] Barcode scanner integration
+- [ ] Bulk product import (CSV/Excel)
+
+### ⏳ FAZ 5: Inventory Management (Başlanacak)
+**Tahmini Süre**: 2 hafta
+**Durum**: ⏳ Bekliyor
+
+- [ ] Inventory model ve migration
+- [ ] Stock tracking API
+- [ ] Stock transfer API
+- [ ] Stock adjustment API
+- [ ] Low stock alerts
+- [ ] Inventory dashboard UI
+- [ ] Stock transfer form
+- [ ] Stock adjustment form
+- [ ] Real-time stock updates
+
+### ⏳ FAZ 6: POS & Sales (Başlanacak)
+**Tahmini Süre**: 3 hafta
+**Durum**: ⏳ Bekliyor
+
+- [ ] Sales model ve migration
+- [ ] Sale items model
+- [ ] Create sale API
+- [ ] Sale details API
+- [ ] Refund API
+- [ ] POS screen UI (barcode input, cart)
+- [ ] Payment modal (cash, card, credit)
+- [ ] Receipt generation
+- [ ] ESC/POS printer integration
+- [ ] Sale history list
+
+### ⏳ FAZ 7: Customer & Cari Management (Başlanacak)
+**Tahmini Süre**: 2 hafta
+**Durum**: ⏳ Bekliyor
+
+- [ ] Customer model ve migration
+- [ ] Customer transactions model
+- [ ] Customer CRUD API
+- [ ] Payment recording API
+- [ ] Debt tracking
+- [ ] Customer list UI
+- [ ] Customer form
+- [ ] Transaction history
+- [ ] Payment recording form
+- [ ] Debt reports
+
+### ⏳ FAZ 8: Reporting & Analytics (Başlanacak)
+**Tahmini Süre**: 2 hafta
+**Durum**: ⏳ Bekliyor
+
+- [ ] Report API endpoints
+- [ ] Sales summary report
+- [ ] Inventory status report
+- [ ] Top products report
+- [ ] Debt summary report
+- [ ] Dashboard overview API
+- [ ] Dashboard UI (cards, charts)
+- [ ] Report viewer (filters, export)
+- [ ] Excel export
+- [ ] PDF export
+
+### ⏳ FAZ 9: Localization (Başlanacak)
+**Tahmini Süre**: 1 hafta
+**Durum**: ⏳ Bekliyor
+
+- [ ] i18next kurulumu
+- [ ] TR lokalizasyon dosyası
+- [ ] EN lokalizasyon dosyası
+- [ ] RU lokalizasyon dosyası
+- [ ] UZ lokalizasyon dosyası
+- [ ] Language switcher component
+- [ ] Backend error messages i18n
+- [ ] Database content localization (categories)
+
+### ⏳ FAZ 10: Testing (Başlanacak)
+**Tahmini Süre**: 2 hafta
+**Durum**: ⏳ Bekliyor
+
+- [ ] Jest kurulumu
+- [ ] Unit tests (services)
+- [ ] Integration tests (API)
+- [ ] React Testing Library
+- [ ] Component tests
+- [ ] E2E tests (Playwright)
+- [ ] Test coverage %80+
+
+### ⏳ FAZ 11: Deployment & DevOps (Başlanacak)
+**Tahmini Süre**: 1 hafta
+**Durum**: ⏳ Bekliyor
+
+- [ ] Production Dockerfile'lar
+- [ ] Docker Compose production
+- [ ] Nginx configuration
+- [ ] SSL certificate setup
+- [ ] GitHub Actions CI/CD
+- [ ] Automated backups
+- [ ] Monitoring setup (Prometheus + Grafana)
+- [ ] Log aggregation (ELK)
+
+---
+
+## 📝 Tamamlanan Adımlar
+
+### Sprint 1 (Hafta 1-2) ✅
+- ✅ Proje planlaması ve teknik doküman hazırlandı
+- ✅ Repository oluşturuldu ve proje yapısı kuruldu
+- ✅ Docker & Docker Compose yapılandırması tamamlandı
+- ✅ PostgreSQL ve Redis container'ları ayağa kaldırıldı
+- ✅ Backend Express.js uygulaması başlatıldı
+- ✅ Frontend React + Vite uygulaması başlatıldı
+- ✅ Prisma ORM entegre edildi
+- ✅ Veritabanı şeması tasarlandı (ER diyagram)
+- ✅ API endpoint yapısı planlandı
+
+### Sprint 2 (Hafta 3) ✅
+- ✅ User model oluşturuldu
+- ✅ JWT authentication implementasyonu
+- ✅ Login/Register API endpoints
+- ✅ Refresh token mekanizması
+- ✅ Auth middleware
+- ✅ Error handling middleware
+- ✅ Login page UI
+- ✅ Protected routes (React Router)
+- ✅ Auth context ve hooks
+
+### Sprint 3 (Hafta 4) 🔄
+- ✅ Branch model oluşturuldu
+- ✅ Branch CRUD API endpoints
+- 🔄 Branch management UI (devam ediyor)
+- ⏳ Branch filtering ve search
+
+---
+
+## 🎯 Gelecek Adımlar (Priority Order)
+
+### Bu Hafta (Hafta 5)
+1. **Branch Management UI Tamamlama**
+   - [ ] Branch list component
+   - [ ] Branch create/edit modal
+   - [ ] Branch delete confirmation
+   - [ ] Branch filter & search
+
+2. **Product Model Başlangıç**
+   - [ ] Product & Category models
+   - [ ] Migration oluşturma
+   - [ ] Basic CRUD endpoints
+
+### Önümüzdeki 2 Hafta (Hafta 6-7)
+3. **Product Management Tam Implementasyon**
+   - [ ] Product list UI (pagination, filter)
+   - [ ] Product form (create/edit)
+   - [ ] Image upload to S3
+   - [ ] Barcode validation
+   - [ ] Category management
+
+4. **Inventory Management Başlangıç**
+   - [ ] Inventory model
+   - [ ] Stock tracking API
+   - [ ] Basic inventory UI
+
+### Gelecek Ay (Hafta 8-11)
+5. **POS System (En Kritik)**
+   - [ ] Sales flow implementasyonu
+   - [ ] POS ekranı UI
+   - [ ] Barcode scanner entegrasyonu
+   - [ ] Payment processing
+   - [ ] Receipt printing
+
+6. **Customer Management**
+   - [ ] Customer CRUD
+   - [ ] Cari hesap tracking
+   - [ ] Payment recording
+
+### 2-3 Ay İçinde
+7. **Reporting & Analytics**
+8. **Localization (4 dil)**
+9. **Testing & QA**
+10. **Production Deployment**
+
+---
+
+## 🔌 API Endpoints Checklist
+
+### Authentication Module
+- [x] `POST /api/auth/register` - Yeni kullanıcı kaydı
+- [x] `POST /api/auth/login` - Kullanıcı girişi
+- [x] `POST /api/auth/refresh` - Token yenileme
+- [x] `POST /api/auth/logout` - Çıkış
+
+### Branch Management
+- [x] `GET /api/branches` - Şube listesi
+- [x] `GET /api/branches/:id` - Şube detayı
+- [x] `POST /api/branches` - Yeni şube
+- [x] `PUT /api/branches/:id` - Şube güncelle
+- [x] `DELETE /api/branches/:id` - Şube sil
+
+### Product Management
+- [ ] `GET /api/products` - Ürün listesi
+- [ ] `GET /api/products/:id` - Ürün detayı
+- [ ] `POST /api/products` - Yeni ürün
+- [ ] `PUT /api/products/:id` - Ürün güncelle
+- [ ] `DELETE /api/products/:id` - Ürün sil
+- [ ] `POST /api/products/import` - Toplu ürün içe aktarma
+
+### Category Management
+- [ ] `GET /api/categories` - Kategori listesi (hiyerarşik)
+- [ ] `POST /api/categories` - Yeni kategori
+- [ ] `PUT /api/categories/:id` - Kategori güncelle
+- [ ] `DELETE /api/categories/:id` - Kategori sil
+
+### Inventory Management
+- [ ] `GET /api/inventory` - Stok durumu
+- [ ] `POST /api/inventory/transfer` - Stok transferi
+- [ ] `POST /api/inventory/adjustment` - Stok düzeltme
+- [ ] `GET /api/inventory/low-stock` - Düşük stok uyarıları
+
+### Sales (POS)
+- [ ] `POST /api/sales` - Yeni satış
+- [ ] `GET /api/sales` - Satış listesi
+- [ ] `GET /api/sales/:id` - Satış detayı
+- [ ] `POST /api/sales/:id/refund` - İade işlemi
+- [ ] `POST /api/sales/:id/print` - Fiş yazdır
+
+### Customer Management
+- [ ] `GET /api/customers` - Müşteri listesi
+- [ ] `GET /api/customers/:id` - Müşteri detayı
+- [ ] `POST /api/customers` - Yeni müşteri
+- [ ] `PUT /api/customers/:id` - Müşteri güncelle
+- [ ] `DELETE /api/customers/:id` - Müşteri sil
+- [ ] `GET /api/customers/:id/transactions` - Cari hareketler
+- [ ] `POST /api/customers/:id/payments` - Ödeme kaydet
+
+### Reports
+- [ ] `GET /api/reports/sales-summary` - Satış özeti
+- [ ] `GET /api/reports/inventory-status` - Stok durumu
+- [ ] `GET /api/reports/top-products` - En çok satanlar
+- [ ] `GET /api/reports/debt-summary` - Borç özeti
+
+### Dashboard
+- [ ] `GET /api/dashboard/overview` - Dashboard özet
+
+### User Management
+- [ ] `GET /api/users` - Kullanıcı listesi
+- [ ] `PUT /api/users/:id` - Kullanıcı güncelle
+- [ ] `DELETE /api/users/:id` - Kullanıcı sil
+- [ ] `PUT /api/users/:id/password` - Şifre değiştir
+
+---
+
+## 🗄️ Veritabanı Schema
+
+### Tamamlanan Tablolar
+- [x] `users` - Kullanıcılar
+- [x] `branches` - Şubeler
+
+### Yapılacak Tablolar
+- [ ] `categories` - Kategoriler
+- [ ] `products` - Ürünler
+- [ ] `inventory` - Stok durumu
+- [ ] `customers` - Müşteriler
+- [ ] `sales` - Satışlar
+- [ ] `sale_items` - Satış kalemleri
+- [ ] `customer_transactions` - Cari hareketler
+- [ ] `stock_transfers` - Stok transferleri
+- [ ] `stock_transfer_items` - Transfer kalemleri
+- [ ] `stock_adjustments` - Stok düzeltmeleri
+
+---
+
+## 🧪 Testing Strategy
+
+### Unit Tests
+- [ ] Auth service tests
+- [ ] Product service tests
+- [ ] Sales service tests
+- [ ] Inventory service tests
+- [ ] Customer service tests
+
+### Integration Tests
+- [ ] Auth API tests
+- [ ] Product API tests
+- [ ] Sales API tests
+- [ ] Inventory API tests
+
+### E2E Tests
+- [ ] Login flow
+- [ ] Product create flow
+- [ ] POS sale flow
+- [ ] Stock transfer flow
+
+### Coverage Target
+- [ ] Backend: %80+
+- [ ] Frontend: %70+
+
+---
+
+## 🚢 Deployment Guide
+
+### Development
+```bash
+# Clone repository
+git clone https://github.com/your-org/vidalita-retail-manager.git
+cd vidalita-retail-manager
+
+# Start with Docker Compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f backend
+```
+
+### Production
+```bash
+# Build and start
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+```
+
+### Backup Database
+```bash
+# Manual backup
+./scripts/backup-db.sh
+
+# Automated (cron)
+0 2 * * * /path/to/scripts/backup-db.sh
+```
+
+---
+
+## 📊 Progress Tracker
+
+### Genel İlerleme
+```
+█████████████░░░░░░░░░░░░░░░ 35% Tamamlandı
+
+Backend:  ████████░░░░░░░░░░░░░░░░ 30%
+Frontend: █████░░░░░░░░░░░░░░░░░░░ 20%
+Testing:  ░░░░░░░░░░░░░░░░░░░░░░░░  0%
+DevOps:   ██████████░░░░░░░░░░░░░░ 40%
+```
+
+### Modül İlerlemesi
+| Modül | Backend | Frontend | Test | Durum |
+|-------|---------|----------|------|-------|
+| Auth | 100% | 100% | 0% | ✅ |
+| Branch | 100% | 60% | 0% | 🔄 |
+| Product | 0% | 0% | 0% | ⏳ |
+| Inventory | 0% | 0% | 0% | ⏳ |
+| Sales | 0% | 0% | 0% | ⏳ |
+| Customer | 0% | 0% | 0% | ⏳ |
+| Reports | 0% | 0% | 0% | ⏳ |
+
+---
+
+## 👥 Team & Contributors
+
+### Current Team
+- **Lead Developer**: [İsim]
+- **Backend Developer**: [İsim]
+- **Frontend Developer**: [İsim]
+- **DevOps Engineer**: [İsim]
+- **QA Engineer**: [İsim]
+
+### How to Contribute
+1. Fork repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+---
+
+## 📞 Support & Contact
+
+- **Documentation**: https://docs.vidalita.com
+- **Issue Tracker**: https://github.com/your-org/vidalita-retail-manager/issues
+- **Email**: dev@vidalita.com
+- **Slack**: vidalita.slack.com
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🎉 Acknowledgments
+
+- Prisma ORM documentation
+- Express.js community
+- React documentation
+- TailwindCSS team
+
+---
+
+**Son Güncelleme**: 25 Kasım 2025
+**Versiyon**: 0.3.5-alpha
+**Durum**: Active Development 🚀
