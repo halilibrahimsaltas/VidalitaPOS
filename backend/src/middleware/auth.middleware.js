@@ -35,11 +35,11 @@ export const authenticate = async (req, res, next) => {
 export const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
-      throw new ApiError(401, 'Authentication required');
+      return next(new ApiError(401, 'Authentication required'));
     }
 
     if (!roles.includes(req.user.role)) {
-      throw new ApiError(403, 'Insufficient permissions');
+      return next(new ApiError(403, 'Insufficient permissions'));
     }
 
     next();

@@ -9,6 +9,7 @@ import stockAdjustmentRoutes from './stockAdjustment.routes.js';
 import saleRoutes from './sale.routes.js';
 import customerRoutes from './customer.routes.js';
 import reportRoutes from './report.routes.js';
+import userRoutes from './user.routes.js';
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ router.use('/stock-adjustments', stockAdjustmentRoutes);
 router.use('/sales', saleRoutes);
 router.use('/customers', customerRoutes);
 router.use('/reports', reportRoutes);
+router.use('/users', userRoutes);
 
 export default router;
 

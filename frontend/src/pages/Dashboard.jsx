@@ -231,6 +231,12 @@ const Dashboard = () => {
                 >
                   {t('customers.title')} →
                 </Link>
+                <Link
+                  to="/users"
+                  className="inline-block btn btn-secondary"
+                >
+                  Kullanıcı Yönetimi →
+                </Link>
               </div>
             </div>
           </>

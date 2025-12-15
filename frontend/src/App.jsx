@@ -10,6 +10,7 @@ import POS from './pages/POS';
 import Sales from './pages/Sales';
 import Customers from './pages/Customers';
 import Reports from './pages/Reports';
+import Users from './pages/Users';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 const queryClient = new QueryClient({
@@ -89,6 +90,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Reports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <ProtectedRoute>
+                  <Users />
                 </ProtectedRoute>
               }
             />
