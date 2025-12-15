@@ -1,6 +1,6 @@
 import { saleRepository } from '../repositories/sale.repository.js';
 import { generateSaleNumber } from '../utils/saleNumber.js';
-import { inventoryService } from './inventory.service.js';
+import inventoryService from './inventory.service.js';
 import { ApiError } from '../utils/ApiError.js';
 import { prisma } from '../config/database.js';
 

@@ -42,8 +42,15 @@ export const validateCreateSale = [
     .isFloat({ min: 0 })
     .withMessage('Discount must be a non-negative number'),
   body('customerId')
-    .optional()
-    .isUUID()
+    .optional({ values: 'falsy' })
+    .custom((value) => {
+      if (!value || value === '' || value === null || value === undefined) {
+        return true; // Allow null, empty string, or undefined
+      }
+      // If value exists, it must be a valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(value);
+    })
     .withMessage('Invalid customer ID'),
   body('notes')
     .optional()

@@ -28,8 +28,15 @@ export const validateCreateProduct = [
     .isFloat({ min: 0 })
     .withMessage('Cost price must be a positive number'),
   body('categoryId')
-    .optional()
-    .isUUID()
+    .optional({ values: 'falsy' })
+    .custom((value) => {
+      if (value === null || value === '' || value === undefined) {
+        return true; // Allow null, empty string, or undefined
+      }
+      // If value exists, it must be a valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(value);
+    })
     .withMessage('Invalid category ID'),
   body('description')
     .optional()
@@ -74,8 +81,15 @@ export const validateUpdateProduct = [
     .isFloat({ min: 0 })
     .withMessage('Cost price must be a positive number'),
   body('categoryId')
-    .optional()
-    .isUUID()
+    .optional({ values: 'falsy' })
+    .custom((value) => {
+      if (value === null || value === '' || value === undefined) {
+        return true; // Allow null, empty string, or undefined
+      }
+      // If value exists, it must be a valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(value);
+    })
     .withMessage('Invalid category ID'),
   body('description')
     .optional()

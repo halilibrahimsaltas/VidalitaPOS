@@ -1,5 +1,5 @@
 import { stockTransferRepository } from '../repositories/stockTransfer.repository.js';
-import { inventoryService } from './inventory.service.js';
+import inventoryService from './inventory.service.js';
 import { ApiError } from '../utils/ApiError.js';
 import { prisma } from '../config/database.js';
 

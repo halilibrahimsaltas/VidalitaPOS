@@ -13,14 +13,11 @@ export const errorHandler = (err, req, res, next) => {
   const { statusCode, message } = error;
 
   // Log error
-  logger.error({
-    error: {
-      message,
-      stack: error.stack,
-      statusCode,
-      path: req.path,
-      method: req.method,
-    },
+  logger.error(message, {
+    statusCode,
+    path: req.path,
+    method: req.method,
+    stack: error.stack,
   });
 
   res.status(statusCode).json({

@@ -7,7 +7,7 @@ export const authenticate = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new ApiError(401, 'Authentication required');
+      return next(new ApiError(401, 'Authentication required'));
     }
 
     const token = authHeader.substring(7);
@@ -18,11 +18,16 @@ export const authenticate = async (req, res, next) => {
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      throw new ApiError(401, 'Invalid token');
+      return next(new ApiError(401, 'Invalid token'));
     }
     if (error instanceof jwt.TokenExpiredError) {
-      throw new ApiError(401, 'Token expired');
+      return next(new ApiError(401, 'Token expired'));
     }
+    // If it's already an ApiError, pass it along
+    if (error instanceof ApiError) {
+      return next(error);
+    }
+    // Otherwise, create a new ApiError
     next(error);
   }
 };

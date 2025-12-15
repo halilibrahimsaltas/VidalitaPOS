@@ -7,7 +7,9 @@ import Branches from './pages/Branches';
 import Products from './pages/Products';
 import Inventory from './pages/Inventory';
 import POS from './pages/POS';
+import Sales from './pages/Sales';
 import Customers from './pages/Customers';
+import Reports from './pages/Reports';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 const queryClient = new QueryClient({
@@ -67,10 +69,26 @@ function App() {
               }
             />
             <Route
+              path="/sales"
+              element={
+                <ProtectedRoute>
+                  <Sales />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/customers"
               element={
                 <ProtectedRoute>
                   <Customers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
                 </ProtectedRoute>
               }
             />

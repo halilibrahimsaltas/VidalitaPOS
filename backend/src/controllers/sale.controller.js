@@ -44,6 +44,10 @@ export const getSaleByNumber = async (req, res, next) => {
 
 export const createSale = async (req, res, next) => {
   try {
+    // Normalize customerId - convert empty string to null
+    if (req.body.customerId === '') {
+      req.body.customerId = null;
+    }
     const sale = await saleService.createSale(req.body, req.user.id);
     res.status(201).json(ApiResponse.success(sale, 'Sale created successfully'));
   } catch (error) {

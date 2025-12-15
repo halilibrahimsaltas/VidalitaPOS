@@ -1,5 +1,5 @@
 import { ApiResponse } from '../utils/ApiResponse.js';
-import * as productService from '../services/product.service.js';
+import productService from '../services/product.service.js';
 
 export const getAllProducts = async (req, res, next) => {
   try {
@@ -67,3 +67,41 @@ export const deleteProduct = async (req, res, next) => {
   }
 };
 
+export const uploadProductImage = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json(ApiResponse.error('No file uploaded'));
+    }
+
+    const result = await productService.uploadProductImage(req.file);
+    res.json(ApiResponse.success(result, 'Image uploaded successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const importProducts = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json(ApiResponse.error('No file uploaded'));
+    }
+
+    const result = await productService.importProducts(req.file);
+    res.json(ApiResponse.success(result, 'Products imported successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getImportTemplate = async (req, res, next) => {
+  try {
+    const { generateCSVTemplate } = await import('../utils/csvParser.js');
+    const template = generateCSVTemplate();
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="product-import-template.csv"');
+    res.send(template);
+  } catch (error) {
+    next(error);
+  }
+};

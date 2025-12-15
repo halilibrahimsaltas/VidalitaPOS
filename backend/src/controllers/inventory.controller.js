@@ -1,5 +1,5 @@
 import { ApiResponse } from '../utils/ApiResponse.js';
-import * as inventoryService from '../services/inventory.service.js';
+import inventoryService from '../services/inventory.service.js';
 
 export const getAllInventory = async (req, res, next) => {
   try {

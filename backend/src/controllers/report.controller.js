@@ -1,5 +1,5 @@
 import { ApiResponse } from '../utils/ApiResponse.js';
-import * as reportService from '../services/report.service.js';
+import reportService from '../services/report.service.js';
 
 export const getSalesSummary = async (req, res, next) => {
   try {
@@ -53,6 +53,22 @@ export const getDebtSummary = async (req, res, next) => {
 
     const result = await reportService.getDebtSummary(filters);
     res.json(ApiResponse.success(result, 'Debt summary retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCashRegisterReport = async (req, res, next) => {
+  try {
+    const filters = {
+      branchId: req.query.branchId,
+      startDate: req.query.startDate,
+      endDate: req.query.endDate,
+      period: req.query.period || 'daily', // daily, weekly, monthly
+    };
+
+    const result = await reportService.getCashRegisterReport(filters);
+    res.json(ApiResponse.success(result, 'Cash register report retrieved successfully'));
   } catch (error) {
     next(error);
   }

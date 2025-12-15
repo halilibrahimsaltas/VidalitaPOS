@@ -2,11 +2,29 @@ import { useState, useEffect } from 'react';
 import Input from '../common/Input';
 import Select from '../common/Select';
 import Button from '../common/Button';
-import { useRootCategories } from '../../hooks/useCategories';
+import Modal from '../common/Modal';
+import { useRootCategories, useCreateCategory } from '../../hooks/useCategories';
+import { useBranches } from '../../hooks/useBranches';
+import { useInventoryByProduct } from '../../hooks/useInventory';
+import { useProductByBarcode } from '../../hooks/useProducts';
+import { productService } from '../../services/product.service';
+
+// Helper function to get full image URL
+const getImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url; // Already a full URL
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  return url.startsWith('/') ? `${apiBaseUrl}${url}` : `${apiBaseUrl}/${url}`;
+};
 
 const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
-  const { data: categoriesData } = useRootCategories();
+  const { data: categoriesData, refetch: refetchCategories } = useRootCategories();
   const categories = categoriesData?.data || [];
+  const createCategory = useCreateCategory();
+  const { data: branchesData } = useBranches({ limit: 100, isActive: true });
+  const branches = branchesData?.data?.branches || [];
+  const { data: inventoryData } = useInventoryByProduct(product?.id);
+  const inventory = inventoryData?.data || [];
 
   const [formData, setFormData] = useState({
     name: '',
@@ -18,9 +36,51 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
     costPrice: '',
     imageUrl: '',
     isActive: true,
+    // Stock fields
+    branchId: '',
+    quantity: '',
+    minStockLevel: '',
+    maxStockLevel: '',
   });
 
   const [errors, setErrors] = useState({});
+  const [imagePreview, setImagePreview] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryParentId, setNewCategoryParentId] = useState('');
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [barcodeCheckTimer, setBarcodeCheckTimer] = useState(null);
+
+  // Check barcode uniqueness (only when creating new product or when editing and barcode is provided and changed)
+  const barcodeToCheck = formData.barcode?.trim();
+  const shouldCheckBarcode = barcodeToCheck && barcodeToCheck.length >= 8 && 
+    (!product || barcodeToCheck !== product.barcode);
+  const { data: existingBarcodeProduct, refetch: checkBarcode } = useProductByBarcode(
+    shouldCheckBarcode ? barcodeToCheck : ''
+  );
+
+  // Effect to check barcode when it changes (for immediate feedback)
+  useEffect(() => {
+    if (shouldCheckBarcode && existingBarcodeProduct?.data) {
+      if (!product || existingBarcodeProduct.data.id !== product.id) {
+        setErrors((prev) => ({
+          ...prev,
+          barcode: `Bu barkod numarası zaten kullanılıyor. Ürün: ${existingBarcodeProduct.data.name}`,
+        }));
+      }
+    } else if (shouldCheckBarcode && !existingBarcodeProduct) {
+      // Clear error if barcode doesn't exist (for duplicate error only)
+      setErrors((prev) => {
+        if (prev.barcode?.includes('kullanılıyor')) {
+          const newErrors = { ...prev };
+          delete newErrors.barcode;
+          return newErrors;
+        }
+        return prev;
+      });
+    }
+  }, [existingBarcodeProduct, product, shouldCheckBarcode]);
 
   useEffect(() => {
     if (product) {
@@ -34,9 +94,15 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
         costPrice: product.costPrice ? parseFloat(product.costPrice).toFixed(2) : '',
         imageUrl: product.imageUrl || '',
         isActive: product.isActive !== undefined ? product.isActive : true,
+        // Stock fields - will be loaded from inventory if needed (use first inventory item)
+        branchId: inventory.length > 0 ? inventory[0].branchId : '',
+        quantity: inventory.length > 0 ? inventory[0].quantity?.toString() : '',
+        minStockLevel: inventory.length > 0 ? inventory[0].minStockLevel?.toString() : '',
+        maxStockLevel: inventory.length > 0 ? inventory[0].maxStockLevel?.toString() : '',
       });
+      setImagePreview(getImageUrl(product.imageUrl || ''));
     }
-  }, [product]);
+  }, [product, inventory]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -48,6 +114,82 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
+
+    // Check barcode uniqueness when barcode changes (only for new products)
+    if (name === 'barcode' && !product && value.trim().length >= 8) {
+      // Debounce the check
+      if (barcodeCheckTimer) {
+        clearTimeout(barcodeCheckTimer);
+      }
+      const timer = setTimeout(() => {
+        checkBarcode().then((result) => {
+          if (result.data?.data) {
+            setErrors((prev) => ({
+              ...prev,
+              barcode: `Bu barkod numarası zaten kullanılıyor. Ürün: ${result.data.data.name}`,
+            }));
+          } else {
+            setErrors((prev) => {
+              const newErrors = { ...prev };
+              if (newErrors.barcode?.includes('kullanılıyor')) {
+                delete newErrors.barcode;
+              }
+              return newErrors;
+            });
+          }
+        }).catch(() => {
+          // Barcode doesn't exist (404), which is good
+          setErrors((prev) => {
+            const newErrors = { ...prev };
+            if (newErrors.barcode?.includes('kullanılıyor')) {
+              delete newErrors.barcode;
+            }
+            return newErrors;
+          });
+        });
+      }, 500);
+      setBarcodeCheckTimer(timer);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setErrors((prev) => ({ ...prev, image: 'Sadece resim dosyaları yüklenebilir' }));
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors((prev) => ({ ...prev, image: 'Dosya boyutu 5MB\'dan küçük olmalıdır' }));
+      return;
+    }
+
+    setIsUploading(true);
+    setErrors((prev) => ({ ...prev, image: '' }));
+
+    try {
+      const result = await productService.uploadImage(file);
+      const imageUrl = result.data.url;
+      setFormData((prev) => ({ ...prev, imageUrl }));
+      setImagePreview(imageUrl);
+    } catch (error) {
+      setErrors((prev) => ({
+        ...prev,
+        image: error.response?.data?.message || 'Resim yüklenirken bir hata oluştu',
+      }));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleImageUrlChange = (e) => {
+    const url = e.target.value;
+    setFormData((prev) => ({ ...prev, imageUrl: url }));
+    setImagePreview(getImageUrl(url));
   };
 
   const validate = () => {
@@ -65,8 +207,13 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
       newErrors.costPrice = 'Maliyet fiyatı negatif olamaz';
     }
 
-    if (formData.barcode && formData.barcode.length < 8) {
-      newErrors.barcode = 'Barkod en az 8 karakter olmalıdır';
+    if (formData.barcode && formData.barcode.trim().length > 0) {
+      if (formData.barcode.trim().length < 8) {
+        newErrors.barcode = 'Barkod en az 8 karakter olmalıdır';
+      } else if (existingBarcodeProduct?.data && (!product || existingBarcodeProduct.data.id !== product.id)) {
+        // Check for duplicate barcode (only for new products or when barcode is changed)
+        newErrors.barcode = `Bu barkod numarası zaten kullanılıyor. Ürün: ${existingBarcodeProduct.data.name}`;
+      }
     }
 
     setErrors(newErrors);
@@ -76,13 +223,23 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validate()) {
+      // Separate inventory fields from product fields
+      const { branchId, quantity, minStockLevel, maxStockLevel, ...productFields } = formData;
+      
       const submitData = {
-        ...formData,
-        price: parseFloat(formData.price),
-        costPrice: formData.costPrice ? parseFloat(formData.costPrice) : null,
-        categoryId: formData.categoryId || null,
-        barcode: formData.barcode || null,
-        sku: formData.sku || null,
+        ...productFields,
+        price: parseFloat(productFields.price),
+        costPrice: productFields.costPrice ? parseFloat(productFields.costPrice) : null,
+        categoryId: productFields.categoryId || null,
+        barcode: productFields.barcode || null,
+        sku: productFields.sku || null,
+        // Include inventory data if branch is selected
+        inventory: branchId ? {
+          branchId,
+          quantity: quantity ? parseInt(quantity) : 0,
+          minStockLevel: minStockLevel ? parseInt(minStockLevel) : 0,
+          maxStockLevel: maxStockLevel ? parseInt(maxStockLevel) : null,
+        } : undefined,
       };
       onSubmit(submitData);
     }
@@ -106,6 +263,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
   const categoryOptions = flattenCategories(categories);
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
@@ -138,14 +296,28 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
           placeholder="Stok kodu"
         />
 
-        <Select
-          label="Kategori"
-          name="categoryId"
-          value={formData.categoryId}
-          onChange={handleChange}
-          options={categoryOptions}
-          error={errors.categoryId}
-        />
+        <div className="flex-1">
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <Select
+                label="Kategori"
+                name="categoryId"
+                value={formData.categoryId}
+                onChange={handleChange}
+                options={categoryOptions}
+                error={errors.categoryId}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsCategoryModalOpen(true)}
+              className="mb-0"
+            >
+              + Yeni
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -184,15 +356,109 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
         placeholder="Ürün açıklaması"
       />
 
-      <Input
-        label="Görsel URL"
-        name="imageUrl"
-        type="url"
-        value={formData.imageUrl}
-        onChange={handleChange}
-        error={errors.imageUrl}
-        placeholder="https://example.com/image.jpg"
-      />
+      {/* Image Upload */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Ürün Görseli
+        </label>
+        
+        {/* Image Preview */}
+        {imagePreview && (
+          <div className="mb-4">
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+              onError={() => setImagePreview('')}
+            />
+          </div>
+        )}
+
+        {/* File Upload */}
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={isUploading}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 disabled:opacity-50"
+            />
+            {isUploading && (
+              <p className="mt-1 text-sm text-gray-500">Yükleniyor...</p>
+            )}
+            {errors.image && (
+              <p className="mt-1 text-sm text-red-600">{errors.image}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Or URL Input */}
+        <div className="text-sm text-gray-500 mb-2">veya</div>
+        <Input
+          label="Görsel URL"
+          name="imageUrl"
+          type="url"
+          value={formData.imageUrl}
+          onChange={handleImageUrlChange}
+          error={errors.imageUrl}
+          placeholder="https://example.com/image.jpg"
+        />
+      </div>
+
+      {/* Stock Information */}
+      <div className="border-t pt-4 mt-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Stok Bilgisi</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Select
+            label="Şube"
+            name="branchId"
+            value={formData.branchId}
+            onChange={handleChange}
+            error={errors.branchId}
+            options={[
+              { value: '', label: 'Şube Seçiniz (Opsiyonel)' },
+              ...branches.map((b) => ({ value: b.id, label: b.name })),
+            ]}
+          />
+
+          <Input
+            label="Stok Miktarı"
+            name="quantity"
+            type="number"
+            min="0"
+            value={formData.quantity}
+            onChange={handleChange}
+            error={errors.quantity}
+            placeholder="0"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <Input
+            label="Minimum Stok Seviyesi"
+            name="minStockLevel"
+            type="number"
+            min="0"
+            value={formData.minStockLevel}
+            onChange={handleChange}
+            error={errors.minStockLevel}
+            placeholder="0"
+          />
+
+          <Input
+            label="Maksimum Stok Seviyesi"
+            name="maxStockLevel"
+            type="number"
+            min="0"
+            value={formData.maxStockLevel}
+            onChange={handleChange}
+            error={errors.maxStockLevel}
+            placeholder="Sınırsız"
+          />
+        </div>
+      </div>
 
       <div className="flex items-center">
         <input
@@ -217,6 +483,84 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
         </Button>
       </div>
     </form>
+
+    {/* Category Creation Modal */}
+    <Modal
+      isOpen={isCategoryModalOpen}
+      onClose={() => {
+        setIsCategoryModalOpen(false);
+        setNewCategoryName('');
+        setNewCategoryParentId('');
+      }}
+      title="Yeni Kategori Ekle"
+      size="md"
+    >
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (!newCategoryName.trim()) {
+            alert('Kategori adı gereklidir');
+            return;
+          }
+
+          setIsCreatingCategory(true);
+          try {
+            const categoryData = {
+              name: newCategoryName.trim(),
+              parentId: newCategoryParentId || null,
+            };
+            const result = await createCategory.mutateAsync(categoryData);
+            // Set the newly created category as selected
+            setFormData((prev) => ({ ...prev, categoryId: result.data.id }));
+            // Refresh categories
+            refetchCategories();
+            setIsCategoryModalOpen(false);
+            setNewCategoryName('');
+            setNewCategoryParentId('');
+          } catch (error) {
+            alert(error.response?.data?.message || 'Kategori oluşturulurken bir hata oluştu');
+          } finally {
+            setIsCreatingCategory(false);
+          }
+        }}
+        className="space-y-4"
+      >
+        <Input
+          label="Kategori Adı"
+          value={newCategoryName}
+          onChange={(e) => setNewCategoryName(e.target.value)}
+          placeholder="Örn: İçecekler"
+          required
+        />
+        <Select
+          label="Üst Kategori (Opsiyonel)"
+          value={newCategoryParentId}
+          onChange={(e) => setNewCategoryParentId(e.target.value)}
+          options={[
+            { value: '', label: 'Kök kategori (üst kategori yok)' },
+            ...categoryOptions,
+          ]}
+        />
+        <div className="flex justify-end space-x-3 pt-4">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setIsCategoryModalOpen(false);
+              setNewCategoryName('');
+              setNewCategoryParentId('');
+            }}
+            disabled={isCreatingCategory}
+          >
+            İptal
+          </Button>
+          <Button type="submit" variant="primary" disabled={isCreatingCategory}>
+            {isCreatingCategory ? 'Oluşturuluyor...' : 'Oluştur'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+    </>
   );
 };
 

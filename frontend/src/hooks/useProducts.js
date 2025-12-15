@@ -41,6 +41,7 @@ export const useCreateProduct = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries('products');
+        queryClient.invalidateQueries('inventory');
       },
     }
   );
@@ -55,6 +56,7 @@ export const useUpdateProduct = () => {
       onSuccess: (_, variables) => {
         queryClient.invalidateQueries('products');
         queryClient.invalidateQueries(['product', variables.id]);
+        queryClient.invalidateQueries('inventory');
       },
     }
   );

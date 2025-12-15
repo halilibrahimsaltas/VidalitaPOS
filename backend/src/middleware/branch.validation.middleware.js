@@ -12,10 +12,8 @@ export const validateCreateBranch = [
     .trim()
     .notEmpty()
     .withMessage('Branch code is required')
-    .isLength({ min: 2, max: 20 })
-    .withMessage('Branch code must be between 2 and 20 characters')
-    .matches(/^[A-Z0-9_-]+$/)
-    .withMessage('Branch code can only contain uppercase letters, numbers, hyphens, and underscores'),
+    .isLength({ min: 1, max: 50 })
+    .withMessage('Branch code must be between 1 and 50 characters'),
   body('address')
     .optional()
     .trim()
@@ -54,10 +52,8 @@ export const validateUpdateBranch = [
   body('code')
     .optional()
     .trim()
-    .isLength({ min: 2, max: 20 })
-    .withMessage('Branch code must be between 2 and 20 characters')
-    .matches(/^[A-Z0-9_-]+$/)
-    .withMessage('Branch code can only contain uppercase letters, numbers, hyphens, and underscores'),
+    .isLength({ min: 1, max: 50 })
+    .withMessage('Branch code must be between 1 and 50 characters'),
   body('address')
     .optional()
     .trim()

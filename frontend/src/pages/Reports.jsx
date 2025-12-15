@@ -3,56 +3,24 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/common/LanguageSwitcher';
-import { useCreateBranch, useUpdateBranch } from '../hooks/useBranches';
-import BranchList from '../components/branches/BranchList';
-import BranchForm from '../components/branches/BranchForm';
-import Modal from '../components/common/Modal';
+import CashRegisterReport from '../components/reports/CashRegisterReport';
+import Button from '../components/common/Button';
 
-const Branches = () => {
+const Reports = () => {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingBranch, setEditingBranch] = useState(null);
-
-  const createBranch = useCreateBranch();
-  const updateBranch = useUpdateBranch();
+  const [activeReport, setActiveReport] = useState('cash-register');
 
   const handleLogout = () => {
     logout();
   };
 
-  const handleCreate = () => {
-    setEditingBranch(null);
-    setIsModalOpen(true);
-  };
-
-  const handleEdit = (branch) => {
-    setEditingBranch(branch);
-    setIsModalOpen(true);
-  };
-
-  const handleClose = () => {
-    setIsModalOpen(false);
-    setEditingBranch(null);
-  };
-
-  const handleSubmit = async (formData) => {
-    try {
-      if (editingBranch) {
-        await updateBranch.mutateAsync({
-          id: editingBranch.id,
-          data: formData,
-        });
-      } else {
-        await createBranch.mutateAsync(formData);
-      }
-      handleClose();
-    } catch (error) {
-      alert(error.response?.data?.message || 'Bir hata oluştu');
-    }
-  };
-
-  const isLoading = createBranch.isLoading || updateBranch.isLoading;
+  const reports = [
+    { id: 'cash-register', name: 'Gün Sonu Kasa Raporu', icon: '💰' },
+    // Future reports can be added here
+    // { id: 'sales-summary', name: 'Satış Özet Raporu', icon: '📊' },
+    // { id: 'inventory', name: 'Stok Durum Raporu', icon: '📦' },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,7 +40,7 @@ const Branches = () => {
                 </Link>
                 <Link
                   to="/branches"
-                  className="text-primary-600 font-medium px-2 py-2 rounded-md text-sm whitespace-nowrap"
+                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
                 >
                   {t('navigation.branches')}
                 </Link>
@@ -106,6 +74,12 @@ const Branches = () => {
                 >
                   {t('navigation.customers')}
                 </Link>
+                <Link
+                  to="/reports"
+                  className="text-primary-600 font-medium px-2 py-2 rounded-md text-sm whitespace-nowrap"
+                >
+                  Raporlar
+                </Link>
               </nav>
             </div>
             <div className="flex items-center space-x-3 flex-shrink-0">
@@ -126,31 +100,36 @@ const Branches = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">{t('branches.title')}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Raporlar</h1>
           <p className="mt-2 text-sm text-gray-600">
-            {t('branches.subtitle')}
+            Satış, kasa ve stok raporlarını görüntüleyin
           </p>
         </div>
 
-        <BranchList onEdit={handleEdit} onCreate={handleCreate} />
+        {/* Report Type Selector */}
+        <div className="mb-6 bg-white rounded-lg shadow p-4">
+          <div className="flex flex-wrap gap-2">
+            {reports.map((report) => (
+              <Button
+                key={report.id}
+                variant={activeReport === report.id ? 'primary' : 'secondary'}
+                onClick={() => setActiveReport(report.id)}
+              >
+                {report.icon} {report.name}
+              </Button>
+            ))}
+          </div>
+        </div>
 
-        <Modal
-          isOpen={isModalOpen}
-          onClose={handleClose}
-          title={editingBranch ? t('branches.edit') : t('branches.create')}
-          size="lg"
-        >
-          <BranchForm
-            branch={editingBranch}
-            onSubmit={handleSubmit}
-            onCancel={handleClose}
-            isLoading={isLoading}
-          />
-        </Modal>
+        {/* Active Report */}
+        <div>
+          {activeReport === 'cash-register' && <CashRegisterReport />}
+          {/* Future reports can be added here */}
+        </div>
       </main>
     </div>
   );
 };
 
-export default Branches;
+export default Reports;
 

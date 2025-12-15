@@ -19,7 +19,11 @@ if (process.env.NODE_ENV !== 'production') {
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.simple()
+        winston.format.printf(({ level, message, timestamp, service, ...meta }) => {
+          const ts = timestamp ? new Date(timestamp).toISOString() : new Date().toISOString();
+          const metaStr = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
+          return `${ts} [${service || 'vidalita-backend'}] ${level}: ${message} ${metaStr}`;
+        })
       ),
     })
   );

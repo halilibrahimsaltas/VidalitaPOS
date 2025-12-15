@@ -10,7 +10,7 @@ const generateSlug = (name) => {
     .replace(/^-+|-+$/g, '');
 };
 
-export const categoryService = {
+const categoryService = {
   getAllCategories: async (filters = {}) => {
     return categoryRepository.findAll(filters);
   },
@@ -116,4 +116,6 @@ export const categoryService = {
     return categoryRepository.delete(id);
   },
 };
+
+export default categoryService;
 

@@ -1,7 +1,7 @@
 import { prisma } from '../config/database.js';
 import { ApiError } from '../utils/ApiError.js';
 
-export const reportService = {
+const reportService = {
   getSalesSummary: async (filters = {}) => {
     const { branchId, startDate, endDate } = filters;
 
@@ -278,6 +278,192 @@ export const reportService = {
     };
   },
 
+  getCashRegisterReport: async (filters = {}) => {
+    const { branchId, startDate, endDate, period = 'daily' } = filters;
+
+    // Calculate date range based on period
+    let dateStart, dateEnd;
+    const now = new Date();
+    now.setHours(23, 59, 59, 999);
+
+    if (period === 'daily') {
+      dateStart = startDate ? new Date(startDate) : new Date(now);
+      dateStart.setHours(0, 0, 0, 0);
+      dateEnd = endDate ? new Date(endDate) : new Date(now);
+      dateEnd.setHours(23, 59, 59, 999);
+    } else if (period === 'weekly') {
+      dateStart = startDate ? new Date(startDate) : new Date(now);
+      dateStart.setDate(dateStart.getDate() - 7);
+      dateStart.setHours(0, 0, 0, 0);
+      dateEnd = endDate ? new Date(endDate) : new Date(now);
+      dateEnd.setHours(23, 59, 59, 999);
+    } else if (period === 'monthly') {
+      dateStart = startDate ? new Date(startDate) : new Date(now);
+      dateStart.setDate(1);
+      dateStart.setHours(0, 0, 0, 0);
+      dateEnd = endDate ? new Date(endDate) : new Date(now);
+      dateEnd.setMonth(dateEnd.getMonth() + 1);
+      dateEnd.setDate(0);
+      dateEnd.setHours(23, 59, 59, 999);
+    } else {
+      dateStart = startDate ? new Date(startDate) : new Date(now);
+      dateStart.setHours(0, 0, 0, 0);
+      dateEnd = endDate ? new Date(endDate) : new Date(now);
+      dateEnd.setHours(23, 59, 59, 999);
+    }
+
+    const where = {
+      createdAt: {
+        gte: dateStart,
+        lte: dateEnd,
+      },
+    };
+
+    if (branchId) {
+      where.branchId = branchId;
+    }
+
+    // Get all sales (completed and refunded)
+    const sales = await prisma.sale.findMany({
+      where: {
+        ...where,
+        status: { in: ['COMPLETED', 'REFUNDED', 'PARTIALLY_REFUNDED'] },
+      },
+      include: {
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
+        },
+        cashier: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+          },
+        },
+        items: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    // Calculate totals
+    const completedSales = sales.filter((s) => s.status === 'COMPLETED');
+    const refundedSales = sales.filter((s) => s.status === 'REFUNDED');
+    const partiallyRefundedSales = sales.filter((s) => s.status === 'PARTIALLY_REFUNDED');
+
+    // Total sales (completed)
+    const totalSales = completedSales.length;
+    const totalSalesAmount = completedSales.reduce((sum, s) => sum + parseFloat(s.total), 0);
+    const totalDiscount = completedSales.reduce((sum, s) => sum + parseFloat(s.discount || 0), 0);
+
+    // Total refunds
+    const totalRefunds = refundedSales.length + partiallyRefundedSales.length;
+    const totalRefundAmount = [
+      ...refundedSales,
+      ...partiallyRefundedSales,
+    ].reduce((sum, s) => sum + parseFloat(s.total), 0);
+
+    // Net amount
+    const netAmount = totalSalesAmount - totalRefundAmount;
+
+    // Payment method breakdown
+    const paymentMethods = {
+      CASH: { count: 0, amount: 0 },
+      CARD: { count: 0, amount: 0 },
+      CREDIT: { count: 0, amount: 0 },
+      MIXED: { count: 0, amount: 0 },
+    };
+
+    completedSales.forEach((sale) => {
+      const method = sale.paymentMethod;
+      if (paymentMethods[method]) {
+        paymentMethods[method].count += 1;
+        paymentMethods[method].amount += parseFloat(sale.total);
+      }
+    });
+
+    // Daily breakdown
+    const dailyBreakdown = sales.reduce((acc, sale) => {
+      const date = new Date(sale.createdAt).toISOString().split('T')[0];
+      if (!acc[date]) {
+        acc[date] = {
+          date,
+          sales: { count: 0, amount: 0 },
+          refunds: { count: 0, amount: 0 },
+          net: 0,
+        };
+      }
+
+      if (sale.status === 'COMPLETED') {
+        acc[date].sales.count += 1;
+        acc[date].sales.amount += parseFloat(sale.total);
+      } else if (sale.status === 'REFUNDED' || sale.status === 'PARTIALLY_REFUNDED') {
+        acc[date].refunds.count += 1;
+        acc[date].refunds.amount += parseFloat(sale.total);
+      }
+
+      acc[date].net = acc[date].sales.amount - acc[date].refunds.amount;
+      return acc;
+    }, {});
+
+    // Sales list for detail
+    const salesList = completedSales.map((sale) => ({
+      id: sale.id,
+      saleNumber: sale.saleNumber,
+      date: sale.createdAt,
+      total: parseFloat(sale.total),
+      paymentMethod: sale.paymentMethod,
+      discount: parseFloat(sale.discount || 0),
+      cashier: sale.cashier ? sale.cashier.fullName : 'N/A',
+    }));
+
+    // Refunds list for detail
+    const refundsList = [...refundedSales, ...partiallyRefundedSales].map((sale) => ({
+      id: sale.id,
+      saleNumber: sale.saleNumber,
+      date: sale.createdAt,
+      total: parseFloat(sale.total),
+      status: sale.status,
+      originalSaleNumber: sale.saleNumber, // For tracking original sale
+    }));
+
+    // Get branch info if filtered by branch
+    const branchInfo = branchId && sales.length > 0 ? sales[0].branch : null;
+
+    return {
+      period: {
+        startDate: dateStart,
+        endDate: dateEnd,
+        type: period,
+        branch: branchInfo,
+      },
+      summary: {
+        totalSales,
+        totalSalesAmount,
+        totalRefunds,
+        totalRefundAmount,
+        totalDiscount,
+        netAmount,
+      },
+      paymentMethods,
+      dailyBreakdown: Object.values(dailyBreakdown).sort((a, b) => a.date.localeCompare(b.date)),
+      salesList: salesList.slice(0, 100), // Limit to 100 for performance
+      refundsList: refundsList.slice(0, 100),
+    };
+  },
+
   getDashboardOverview: async (filters = {}) => {
     const { branchId } = filters;
 
@@ -382,4 +568,6 @@ export const reportService = {
     };
   },
 };
+
+export default reportService;
 

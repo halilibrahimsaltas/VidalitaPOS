@@ -9,8 +9,15 @@ export const validateCreateCategory = [
     .isLength({ min: 2, max: 100 })
     .withMessage('Category name must be between 2 and 100 characters'),
   body('parentId')
-    .optional()
-    .isUUID()
+    .optional({ values: 'falsy' })
+    .custom((value) => {
+      if (value === null || value === '' || value === undefined) {
+        return true; // Allow null, empty string, or undefined
+      }
+      // If value exists, it must be a valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(value);
+    })
     .withMessage('Invalid parent category ID'),
   body('description')
     .optional()
@@ -37,8 +44,15 @@ export const validateUpdateCategory = [
     .isLength({ min: 2, max: 100 })
     .withMessage('Category name must be between 2 and 100 characters'),
   body('parentId')
-    .optional()
-    .isUUID()
+    .optional({ values: 'falsy' })
+    .custom((value) => {
+      if (value === null || value === '' || value === undefined) {
+        return true; // Allow null, empty string, or undefined
+      }
+      // If value exists, it must be a valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(value);
+    })
     .withMessage('Invalid parent category ID'),
   body('description')
     .optional()

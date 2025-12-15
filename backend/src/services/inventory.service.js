@@ -2,7 +2,7 @@ import { inventoryRepository } from '../repositories/inventory.repository.js';
 import { ApiError } from '../utils/ApiError.js';
 import { prisma } from '../config/database.js';
 
-export const inventoryService = {
+const inventoryService = {
   getAllInventory: async (filters) => {
     return inventoryRepository.findAll(filters);
   },
@@ -81,4 +81,6 @@ export const inventoryService = {
     return inventoryRepository.getLowStockItems(branchId);
   },
 };
+
+export default inventoryService;
 

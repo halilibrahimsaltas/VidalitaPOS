@@ -1,11 +1,6 @@
 import api from './api';
 
 export const reportService = {
-  getDashboardOverview: async (params = {}) => {
-    const response = await api.get('/reports/dashboard/overview', { params });
-    return response.data;
-  },
-
   getSalesSummary: async (params = {}) => {
     const response = await api.get('/reports/sales-summary', { params });
     return response.data;
@@ -25,5 +20,14 @@ export const reportService = {
     const response = await api.get('/reports/debt-summary', { params });
     return response.data;
   },
-};
 
+  getCashRegisterReport: async (params = {}) => {
+    const response = await api.get('/reports/cash-register', { params });
+    return response.data;
+  },
+
+  getDashboardOverview: async (params = {}) => {
+    const response = await api.get('/reports/dashboard/overview', { params });
+    return response.data;
+  },
+};

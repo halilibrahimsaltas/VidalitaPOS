@@ -1,7 +1,7 @@
 import { branchRepository } from '../repositories/branch.repository.js';
 import { ApiError } from '../utils/ApiError.js';
 
-export const branchService = {
+const branchService = {
   getAllBranches: async (filters) => {
     return branchRepository.findAll(filters);
   },
@@ -65,4 +65,6 @@ export const branchService = {
     return branchRepository.delete(id);
   },
 };
+
+export default branchService;
 

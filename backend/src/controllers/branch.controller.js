@@ -1,5 +1,5 @@
 import { ApiResponse } from '../utils/ApiResponse.js';
-import * as branchService from '../services/branch.service.js';
+import branchService from '../services/branch.service.js';
 
 export const getAllBranches = async (req, res, next) => {
   try {

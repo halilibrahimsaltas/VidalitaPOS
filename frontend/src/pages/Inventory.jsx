@@ -1,30 +1,42 @@
 import { useState } from 'react';
 import { useLowStockItems } from '../hooks/useInventory';
 import InventoryList from '../components/inventory/InventoryList';
-import Modal from '../components/common/Modal';
-import Button from '../components/common/Button';
+import InventoryEditModal from '../components/inventory/InventoryEditModal';
+import StockTransferModal from '../components/inventory/StockTransferModal';
+import StockAdjustmentModal from '../components/inventory/StockAdjustmentModal';
 
 const Inventory = () => {
-  const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
   const { data: lowStockData } = useLowStockItems();
   const lowStockItems = lowStockData?.data || [];
 
-  const handleAdjust = (item) => {
+  const handleEdit = (item) => {
     setSelectedItem(item);
-    setIsAdjustModalOpen(true);
+    setIsEditModalOpen(true);
   };
 
   const handleTransfer = () => {
     setIsTransferModalOpen(true);
   };
 
+  const handleAdjust = (item) => {
+    setSelectedItem(item);
+    setIsAdjustmentModalOpen(true);
+  };
+
   const handleClose = () => {
-    setIsAdjustModalOpen(false);
+    setIsEditModalOpen(false);
     setIsTransferModalOpen(false);
+    setIsAdjustmentModalOpen(false);
     setSelectedItem(null);
+  };
+
+  const handleEditSuccess = () => {
+    // Inventory list will automatically refetch due to query invalidation
   };
 
   return (
@@ -53,42 +65,30 @@ const Inventory = () => {
           </div>
         )}
 
-        <InventoryList onAdjust={handleAdjust} onTransfer={handleTransfer} />
+        <InventoryList onEdit={handleEdit} onTransfer={handleTransfer} onAdjust={handleAdjust} />
 
-        {/* Stock Adjustment Modal - Placeholder */}
-        {isAdjustModalOpen && (
-          <Modal isOpen={isAdjustModalOpen} onClose={handleClose} title="Stok Düzeltme" size="md">
-            <div className="p-4">
-              <p className="text-gray-600 mb-4">
-                Stok düzeltme formu yakında eklenecek.
-              </p>
-              <p className="text-sm text-gray-500">
-                Seçili ürün: {selectedItem?.product?.name}
-              </p>
-              <div className="mt-4 flex justify-end">
-                <Button onClick={handleClose} variant="secondary">
-                  Kapat
-                </Button>
-              </div>
-            </div>
-          </Modal>
-        )}
+        {/* Inventory Edit Modal */}
+        <InventoryEditModal
+          isOpen={isEditModalOpen}
+          onClose={handleClose}
+          inventoryItem={selectedItem}
+          onSuccess={handleEditSuccess}
+        />
 
-        {/* Stock Transfer Modal - Placeholder */}
-        {isTransferModalOpen && (
-          <Modal isOpen={isTransferModalOpen} onClose={handleClose} title="Stok Transferi" size="lg">
-            <div className="p-4">
-              <p className="text-gray-600 mb-4">
-                Stok transferi formu yakında eklenecek.
-              </p>
-              <div className="mt-4 flex justify-end">
-                <Button onClick={handleClose} variant="secondary">
-                  Kapat
-                </Button>
-              </div>
-            </div>
-          </Modal>
-        )}
+        {/* Stock Transfer Modal */}
+        <StockTransferModal
+          isOpen={isTransferModalOpen}
+          onClose={handleClose}
+          onSuccess={handleEditSuccess}
+        />
+
+        {/* Stock Adjustment Modal */}
+        <StockAdjustmentModal
+          isOpen={isAdjustmentModalOpen}
+          onClose={handleClose}
+          inventoryItem={selectedItem}
+          onSuccess={handleEditSuccess}
+        />
       </div>
     </div>
   );

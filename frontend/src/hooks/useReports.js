@@ -1,56 +1,68 @@
 import { useQuery } from 'react-query';
 import { reportService } from '../services/report.service';
 
-export const useDashboardOverview = (filters = {}) => {
-  return useQuery(
-    ['dashboardOverview', filters],
-    () => reportService.getDashboardOverview(filters),
-    {
-      staleTime: 60000, // 1 minute
-      refetchInterval: 300000, // 5 minutes
-    }
-  );
-};
-
 export const useSalesSummary = (filters = {}) => {
   return useQuery(
-    ['salesSummary', filters],
+    ['reports', 'sales-summary', filters],
     () => reportService.getSalesSummary(filters),
     {
       keepPreviousData: true,
-      staleTime: 30000,
+      staleTime: 60000, // 1 minute
     }
   );
 };
 
 export const useInventoryStatus = (filters = {}) => {
   return useQuery(
-    ['inventoryStatus', filters],
+    ['reports', 'inventory-status', filters],
     () => reportService.getInventoryStatus(filters),
     {
-      staleTime: 30000,
+      keepPreviousData: true,
+      staleTime: 60000,
     }
   );
 };
 
 export const useTopProducts = (filters = {}) => {
   return useQuery(
-    ['topProducts', filters],
+    ['reports', 'top-products', filters],
     () => reportService.getTopProducts(filters),
     {
       keepPreviousData: true,
-      staleTime: 30000,
+      staleTime: 60000,
     }
   );
 };
 
 export const useDebtSummary = (filters = {}) => {
   return useQuery(
-    ['debtSummary', filters],
+    ['reports', 'debt-summary', filters],
     () => reportService.getDebtSummary(filters),
     {
-      staleTime: 30000,
+      keepPreviousData: true,
+      staleTime: 60000,
     }
   );
 };
 
+export const useCashRegisterReport = (filters = {}) => {
+  return useQuery(
+    ['reports', 'cash-register', filters],
+    () => reportService.getCashRegisterReport(filters),
+    {
+      keepPreviousData: true,
+      staleTime: 30000, // 30 seconds
+    }
+  );
+};
+
+export const useDashboardOverview = (filters = {}) => {
+  return useQuery(
+    ['reports', 'dashboard-overview', filters],
+    () => reportService.getDashboardOverview(filters),
+    {
+      keepPreviousData: true,
+      staleTime: 60000,
+    }
+  );
+};

@@ -4,7 +4,7 @@ import { useBranches } from '../../hooks/useBranches';
 import Select from '../common/Select';
 import Button from '../common/Button';
 
-const InventoryList = ({ onAdjust, onTransfer }) => {
+const InventoryList = ({ onEdit, onTransfer, onAdjust }) => {
   const [branchFilter, setBranchFilter] = useState('');
   const [lowStockFilter, setLowStockFilter] = useState('');
 
@@ -130,12 +130,22 @@ const InventoryList = ({ onAdjust, onTransfer }) => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => onAdjust(item)}
-                          className="text-primary-600 hover:text-primary-900"
-                        >
-                          Düzelt
-                        </button>
+                        <div className="flex justify-end space-x-3">
+                          <button
+                            onClick={() => onEdit(item)}
+                            className="text-primary-600 hover:text-primary-900"
+                          >
+                            Düzenle
+                          </button>
+                          {onAdjust && (
+                            <button
+                              onClick={() => onAdjust(item)}
+                              className="text-orange-600 hover:text-orange-900"
+                            >
+                              Düzelt
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

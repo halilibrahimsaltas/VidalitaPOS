@@ -44,58 +44,70 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-xl font-bold text-gray-900">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4 md:space-x-8 flex-shrink-0">
+              <h1 className="text-xl font-bold text-gray-900 whitespace-nowrap">
                 🛍️ Vidalita Retail Manager
               </h1>
-              <nav className="hidden md:flex space-x-4">
+              <nav className="hidden md:flex space-x-2 items-center">
                 <Link
                   to="/dashboard"
-                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
                 >
                   {t('navigation.dashboard')}
                 </Link>
                 <Link
                   to="/branches"
-                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
                 >
                   {t('navigation.branches')}
                 </Link>
                 <Link
                   to="/products"
-                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
                 >
                   {t('navigation.products')}
                 </Link>
                 <Link
                   to="/inventory"
-                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
                 >
                   {t('navigation.inventory')}
                 </Link>
                 <Link
                   to="/pos"
-                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
                 >
                   {t('navigation.pos')}
                 </Link>
                 <Link
+                  to="/sales"
+                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
+                >
+                  Satış Geçmişi
+                </Link>
+                <Link
                   to="/customers"
-                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
                 >
                   {t('navigation.customers')}
                 </Link>
+                <Link
+                  to="/reports"
+                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
+                >
+                  Raporlar
+                </Link>
               </nav>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3 flex-shrink-0">
               <LanguageSwitcher />
-              <span className="text-sm text-gray-700">
+              <span className="text-sm text-gray-700 whitespace-nowrap hidden lg:inline">
                 {t('auth.welcome')}, <strong>{user?.fullName || user?.username}</strong>
               </span>
               <button
                 onClick={handleLogout}
-                className="btn btn-secondary text-sm"
+                className="btn btn-secondary text-sm whitespace-nowrap"
               >
                 {t('auth.logout')}
               </button>
@@ -206,6 +218,12 @@ const Dashboard = () => {
                   className="inline-block btn btn-secondary"
                 >
                   {t('inventory.title')} →
+                </Link>
+                <Link
+                  to="/sales"
+                  className="inline-block btn btn-secondary"
+                >
+                  Satış Geçmişi →
                 </Link>
                 <Link
                   to="/customers"

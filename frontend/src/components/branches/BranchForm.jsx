@@ -48,8 +48,8 @@ const BranchForm = ({ branch, onSubmit, onCancel, isLoading }) => {
 
     if (!formData.code.trim()) {
       newErrors.code = 'Şube kodu gereklidir';
-    } else if (!/^[A-Z0-9_-]+$/.test(formData.code)) {
-      newErrors.code = 'Şube kodu sadece büyük harf, rakam, tire ve alt çizgi içerebilir';
+    } else if (formData.code.trim().length > 50) {
+      newErrors.code = 'Şube kodu en fazla 50 karakter olabilir';
     }
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -86,8 +86,8 @@ const BranchForm = ({ branch, onSubmit, onCancel, isLoading }) => {
         onChange={handleChange}
         error={errors.code}
         required
-        placeholder="Örn: MERKEZ-01"
-        className="uppercase"
+        placeholder="Örn: MERKEZ-01 veya merkez-01"
+        maxLength={50}
       />
 
       <Input

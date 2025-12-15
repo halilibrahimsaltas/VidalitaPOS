@@ -1,22 +1,31 @@
 import { useState, useRef, useEffect } from 'react';
-import { useProductByBarcode } from '../../hooks/useProducts';
+import { useProductByBarcode, useProducts } from '../../hooks/useProducts';
 import { useBranches } from '../../hooks/useBranches';
 import { useAuth } from '../../contexts/AuthContext';
 import Input from '../common/Input';
 import Button from '../common/Button';
+import Modal from '../common/Modal';
 import Cart from './Cart';
 
-const POSScreen = ({ onCheckout }) => {
+const POSScreen = ({ onCheckout, onSplitPayment }) => {
   const { user } = useAuth();
   const [barcodeInput, setBarcodeInput] = useState('');
   const [cart, setCart] = useState([]);
   const [selectedBranch, setSelectedBranch] = useState('');
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [productSearch, setProductSearch] = useState('');
   const barcodeInputRef = useRef(null);
 
   const { data: branchesData } = useBranches({ limit: 100 });
   const branches = branchesData?.data?.branches || [];
 
   const { data: productData, refetch: fetchProduct } = useProductByBarcode(barcodeInput);
+  const { data: productsData } = useProducts({ 
+    limit: 50, 
+    search: productSearch,
+    isActive: true,
+  });
+  const products = productsData?.data?.products || [];
 
   // Auto-focus barcode input
   useEffect(() => {
@@ -166,8 +175,8 @@ const POSScreen = ({ onCheckout }) => {
             <Button
               variant="outline"
               onClick={() => {
-                // Manual product selection can be added here
-                alert('Manuel ürün seçimi yakında eklenecek');
+                // This will be handled by ProductSelectionModal
+                setShowProductModal(true);
               }}
             >
               Ürün Listesi
@@ -192,7 +201,7 @@ const POSScreen = ({ onCheckout }) => {
           onClear={clearCart}
         />
         {cart.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-4 space-y-2">
             <Button
               variant="primary"
               className="w-full"
@@ -200,9 +209,80 @@ const POSScreen = ({ onCheckout }) => {
             >
               Ödemeye Geç ({subtotal.toFixed(2)} ₺)
             </Button>
+            {onSplitPayment && (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  const items = cart.map((item) => ({
+                    productId: item.product.id,
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice,
+                    discount: item.discount,
+                  }));
+                  onSplitPayment({
+                    branchId: selectedBranch,
+                    items,
+                  });
+                }}
+              >
+                Parçalı Ödeme
+              </Button>
+            )}
           </div>
         )}
       </div>
+
+      {/* Product Selection Modal */}
+      <Modal
+        isOpen={showProductModal}
+        onClose={() => {
+          setShowProductModal(false);
+          setProductSearch('');
+        }}
+        title="Ürün Seç"
+        size="lg"
+      >
+        <div className="space-y-4">
+          <Input
+            label="Ürün Ara"
+            value={productSearch}
+            onChange={(e) => setProductSearch(e.target.value)}
+            placeholder="Ürün adı, barkod veya SKU ile ara..."
+            autoFocus
+          />
+
+          <div className="max-h-96 overflow-y-auto">
+            {products.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                Ürün bulunamadı
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-2">
+                {products.map((product) => (
+                  <button
+                    key={product.id}
+                    type="button"
+                    onClick={() => {
+                      addToCart(product);
+                      setShowProductModal(false);
+                      setProductSearch('');
+                    }}
+                    className="text-left p-3 border rounded-lg hover:bg-gray-50 hover:border-primary-300 transition-colors"
+                  >
+                    <div className="font-medium text-gray-900">{product.name}</div>
+                    <div className="text-sm text-gray-500">
+                      {product.barcode && `Barkod: ${product.barcode} | `}
+                      {product.sku && `SKU: ${product.sku} | `}
+                      Fiyat: ₺{parseFloat(product.price).toFixed(2)}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

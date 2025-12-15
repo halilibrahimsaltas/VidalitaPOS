@@ -21,7 +21,7 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit }) => {
     onSubmit({
       paymentMethod,
       paidAmount: parseFloat(paidAmount) || total,
-      customerId: customerId || null,
+      customerId: customerId && customerId.trim() !== '' ? customerId : null,
     });
   };
 
