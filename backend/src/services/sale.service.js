@@ -1,10 +1,9 @@
 import { saleRepository } from '../repositories/sale.repository.js';
 import { generateSaleNumber } from '../utils/saleNumber.js';
-import inventoryService from './inventory.service.js';
 import { ApiError } from '../utils/ApiError.js';
 import { prisma } from '../config/database.js';
 
-export const saleService = {
+const saleService = {
   getAllSales: async (filters) => {
     return saleRepository.findAll(filters);
   },
@@ -42,7 +41,7 @@ export const saleService = {
       }
     }
 
-    // Validate and process items
+    // Validate and process items - Sadece fatura kaydı, stok kontrolü yok
     let subtotal = 0;
     const processedItems = [];
 
@@ -50,16 +49,6 @@ export const saleService = {
       const product = await prisma.product.findUnique({ where: { id: item.productId } });
       if (!product) {
         throw new ApiError(404, `Product ${item.productId} not found`);
-      }
-
-      if (!product.isActive) {
-        throw new ApiError(400, `Product ${product.name} is not active`);
-      }
-
-      // Check inventory
-      const inventory = await inventoryService.getInventoryItem(branchId, item.productId).catch(() => null);
-      if (!inventory || inventory.quantity < item.quantity) {
-        throw new ApiError(400, `Insufficient stock for product ${product.name}`);
       }
 
       const unitPrice = parseFloat(item.unitPrice || product.price);
@@ -88,7 +77,7 @@ export const saleService = {
 
     // Validate payment
     const paidAmount = parseFloat(saleData.paidAmount || total);
-    if (paidAmount < total && paymentMethod !== 'CREDIT') {
+    if (paidAmount < total && paymentMethod !== 'CREDIT' && paymentMethod !== 'MIXED') {
       throw new ApiError(400, 'Paid amount must be greater than or equal to total');
     }
 
@@ -97,7 +86,7 @@ export const saleService = {
     // Generate sale number
     const saleNumber = await generateSaleNumber(prisma);
 
-    // Create sale
+    // Create sale - Sadece fatura kaydı
     const sale = await saleRepository.create({
       saleNumber,
       branchId,
@@ -115,10 +104,8 @@ export const saleService = {
       items: processedItems,
     });
 
-    // Update inventory for each item
-    for (const item of processedItems) {
-      await inventoryService.updateQuantity(branchId, item.productId, -item.quantity);
-    }
+    // NOT: Stok kontrolü ve inventory güncellemesi şimdilik yok
+    // Bu özellikler POS entegrasyonu ile birlikte daha sonra eklenecek
 
     // Create customer transaction if credit sale
     if (customerId && (paymentMethod === 'CREDIT' || paymentMethod === 'MIXED')) {
@@ -173,4 +160,6 @@ export const saleService = {
     return saleRepository.updateStatus(saleId, newStatus);
   },
 };
+
+export default saleService;
 

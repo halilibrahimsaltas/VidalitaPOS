@@ -1,5 +1,5 @@
 import { ApiResponse } from '../utils/ApiResponse.js';
-import * as saleService from '../services/sale.service.js';
+import saleService from '../services/sale.service.js';
 import { generateReceipt } from '../utils/receipt.js';
 
 export const getAllSales = async (req, res, next) => {
