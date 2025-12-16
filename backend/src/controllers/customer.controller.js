@@ -1,5 +1,5 @@
 import { ApiResponse } from '../utils/ApiResponse.js';
-import * as customerService from '../services/customer.service.js';
+import customerService from '../services/customer.service.js';
 
 export const getAllCustomers = async (req, res, next) => {
   try {
@@ -51,6 +51,20 @@ export const deleteCustomer = async (req, res, next) => {
     const { id } = req.params;
     await customerService.deleteCustomer(id);
     res.json(ApiResponse.success(null, 'Customer deleted successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCustomerStatistics = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const filters = {
+      startDate: req.query.startDate,
+      endDate: req.query.endDate,
+    };
+    const statistics = await customerService.getCustomerStatistics(id, filters);
+    res.json(ApiResponse.success(statistics, 'Customer statistics retrieved successfully'));
   } catch (error) {
     next(error);
   }

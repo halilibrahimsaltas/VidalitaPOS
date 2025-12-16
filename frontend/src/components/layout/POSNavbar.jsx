@@ -12,7 +12,7 @@ import {
   HiUsers
 } from 'react-icons/hi2';
 
-const Sidebar = () => {
+const POSNavbar = () => {
   const { t } = useTranslation();
   const location = useLocation();
 
@@ -31,41 +31,37 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="h-full bg-white border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-          {t('dashboard.quickActions')}
-        </h2>
-      </div>
-      <nav className="flex-1 overflow-y-auto p-2">
-        <ul className="space-y-1">
-          {quickActions.map((action) => {
-            const IconComponent = action.icon;
-            return (
-              <li key={action.path}>
+    <div className="bg-white border-b border-gray-200 shadow-sm">
+      <div className="px-4 py-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-1 overflow-x-auto">
+            {quickActions.map((action) => {
+              const IconComponent = action.icon;
+              return (
                 <Link
+                  key={action.path}
                   to={action.path}
-                  className={`flex items-center space-x-3 px-3 py-3 rounded-md text-base font-medium transition-all ${
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
                     isActive(action.path)
-                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-semibold'
+                      ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600 font-semibold'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <IconComponent className={`flex-shrink-0 w-5 h-5 ${
+                  <IconComponent className={`flex-shrink-0 w-4 h-4 ${
                     isActive(action.path)
                       ? 'text-blue-600'
                       : 'text-gray-500'
                   }`} />
                   <span className="truncate">{t(action.key)}</span>
                 </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-    </aside>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default Sidebar;
+export default POSNavbar;
 

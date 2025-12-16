@@ -3,7 +3,7 @@ import { useCustomers, useDeleteCustomer } from '../../hooks/useCustomers';
 import Button from '../common/Button';
 import Input from '../common/Input';
 
-const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment }) => {
+const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, onViewStatistics }) => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [isActiveFilter, setIsActiveFilter] = useState('');
@@ -143,8 +143,15 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment })
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
                         <button
+                          onClick={() => onViewStatistics(customer)}
+                          className="text-purple-600 hover:text-purple-900"
+                          title="İstatistikler"
+                        >
+                          📊
+                        </button>
+                        <button
                           onClick={() => onViewTransactions(customer)}
-                          className="text-primary-600 hover:text-primary-900"
+                          className="text-blue-600 hover:text-blue-900"
                         >
                           Hareketler
                         </button>
@@ -158,7 +165,7 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment })
                         )}
                         <button
                           onClick={() => onEdit(customer)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-gray-600 hover:text-gray-900"
                         >
                           Düzenle
                         </button>

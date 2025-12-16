@@ -83,6 +83,19 @@ const saleService = {
       throw new ApiError(400, 'Paid amount must be greater than or equal to total');
     }
 
+    // Validate: CREDIT payment method requires customer
+    if (paymentMethod === 'CREDIT' && !customerId) {
+      throw new ApiError(400, 'Customer is required for credit payment method');
+    }
+
+    // Validate: MIXED payment method with credit portion requires customer
+    if (paymentMethod === 'MIXED') {
+      const creditAmount = total - paidAmount;
+      if (creditAmount > 0 && !customerId) {
+        throw new ApiError(400, 'Customer is required when mixed payment includes credit portion');
+      }
+    }
+
     const changeAmount = Math.max(0, paidAmount - total);
 
     // Generate sale number and invoice number

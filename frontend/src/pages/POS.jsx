@@ -67,13 +67,18 @@ const POS = () => {
   const handleCloseReceipt = () => {
     setIsReceiptModalOpen(false);
     setCompletedSale(null);
-    window.location.reload(); // Refresh to clear cart
+    // Clear cart and customer from localStorage after successful sale
+    localStorage.removeItem('pos_cart');
+    localStorage.removeItem('pos_selectedCustomer');
+    // Reload to reset cart state
+    window.location.reload();
   };
 
   return (
     <PageLayout
-      title={t('pos.title')}
-      description={t('pos.subtitle')}
+      hideSidebar={true}
+      fullScreen={true}
+      showPOSNavbar={true}
     >
         <POSScreen 
           onCheckout={handleCheckout} 
@@ -99,6 +104,7 @@ const POS = () => {
             setIsPaymentModalOpen(false);
             setIsSplitPaymentModalOpen(true);
           }}
+          selectedCustomer={checkoutData?.customer || null}
         />
 
         <SplitPaymentModal
@@ -112,6 +118,7 @@ const POS = () => {
             return sum + itemTotal;
           }, 0) || 0}
           onSubmit={handleSplitPaymentSubmit}
+          selectedCustomer={checkoutData?.customer || null}
         />
 
         {completedSale && (

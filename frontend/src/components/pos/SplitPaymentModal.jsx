@@ -3,16 +3,14 @@ import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
 
-const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit }) => {
+const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit, selectedCustomer }) => {
   const [payments, setPayments] = useState([
     { method: 'CASH', amount: '', cardType: '' },
   ]);
-  const [customerId, setCustomerId] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setPayments([{ method: 'CASH', amount: '', cardType: '' }]);
-      setCustomerId('');
     }
   }, [isOpen]);
 
@@ -46,6 +44,13 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit }) => {
       return;
     }
 
+    // Check if any payment is CREDIT and validate customer
+    const hasCredit = payments.some(p => p.method === 'CREDIT' && parseFloat(p.amount) > 0);
+    if (hasCredit && !selectedCustomer) {
+      alert('Veresiye ödemesi için müşteri seçilmesi zorunludur!');
+      return;
+    }
+
     // Group payments by method
     const paymentGroups = payments.reduce((acc, payment) => {
       const method = payment.method;
@@ -72,7 +77,7 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit }) => {
     onSubmit({
       paymentMethod,
       paidAmount,
-      customerId: customerId || null,
+      customerId: selectedCustomer?.id || null,
       splitPayments: Object.values(paymentGroups), // For reference/notes
     });
   };
@@ -89,6 +94,25 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Parçalı Ödeme" size="lg">
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Customer Info */}
+        {selectedCustomer && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+            <div className="text-sm font-medium text-blue-900">Müşteri: {selectedCustomer.name}</div>
+            {selectedCustomer.phone && (
+              <div className="text-xs text-blue-700 mt-1">Tel: {selectedCustomer.phone}</div>
+            )}
+            {selectedCustomer.debt > 0 && (
+              <div className="text-xs text-red-600 mt-1">Mevcut Borç: ₺{selectedCustomer.debt.toFixed(2)}</div>
+            )}
+          </div>
+        )}
+
+        {!selectedCustomer && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-4">
+            <div className="text-sm text-gray-600">Anonim Müşteri</div>
+          </div>
+        )}
+
         <div className="bg-gray-50 p-4 rounded-lg mb-4">
           <div className="flex justify-between items-center">
             <span className="text-gray-600 font-medium">Toplam Tutar:</span>
@@ -109,6 +133,15 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit }) => {
             </div>
           )}
         </div>
+
+        {/* Warning for credit payment without customer */}
+        {payments.some(p => p.method === 'CREDIT' && parseFloat(p.amount) > 0) && !selectedCustomer && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+            <div className="text-sm text-yellow-800">
+              ⚠️ Veresiye ödemesi için müşteri seçilmesi zorunludur. Lütfen POS ekranından müşteri seçin.
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3">
           <div className="flex justify-between items-center">
@@ -182,23 +215,23 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit }) => {
           ))}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Müşteri (Opsiyonel - Veresiye için)
-          </label>
-          <Input
-            type="text"
-            value={customerId}
-            onChange={(e) => setCustomerId(e.target.value)}
-            placeholder="Müşteri ID veya boş bırakın"
-          />
-        </div>
+        {payments.some(p => p.method === 'CREDIT') && !selectedCustomer && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <div className="text-sm text-yellow-800">
+              ⚠️ Veresiye ödemesi için müşteri seçilmesi zorunludur. Lütfen POS ekranından müşteri seçin.
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button type="button" variant="secondary" onClick={onClose}>
             İptal
           </Button>
-          <Button type="submit" variant="primary" disabled={!isValid}>
+          <Button 
+            type="submit" 
+            variant="primary" 
+            disabled={!isValid || (payments.some(p => p.method === 'CREDIT' && parseFloat(p.amount) > 0) && !selectedCustomer)}
+          >
             Ödemeyi Tamamla
           </Button>
         </div>

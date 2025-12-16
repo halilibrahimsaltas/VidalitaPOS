@@ -40,5 +40,10 @@ export const customerService = {
     const response = await api.post(`/customers/${customerId}/payments`, data);
     return response.data;
   },
+
+  getStatistics: async (customerId, params = {}) => {
+    const response = await api.get(`/customers/${customerId}/statistics`, { params });
+    return response.data;
+  },
 };
 

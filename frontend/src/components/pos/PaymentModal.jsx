@@ -3,25 +3,30 @@ import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
 
-const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment }) => {
+const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, selectedCustomer }) => {
   const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [paidAmount, setPaidAmount] = useState('');
-  const [customerId, setCustomerId] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setPaymentMethod('CASH');
       setPaidAmount(total.toFixed(2));
-      setCustomerId('');
     }
   }, [isOpen, total]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate: Veresiye ödemesi için müşteri zorunlu
+    if (paymentMethod === 'CREDIT' && !selectedCustomer) {
+      alert('Veresiye ödemesi için müşteri seçilmesi zorunludur!');
+      return;
+    }
+
     onSubmit({
       paymentMethod,
       paidAmount: parseFloat(paidAmount) || total,
-      customerId: customerId && customerId.trim() !== '' ? customerId : null,
+      customerId: selectedCustomer?.id || null,
     });
   };
 
@@ -94,6 +99,29 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment }) => {
           </div>
         </div>
 
+        {/* Customer Info */}
+        {selectedCustomer && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium text-blue-900">Müşteri: {selectedCustomer.name}</div>
+                {selectedCustomer.phone && (
+                  <div className="text-xs text-blue-700 mt-1">Tel: {selectedCustomer.phone}</div>
+                )}
+                {selectedCustomer.debt > 0 && (
+                  <div className="text-xs text-red-600 mt-1">Mevcut Borç: ₺{selectedCustomer.debt.toFixed(2)}</div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!selectedCustomer && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <div className="text-sm text-gray-600">Anonim Müşteri</div>
+          </div>
+        )}
+
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="flex justify-between mb-2">
             <span className="text-gray-600">Toplam:</span>
@@ -114,14 +142,12 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment }) => {
           />
         )}
 
-        {paymentMethod === 'CREDIT' && (
-          <Input
-            label="Müşteri ID (Opsiyonel)"
-            type="text"
-            value={customerId}
-            onChange={(e) => setCustomerId(e.target.value)}
-            placeholder="Müşteri ID"
-          />
+        {paymentMethod === 'CREDIT' && !selectedCustomer && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <div className="text-sm text-yellow-800">
+              ⚠️ Veresiye ödemesi için müşteri seçilmesi zorunludur. Lütfen POS ekranından müşteri seçin.
+            </div>
+          </div>
         )}
 
         {paymentMethod !== 'CREDIT' && changeAmount > 0 && (
@@ -150,7 +176,11 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment }) => {
               Parçalı Ödeme
             </Button>
           )}
-          <Button type="submit" variant="primary">
+          <Button 
+            type="submit" 
+            variant="primary"
+            disabled={paymentMethod === 'CREDIT' && !selectedCustomer}
+          >
             Ödemeyi Tamamla
           </Button>
         </div>

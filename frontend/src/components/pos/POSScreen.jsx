@@ -1,31 +1,64 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useProductByBarcode, useProducts } from '../../hooks/useProducts';
 import { useBranches } from '../../hooks/useBranches';
 import { useAuth } from '../../contexts/AuthContext';
-import Input from '../common/Input';
-import Button from '../common/Button';
-import Modal from '../common/Modal';
-import Cart from './Cart';
+import CustomerSelector from './CustomerSelector';
+import { HiShoppingCart, HiPlus, HiMinus, HiTrash } from 'react-icons/hi2';
+import { HiX } from 'react-icons/hi';
 
 const POSScreen = ({ onCheckout, onSplitPayment }) => {
   const { user } = useAuth();
   const [barcodeInput, setBarcodeInput] = useState('');
-  const [cart, setCart] = useState([]);
-  const [selectedBranch, setSelectedBranch] = useState('');
-  const [showProductModal, setShowProductModal] = useState(false);
+  const [cart, setCart] = useState(() => {
+    // Load cart from localStorage on mount
+    try {
+      const savedCart = localStorage.getItem('pos_cart');
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        // Recalculate totals for saved items
+        return parsed.map(item => ({
+          ...item,
+          total: item.quantity * item.unitPrice - (item.discount || 0),
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error);
+    }
+    return [];
+  });
+  const [selectedBranch, setSelectedBranch] = useState(() => {
+    // Load selected branch from localStorage
+    const saved = localStorage.getItem('pos_selectedBranch');
+    return saved || '';
+  });
+  const [selectedCustomer, setSelectedCustomer] = useState(() => {
+    // Load selected customer from localStorage
+    try {
+      const saved = localStorage.getItem('pos_selectedCustomer');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (error) {
+      console.error('Error loading customer from localStorage:', error);
+    }
+    return null;
+  });
   const [productSearch, setProductSearch] = useState('');
+  const [productPage, setProductPage] = useState(1);
   const barcodeInputRef = useRef(null);
 
-  const { data: branchesData } = useBranches({ limit: 100 });
+  const { data: branchesData } = useBranches({ limit: 100, isActive: true });
   const branches = branchesData?.data?.branches || [];
 
   const { data: productData, refetch: fetchProduct } = useProductByBarcode(barcodeInput);
   const { data: productsData } = useProducts({ 
-    limit: 50, 
-    search: productSearch,
+    page: productPage,
+    limit: 20, 
+    search: productSearch || undefined,
     isActive: true,
   });
   const products = productsData?.data?.products || [];
+  const totalProducts = productsData?.data?.pagination?.total || 0;
 
   // Auto-focus barcode input
   useEffect(() => {
@@ -34,21 +67,119 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
     }
   }, []);
 
-  // Set default branch if user has one
+  // Set default branch
   useEffect(() => {
-    if (user?.branchId && !selectedBranch) {
-      setSelectedBranch(user.branchId);
+    if (!selectedBranch && branches.length > 0) {
+      if (user?.branchId) {
+        // Use user's branch if available
+        const branchId = user.branchId;
+        setSelectedBranch(branchId);
+        localStorage.setItem('pos_selectedBranch', branchId);
+      } else if (user?.role === 'ADMIN' && branches[0]) {
+        // Admin: use first branch
+        const branchId = branches[0].id;
+        setSelectedBranch(branchId);
+        localStorage.setItem('pos_selectedBranch', branchId);
+      }
     }
-  }, [user, selectedBranch]);
+  }, [user, branches, selectedBranch]);
 
-  // Handle product found
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    if (cart.length > 0) {
+      // Save only essential data (product id, not full product object)
+      const cartToSave = cart.map(item => ({
+        productId: item.product.id,
+        product: {
+          id: item.product.id,
+          name: item.product.name,
+          price: item.product.price,
+          barcode: item.product.barcode,
+          imageUrl: item.product.imageUrl,
+        },
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        discount: item.discount || 0,
+        total: item.total,
+      }));
+      localStorage.setItem('pos_cart', JSON.stringify(cartToSave));
+    } else {
+      localStorage.removeItem('pos_cart');
+    }
+  }, [cart]);
+
+  // Save selected branch to localStorage
+  useEffect(() => {
+    if (selectedBranch) {
+      localStorage.setItem('pos_selectedBranch', selectedBranch);
+    }
+  }, [selectedBranch]);
+
+  // Save selected customer to localStorage
+  useEffect(() => {
+    if (selectedCustomer) {
+      localStorage.setItem('pos_selectedCustomer', JSON.stringify(selectedCustomer));
+    } else {
+      localStorage.removeItem('pos_selectedCustomer');
+    }
+  }, [selectedCustomer]);
+
+  // Save selected customer to localStorage
+  useEffect(() => {
+    if (selectedCustomer) {
+      localStorage.setItem('pos_selectedCustomer', JSON.stringify(selectedCustomer));
+    } else {
+      localStorage.removeItem('pos_selectedCustomer');
+    }
+  }, [selectedCustomer]);
+
+  const addToCart = useCallback((product) => {
+    setCart((prevCart) => {
+      const existingItemIndex = prevCart.findIndex((item) => item.product.id === product.id);
+
+      if (existingItemIndex >= 0) {
+        const newCart = [...prevCart];
+        newCart[existingItemIndex].quantity += 1;
+        newCart[existingItemIndex].total = newCart[existingItemIndex].quantity * newCart[existingItemIndex].unitPrice - (newCart[existingItemIndex].discount || 0);
+        return newCart;
+      } else {
+        const unitPrice = parseFloat(product.price);
+        return [
+          ...prevCart,
+          {
+            product,
+            quantity: 1,
+            unitPrice,
+            discount: 0,
+            total: unitPrice,
+          },
+        ];
+      }
+    });
+  }, []);
+
+  // Handle product found by barcode
   useEffect(() => {
     if (productData?.data && barcodeInput) {
       const product = productData.data;
       addToCart(product);
       setBarcodeInput('');
+      setProductSearch(''); // Clear search when barcode is found
+      if (barcodeInputRef.current) {
+        barcodeInputRef.current.focus();
+      }
     }
-  }, [productData, barcodeInput]);
+  }, [productData, barcodeInput, addToCart]);
+
+  // Sync barcode input with product search
+  useEffect(() => {
+    if (barcodeInput && !barcodeInput.match(/^\d+$/)) {
+      // If input is not just numbers, treat it as search
+      setProductSearch(barcodeInput);
+    } else if (!barcodeInput) {
+      setProductSearch('');
+    }
+  }, [barcodeInput]);
 
   const handleBarcodeSubmit = (e) => {
     e.preventDefault();
@@ -57,30 +188,6 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
     }
   };
 
-  const addToCart = (product) => {
-    const existingItemIndex = cart.findIndex((item) => item.product.id === product.id);
-
-    if (existingItemIndex >= 0) {
-      // Update quantity
-      const newCart = [...cart];
-      newCart[existingItemIndex].quantity += 1;
-      newCart[existingItemIndex].total = newCart[existingItemIndex].quantity * newCart[existingItemIndex].unitPrice;
-      setCart(newCart);
-    } else {
-      // Add new item
-      const unitPrice = parseFloat(product.price);
-      setCart([
-        ...cart,
-        {
-          product,
-          quantity: 1,
-          unitPrice,
-          discount: 0,
-          total: unitPrice,
-        },
-      ]);
-    }
-  };
 
   const removeItem = (index) => {
     setCart(cart.filter((_, i) => i !== index));
@@ -90,13 +197,14 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
     if (newQuantity < 1) return;
     const newCart = [...cart];
     newCart[index].quantity = newQuantity;
-    newCart[index].total = newQuantity * newCart[index].unitPrice - newCart[index].discount;
+    newCart[index].total = newQuantity * newCart[index].unitPrice - (newCart[index].discount || 0);
     setCart(newCart);
   };
 
   const clearCart = () => {
-    if (window.confirm('Sepeti temizlemek istediğinize emin misiniz?')) {
+    if (cart.length > 0 && window.confirm('Sepeti temizlemek istediğinize emin misiniz?')) {
       setCart([]);
+      localStorage.removeItem('pos_cart');
     }
   };
 
@@ -115,177 +223,348 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
       productId: item.product.id,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
-      discount: item.discount,
+      discount: item.discount || 0,
     }));
 
     onCheckout({
       branchId: selectedBranch,
       items,
+      customerId: selectedCustomer?.id || null,
+      customer: selectedCustomer || null,
+    });
+  };
+
+  const handleSplitPayment = () => {
+    if (cart.length === 0) {
+      alert('Sepet boş!');
+      return;
+    }
+
+    if (!selectedBranch) {
+      alert('Lütfen bir şube seçin!');
+      return;
+    }
+
+    const items = cart.map((item) => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      discount: item.discount || 0,
+    }));
+
+    onSplitPayment({
+      branchId: selectedBranch,
+      items,
+      customerId: selectedCustomer?.id || null,
+      customer: selectedCustomer || null,
     });
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
+  const totalDiscount = cart.reduce((sum, item) => sum + (item.discount || 0), 0);
+  const total = subtotal;
+
+  const selectedBranchName = branches.find(b => b.id === selectedBranch)?.name || '';
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
-      {/* Left Panel - Product Search */}
-      <div className="lg:col-span-2 space-y-4">
-        <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="text-lg font-semibold mb-4">Ürün Arama</h3>
-          
+    <div className="h-[calc(100vh-8rem)] flex flex-col bg-gray-50">
+      {/* Top Bar - Barcode Input & Branch Selection */}
+      <div className="bg-white border-b border-gray-200 p-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
           {/* Branch Selection */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Şube
-            </label>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Şube:</label>
             <select
               value={selectedBranch}
               onChange={(e) => setSelectedBranch(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              disabled={user?.role !== 'ADMIN' && user?.branchId}
             >
               <option value="">Şube seçin...</option>
               {branches.map((branch) => (
                 <option key={branch.id} value={branch.id}>
-                  {branch.name} ({branch.code})
+                  {branch.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Barcode Input */}
-          <form onSubmit={handleBarcodeSubmit}>
-            <Input
-              ref={barcodeInputRef}
-              label="Barkod / Ürün Kodu"
-              value={barcodeInput}
-              onChange={(e) => setBarcodeInput(e.target.value)}
-              placeholder="Barkod okuyun veya girin..."
-              autoFocus
-            />
-            <Button type="submit" variant="primary" className="w-full mt-2">
-              Ara
-            </Button>
-          </form>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="text-lg font-semibold mb-4">Hızlı İşlemler</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                // This will be handled by ProductSelectionModal
-                setShowProductModal(true);
-              }}
-            >
-              Ürün Listesi
-            </Button>
-            <Button
-              variant="outline"
-              onClick={clearCart}
-              disabled={cart.length === 0}
-            >
-              Sepeti Temizle
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Panel - Cart */}
-      <div className="lg:col-span-1">
-        <Cart
-          items={cart}
-          onRemoveItem={removeItem}
-          onUpdateQuantity={updateQuantity}
-          onClear={clearCart}
-        />
-        {cart.length > 0 && (
-          <div className="mt-4 space-y-2">
-            <Button
-              variant="primary"
-              className="w-full"
-              onClick={handleCheckout}
-            >
-              Ödemeye Geç ({subtotal.toFixed(2)} ₺)
-            </Button>
-            {onSplitPayment && (
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  const items = cart.map((item) => ({
-                    productId: item.product.id,
-                    quantity: item.quantity,
-                    unitPrice: item.unitPrice,
-                    discount: item.discount,
-                  }));
-                  onSplitPayment({
-                    branchId: selectedBranch,
-                    items,
-                  });
-                }}
-              >
-                Parçalı Ödeme
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Product Selection Modal */}
-      <Modal
-        isOpen={showProductModal}
-        onClose={() => {
-          setShowProductModal(false);
-          setProductSearch('');
-        }}
-        title="Ürün Seç"
-        size="lg"
-      >
-        <div className="space-y-4">
-          <Input
-            label="Ürün Ara"
-            value={productSearch}
-            onChange={(e) => setProductSearch(e.target.value)}
-            placeholder="Ürün adı, barkod veya SKU ile ara..."
-            autoFocus
+          {/* Customer Selection */}
+          <CustomerSelector
+            selectedCustomer={selectedCustomer}
+            onSelectCustomer={setSelectedCustomer}
+            onClearCustomer={() => setSelectedCustomer(null)}
           />
 
-          <div className="max-h-96 overflow-y-auto">
-            {products.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                Ürün bulunamadı
+          {/* Barcode Input */}
+          <form onSubmit={handleBarcodeSubmit} className="flex-1 w-full sm:max-w-md">
+            <div className="relative">
+              <input
+                ref={barcodeInputRef}
+                type="text"
+                value={barcodeInput}
+                onChange={(e) => setBarcodeInput(e.target.value)}
+                placeholder="Barkod okuyun veya ürün adı ile arayın..."
+                className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+                autoFocus
+              />
+              {barcodeInput && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBarcodeInput('');
+                    setProductSearch('');
+                    if (barcodeInputRef.current) {
+                      barcodeInputRef.current.focus();
+                    }
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <HiX className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          </form>
+
+          {/* Cart Summary */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <HiShoppingCart className="w-5 h-5" />
+            <span className="font-semibold">{cart.length} ürün</span>
+            <span className="text-gray-400">|</span>
+            <span className="font-bold text-lg text-gray-900">{total.toFixed(2)} ₺</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Panel - Product Grid */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {productSearch && (
+            <div className="mb-4">
+              <p className="text-sm text-gray-600">
+                "{productSearch}" için {totalProducts} sonuç bulundu
+              </p>
+            </div>
+          )}
+          
+          {products.length === 0 ? (
+            <div className="flex items-center justify-center h-full text-gray-500">
+              <div className="text-center">
+                <HiShoppingCart className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg">Ürün bulunamadı</p>
+                <p className="text-sm mt-2">Barkod okuyun veya ürün adı ile arayın</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {products.map((product) => (
+                <button
+                  key={product.id}
+                  type="button"
+                  onClick={() => {
+                    addToCart(product);
+                    if (barcodeInputRef.current) {
+                      barcodeInputRef.current.focus();
+                    }
+                  }}
+                  className="bg-white rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all p-3 text-left group"
+                >
+                  {/* Product Image */}
+                  <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center overflow-hidden">
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl font-bold" style={{ display: product.imageUrl ? 'none' : 'flex' }}>
+                      {product.name.charAt(0).toUpperCase()}
+                    </div>
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="space-y-1">
+                    <h3 className="font-medium text-sm text-gray-900 line-clamp-2 group-hover:text-blue-600">
+                      {product.name}
+                    </h3>
+                    {product.barcode && (
+                      <p className="text-xs text-gray-500 font-mono">{product.barcode}</p>
+                    )}
+                    <p className="text-lg font-bold text-gray-900">
+                      ₺{parseFloat(product.price).toFixed(2)}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalProducts > 20 && (
+            <div className="mt-6 flex justify-center gap-2">
+              <button
+                onClick={() => setProductPage(p => Math.max(1, p - 1))}
+                disabled={productPage === 1}
+                className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Önceki
+              </button>
+              <span className="px-4 py-2 text-sm text-gray-600">
+                Sayfa {productPage} / {Math.ceil(totalProducts / 20)}
+              </span>
+              <button
+                onClick={() => setProductPage(p => p + 1)}
+                disabled={productPage >= Math.ceil(totalProducts / 20)}
+                className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Sonraki
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Right Panel - Cart */}
+        <div className="w-full sm:w-96 bg-white border-l border-gray-200 flex flex-col">
+          {/* Cart Header */}
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-semibold text-gray-900">Sepet</h2>
+              {cart.length > 0 && (
+                <button
+                  onClick={clearCart}
+                  className="text-sm text-red-600 hover:text-red-800 flex items-center gap-1"
+                >
+                  <HiTrash className="w-4 h-4" />
+                  Temizle
+                </button>
+              )}
+            </div>
+            {/* Customer Info in Cart */}
+            {selectedCustomer ? (
+              <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
+                <div className="font-medium text-blue-900">Müşteri: {selectedCustomer.name}</div>
+                {selectedCustomer.debt > 0 && (
+                  <div className="text-red-600 mt-0.5">Borç: ₺{selectedCustomer.debt.toFixed(2)}</div>
+                )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-2">
-                {products.map((product) => (
-                  <button
-                    key={product.id}
-                    type="button"
-                    onClick={() => {
-                      addToCart(product);
-                      setShowProductModal(false);
-                      setProductSearch('');
-                    }}
-                    className="text-left p-3 border rounded-lg hover:bg-gray-50 hover:border-primary-300 transition-colors"
+              <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600">
+                Anonim Müşteri
+              </div>
+            )}
+          </div>
+
+          {/* Cart Items */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {cart.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                <HiShoppingCart className="w-16 h-16 mb-4" />
+                <p className="text-sm">Sepet boş</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {cart.map((item, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-50 rounded-lg p-3 border border-gray-200"
                   >
-                    <div className="font-medium text-gray-900">{product.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {product.barcode && `Barkod: ${product.barcode} | `}
-                      {product.sku && `SKU: ${product.sku} | `}
-                      Fiyat: ₺{parseFloat(product.price).toFixed(2)}
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm text-gray-900 truncate">
+                          {item.product.name}
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                          ₺{item.unitPrice.toFixed(2)} / adet
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => removeItem(index)}
+                        className="text-red-600 hover:text-red-800 ml-2 flex-shrink-0"
+                      >
+                        <HiX className="w-4 h-4" />
+                      </button>
                     </div>
-                  </button>
+
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => updateQuantity(index, item.quantity - 1)}
+                          className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100"
+                        >
+                          <HiMinus className="w-4 h-4" />
+                        </button>
+                        <span className="w-12 text-center font-semibold text-gray-900">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(index, item.quantity + 1)}
+                          className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100"
+                        >
+                          <HiPlus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-900">
+                          ₺{item.total.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
           </div>
+
+          {/* Cart Footer - Totals & Checkout */}
+          {cart.length > 0 && (
+            <div className="border-t border-gray-200 p-4 space-y-4">
+              {/* Totals */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Ara Toplam:</span>
+                  <span className="text-gray-900 font-medium">₺{subtotal.toFixed(2)}</span>
+                </div>
+                {totalDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">İndirim:</span>
+                    <span className="text-red-600 font-medium">-₺{totalDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
+                  <span className="text-gray-900">Toplam:</span>
+                  <span className="text-gray-900">₺{total.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* Checkout Buttons */}
+              <div className="space-y-2">
+                <button
+                  onClick={handleCheckout}
+                  className="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors"
+                >
+                  Ödemeye Geç
+                </button>
+                {onSplitPayment && (
+                  <button
+                    onClick={handleSplitPayment}
+                    className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                  >
+                    Parçalı Ödeme
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-      </Modal>
+      </div>
     </div>
   );
 };
 
 export default POSScreen;
-

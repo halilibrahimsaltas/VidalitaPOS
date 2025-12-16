@@ -6,6 +6,7 @@ import CustomerList from '../components/customers/CustomerList';
 import CustomerForm from '../components/customers/CustomerForm';
 import TransactionHistory from '../components/customers/TransactionHistory';
 import PaymentForm from '../components/customers/PaymentForm';
+import CustomerStatistics from '../components/customers/CustomerStatistics';
 import Modal from '../components/common/Modal';
 
 const Customers = () => {
@@ -13,6 +14,7 @@ const Customers = () => {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
@@ -40,10 +42,16 @@ const Customers = () => {
     setIsPaymentModalOpen(true);
   };
 
+  const handleViewStatistics = (customer) => {
+    setSelectedCustomer(customer);
+    setIsStatisticsModalOpen(true);
+  };
+
   const handleClose = () => {
     setIsFormModalOpen(false);
     setIsTransactionModalOpen(false);
     setIsPaymentModalOpen(false);
+    setIsStatisticsModalOpen(false);
     setEditingCustomer(null);
     setSelectedCustomer(null);
   };
@@ -89,6 +97,7 @@ const Customers = () => {
           onCreate={handleCreate}
           onViewTransactions={handleViewTransactions}
           onRecordPayment={handleRecordPayment}
+          onViewStatistics={handleViewStatistics}
         />
 
         {/* Customer Form Modal */}
@@ -132,6 +141,18 @@ const Customers = () => {
               onCancel={handleClose}
               isLoading={isLoading}
             />
+          )}
+        </Modal>
+
+        {/* Statistics Modal */}
+        <Modal
+          isOpen={isStatisticsModalOpen}
+          onClose={handleClose}
+          title={`${selectedCustomer?.name} - İstatistikler`}
+          size="xl"
+        >
+          {selectedCustomer && (
+            <CustomerStatistics customerId={selectedCustomer.id} />
           )}
         </Modal>
     </PageLayout>

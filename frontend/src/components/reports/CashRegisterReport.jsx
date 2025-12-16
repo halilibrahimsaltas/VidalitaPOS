@@ -33,7 +33,12 @@ const CashRegisterReport = () => {
   };
 
   const handlePrint = () => {
-    window.print();
+    try {
+      window.print();
+    } catch (error) {
+      console.error('Print error:', error);
+      alert('Yazdırma işlemi başlatılamadı. Lütfen tarayıcınızın yazdırma ayarlarını kontrol edin.');
+    }
   };
 
   if (isLoading) {
@@ -109,14 +114,19 @@ const CashRegisterReport = () => {
       </div>
 
       {/* Report Summary */}
-      <div className="card p-6 print:shadow-none">
+      <div id="cash-register-report" className="card p-6 print:shadow-none">
         <div className="flex justify-between items-center mb-6 print:hidden">
           <h2 className="text-2xl font-semibold text-gray-900">
             Gün Sonu Kasa Raporu
           </h2>
-          <Button onClick={handlePrint} variant="primary">
-            Yazdır
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={refetch} variant="outline" size="sm">
+              Yenile
+            </Button>
+            <Button onClick={handlePrint} variant="primary">
+              🖨️ Yazdır
+            </Button>
+          </div>
         </div>
 
         {/* Report Header */}
@@ -194,12 +204,35 @@ const CashRegisterReport = () => {
       {/* Print Styles */}
       <style>{`
         @media print {
+          @page {
+            margin: 1cm;
+            size: A4;
+          }
+          
+          body * {
+            visibility: hidden;
+          }
+          
+          #cash-register-report,
+          #cash-register-report * {
+            visibility: visible;
+          }
+          
+          #cash-register-report {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+          
           .print\\:hidden {
             display: none !important;
           }
+          
           .print\\:shadow-none {
             box-shadow: none !important;
           }
+          
           body {
             print-color-adjust: exact;
             -webkit-print-color-adjust: exact;

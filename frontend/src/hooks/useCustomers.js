@@ -96,7 +96,20 @@ export const useRecordPayment = () => {
         queryClient.invalidateQueries(['customer', variables.customerId]);
         queryClient.invalidateQueries(['customerTransactions', variables.customerId]);
         queryClient.invalidateQueries(['customerDebt', variables.customerId]);
+        queryClient.invalidateQueries(['customerStatistics', variables.customerId]);
       },
+    }
+  );
+};
+
+export const useCustomerStatistics = (customerId, filters = {}) => {
+  return useQuery(
+    ['customerStatistics', customerId, filters],
+    () => customerService.getStatistics(customerId, filters),
+    {
+      enabled: !!customerId,
+      keepPreviousData: true,
+      staleTime: 30000,
     }
   );
 };

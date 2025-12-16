@@ -5,6 +5,7 @@ import {
   createCustomer,
   updateCustomer,
   deleteCustomer,
+  getCustomerStatistics,
 } from '../controllers/customer.controller.js';
 import {
   getCustomerTransactions,
@@ -30,6 +31,9 @@ router.get('/:id/transactions', getCustomerTransactions);
 
 // Get customer debt
 router.get('/:id/debt', getCustomerDebt);
+
+// Get customer statistics
+router.get('/:id/statistics', getCustomerStatistics);
 
 // Create customer (all authenticated users)
 router.post('/', validateCreateCustomer, createCustomer);
