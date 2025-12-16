@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useSales, useSale } from '../../hooks/useSales';
+import { useSales, useSale, useRefundSale, useCancelSale } from '../../hooks/useSales';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Select from '../common/Select';
 import Modal from '../common/Modal';
 import BranchSelect from '../common/BranchSelect';
+import RefundModal from './RefundModal';
 
 const SalesList = () => {
   const [page, setPage] = useState(1);
@@ -14,6 +15,11 @@ const SalesList = () => {
   const [endDate, setEndDate] = useState('');
   const [selectedSaleId, setSelectedSaleId] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
+  const [saleToRefund, setSaleToRefund] = useState(null);
+
+  const refundSale = useRefundSale();
+  const cancelSale = useCancelSale();
 
   const { data, isLoading, error } = useSales({
     page,
@@ -29,6 +35,40 @@ const SalesList = () => {
   const handleViewDetails = (saleId) => {
     setSelectedSaleId(saleId);
     setIsDetailModalOpen(true);
+  };
+
+  const handleRefund = (sale) => {
+    setSaleToRefund(sale);
+    setIsRefundModalOpen(true);
+  };
+
+  const handleConfirmRefund = async (refundItems) => {
+    try {
+      await refundSale.mutateAsync({
+        id: saleToRefund.id,
+        items: refundItems,
+      });
+      setIsRefundModalOpen(false);
+      setSaleToRefund(null);
+      setIsDetailModalOpen(false);
+      setSelectedSaleId(null);
+    } catch (error) {
+      alert(error.response?.data?.message || 'İade işlemi sırasında bir hata oluştu');
+    }
+  };
+
+  const handleCancel = async (saleId) => {
+    if (!window.confirm('Bu satışı iptal etmek istediğinizden emin misiniz? İptal edilen satışlar geri alınamaz.')) {
+      return;
+    }
+
+    try {
+      await cancelSale.mutateAsync(saleId);
+      setIsDetailModalOpen(false);
+      setSelectedSaleId(null);
+    } catch (error) {
+      alert(error.response?.data?.message || 'İptal işlemi sırasında bir hata oluştu');
+    }
   };
 
   const formatDate = (dateString) => {
@@ -72,6 +112,7 @@ const SalesList = () => {
     { value: '', label: 'Tüm Durumlar' },
     { value: 'COMPLETED', label: 'Tamamlandı' },
     { value: 'REFUNDED', label: 'İade Edildi' },
+    { value: 'PARTIALLY_REFUNDED', label: 'Kısmi İade' },
     { value: 'CANCELLED', label: 'İptal Edildi' },
   ];
 
@@ -84,20 +125,22 @@ const SalesList = () => {
   const statusLabels = {
     COMPLETED: 'Tamamlandı',
     REFUNDED: 'İade Edildi',
+    PARTIALLY_REFUNDED: 'Kısmi İade',
     CANCELLED: 'İptal Edildi',
   };
 
   const statusColors = {
-    COMPLETED: 'bg-green-100 text-green-800',
-    REFUNDED: 'bg-orange-100 text-orange-800',
-    CANCELLED: 'bg-red-100 text-red-800',
+    COMPLETED: 'badge-success',
+    REFUNDED: 'badge-warning',
+    PARTIALLY_REFUNDED: 'badge-warning',
+    CANCELLED: 'badge-danger',
   };
 
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="card p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <BranchSelect
               value={branchFilter}
@@ -143,38 +186,22 @@ const SalesList = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      <div className="card overflow-hidden">
+        <div className="table-container">
+          <table className="table">
+            <thead className="table-header">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Fiş No
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tarih
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Şube
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Müşteri
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ödeme
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Toplam
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Durum
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  İşlemler
-                </th>
+                <th className="table-header-cell min-w-[100px]">Fiş No</th>
+                <th className="table-header-cell min-w-[120px]">Tarih</th>
+                <th className="table-header-cell min-w-[120px] hidden md:table-cell">Şube</th>
+                <th className="table-header-cell min-w-[120px] hidden lg:table-cell">Müşteri</th>
+                <th className="table-header-cell min-w-[80px] hidden sm:table-cell">Ödeme</th>
+                <th className="table-header-cell min-w-[100px] text-right">Toplam</th>
+                <th className="table-header-cell min-w-[100px]">Durum</th>
+                <th className="table-header-cell text-right min-w-[150px]">İşlemler</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="table-body">
               {sales.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
@@ -183,53 +210,76 @@ const SalesList = () => {
                 </tr>
               ) : (
                 sales.map((sale) => (
-                  <tr key={sale.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                  <tr key={sale.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="table-cell">
+                      <div className="text-sm font-medium text-gray-900 truncate" title={sale.saleNumber}>
                         {sale.saleNumber}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
+                    <td className="table-cell">
+                      <div className="text-sm text-gray-600">
                         {formatDate(sale.createdAt)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
+                    <td className="table-cell hidden md:table-cell">
+                      <div className="text-sm text-gray-600 truncate" title={sale.branch?.name || '-'}>
                         {sale.branch?.name || '-'}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
+                    <td className="table-cell hidden lg:table-cell">
+                      <div className="text-sm text-gray-600 truncate" title={sale.customer?.name || 'Perakende'}>
                         {sale.customer?.name || 'Perakende'}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
+                    <td className="table-cell hidden sm:table-cell">
+                      <div className="text-sm text-gray-600 truncate">
                         {paymentMethodLabels[sale.paymentMethod] || sale.paymentMethod}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                    <td className="table-cell text-right">
+                      <div className="text-sm font-semibold text-gray-900">
                         {formatCurrency(parseFloat(sale.total))}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          statusColors[sale.status] || 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
+                    <td className="table-cell">
+                      <span className={`badge ${statusColors[sale.status] || 'badge-gray'}`}>
                         {statusLabels[sale.status] || sale.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleViewDetails(sale.id)}
-                        className="text-primary-600 hover:text-primary-900"
-                      >
-                        Detay
-                      </button>
+                    <td className="table-cell text-right">
+                      <div className="flex items-center justify-end gap-2 flex-wrap">
+                        <button
+                          onClick={() => handleViewDetails(sale.id)}
+                          className="text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
+                        >
+                          Detay
+                        </button>
+                        {sale.status === 'COMPLETED' && (
+                          <>
+                            <button
+                              onClick={() => handleRefund(sale)}
+                              className="text-sm text-gray-600 hover:text-gray-700 font-medium whitespace-nowrap"
+                            >
+                              İade
+                            </button>
+                            <button
+                              onClick={() => handleCancel(sale.id)}
+                              className="text-sm text-red-600 hover:text-red-700 font-medium whitespace-nowrap"
+                              disabled={cancelSale.isLoading}
+                            >
+                              İptal
+                            </button>
+                          </>
+                        )}
+                        {sale.status === 'PARTIALLY_REFUNDED' && (
+                          <button
+                            onClick={() => handleRefund(sale)}
+                            className="text-sm text-gray-600 hover:text-gray-700 font-medium whitespace-nowrap"
+                          >
+                            İade
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -279,98 +329,128 @@ const SalesList = () => {
         {saleDetail?.data ? (
           <div className="space-y-4">
             {/* Sale Info */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">Fiş No</label>
-                <p className="text-sm font-semibold text-gray-900">
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Fiş No</label>
+                <p className="text-sm font-semibold text-gray-900 mt-1 truncate">
                   {saleDetail.data.saleNumber}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Tarih</label>
-                <p className="text-sm font-semibold text-gray-900">
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Tarih</label>
+                <p className="text-sm font-semibold text-gray-900 mt-1">
                   {formatDate(saleDetail.data.createdAt)}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Şube</label>
-                <p className="text-sm font-semibold text-gray-900">
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Şube</label>
+                <p className="text-sm font-semibold text-gray-900 mt-1 truncate">
                   {saleDetail.data.branch?.name || '-'}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Kasiyer</label>
-                <p className="text-sm font-semibold text-gray-900">
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Kasiyer</label>
+                <p className="text-sm font-semibold text-gray-900 mt-1 truncate">
                   {saleDetail.data.cashier?.fullName || saleDetail.data.cashier?.username || '-'}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Müşteri</label>
-                <p className="text-sm font-semibold text-gray-900">
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Müşteri</label>
+                <p className="text-sm font-semibold text-gray-900 mt-1 truncate">
                   {saleDetail.data.customer?.name || 'Perakende'}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Ödeme Yöntemi</label>
-                <p className="text-sm font-semibold text-gray-900">
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Ödeme Yöntemi</label>
+                <p className="text-sm font-semibold text-gray-900 mt-1 truncate">
                   {paymentMethodLabels[saleDetail.data.paymentMethod] || saleDetail.data.paymentMethod}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Durum</label>
-                <span
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    statusColors[saleDetail.data.status] || 'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  {statusLabels[saleDetail.data.status] || saleDetail.data.status}
-                </span>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Durum</label>
+                <div className="mt-1">
+                  <span className={`badge ${statusColors[saleDetail.data.status] || 'badge-gray'}`}>
+                    {statusLabels[saleDetail.data.status] || saleDetail.data.status}
+                  </span>
+                </div>
               </div>
             </div>
 
+            {/* Action Buttons */}
+            {saleDetail.data.status === 'COMPLETED' && (
+              <div className="border-t pt-4 flex justify-end space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsDetailModalOpen(false);
+                    handleRefund(saleDetail.data);
+                  }}
+                >
+                  İade Et
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsDetailModalOpen(false);
+                    handleCancel(saleDetail.data.id);
+                  }}
+                  disabled={cancelSale.isLoading}
+                >
+                  İptal Et
+                </Button>
+              </div>
+            )}
+            {saleDetail.data.status === 'PARTIALLY_REFUNDED' && (
+              <div className="border-t pt-4 flex justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsDetailModalOpen(false);
+                    handleRefund(saleDetail.data);
+                  }}
+                >
+                  İade Et
+                </Button>
+              </div>
+            )}
+
             {/* Sale Items */}
-            <div className="border-t pt-4">
-              <h3 className="text-lg font-semibold mb-3">Satış Kalemleri</h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+            <div className="border-t border-gray-200 pt-4">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">Satış Kalemleri</h3>
+              <div className="table-container">
+                <table className="table">
+                  <thead className="table-header">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                        Ürün
-                      </th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                        Miktar
-                      </th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                        Birim Fiyat
-                      </th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                        İndirim
-                      </th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                        Toplam
-                      </th>
+                      <th className="table-header-cell">Ürün</th>
+                      <th className="table-header-cell text-right">Miktar</th>
+                      <th className="table-header-cell text-right hidden sm:table-cell">Birim Fiyat</th>
+                      <th className="table-header-cell text-right hidden md:table-cell">İndirim</th>
+                      <th className="table-header-cell text-right">Toplam</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="table-body">
                     {saleDetail.data.items?.map((item, index) => (
                       <tr key={index}>
-                        <td className="px-4 py-2 text-sm text-gray-900">
-                          {item.product?.name || '-'}
+                        <td className="table-cell">
+                          <div className="text-sm text-gray-900 truncate" title={item.product?.name || '-'}>
+                            {item.product?.name || '-'}
+                          </div>
                         </td>
-                        <td className="px-4 py-2 text-sm text-gray-500 text-right">
-                          {item.quantity}
+                        <td className="table-cell text-right">
+                          <div className="text-sm text-gray-600">{item.quantity}</div>
                         </td>
-                        <td className="px-4 py-2 text-sm text-gray-500 text-right">
-                          {formatCurrency(parseFloat(item.unitPrice))}
+                        <td className="table-cell text-right hidden sm:table-cell">
+                          <div className="text-sm text-gray-600">{formatCurrency(parseFloat(item.unitPrice))}</div>
                         </td>
-                        <td className="px-4 py-2 text-sm text-gray-500 text-right">
-                          {formatCurrency(parseFloat(item.discount || 0))}
+                        <td className="table-cell text-right hidden md:table-cell">
+                          <div className="text-sm text-gray-600">{formatCurrency(parseFloat(item.discount || 0))}</div>
                         </td>
-                        <td className="px-4 py-2 text-sm font-semibold text-gray-900 text-right">
-                          {formatCurrency(
-                            parseFloat(item.unitPrice) * item.quantity - parseFloat(item.discount || 0)
-                          )}
+                        <td className="table-cell text-right">
+                          <div className="text-sm font-semibold text-gray-900">
+                            {formatCurrency(
+                              parseFloat(item.unitPrice) * item.quantity - parseFloat(item.discount || 0)
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -380,7 +460,7 @@ const SalesList = () => {
                       <td colSpan="4" className="px-4 py-2 text-right text-sm font-semibold text-gray-900">
                         Toplam:
                       </td>
-                      <td className="px-4 py-2 text-right text-lg font-bold text-primary-600">
+                      <td className="px-4 py-2 text-right text-base sm:text-lg font-bold text-blue-600">
                         {formatCurrency(parseFloat(saleDetail.data.total))}
                       </td>
                     </tr>
@@ -391,6 +471,29 @@ const SalesList = () => {
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">Yükleniyor...</div>
+        )}
+      </Modal>
+
+      {/* Refund Modal */}
+      <Modal
+        isOpen={isRefundModalOpen}
+        onClose={() => {
+          setIsRefundModalOpen(false);
+          setSaleToRefund(null);
+        }}
+        title={`İade İşlemi - ${saleToRefund?.saleNumber || ''}`}
+        size="lg"
+      >
+        {saleToRefund && (
+          <RefundModal
+            sale={saleToRefund}
+            onConfirm={handleConfirmRefund}
+            onCancel={() => {
+              setIsRefundModalOpen(false);
+              setSaleToRefund(null);
+            }}
+            isLoading={refundSale.isLoading}
+          />
         )}
       </Modal>
     </div>

@@ -26,14 +26,15 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
         >
           {/* Header */}
           {title && (
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate flex-1 min-w-0 pr-2">{title}</h3>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                aria-label="Close"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5 sm:w-6 sm:h-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -50,7 +51,7 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
           )}
 
           {/* Content */}
-          <div className="px-6 py-4">{children}</div>
+          <div className="px-4 sm:px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">{children}</div>
         </div>
       </div>
     </div>

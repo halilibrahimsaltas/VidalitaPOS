@@ -166,7 +166,15 @@
     "products": "Products",
     "inventory": "Inventory",
     "pos": "POS",
-    "customers": "Customers"
+    "sales": "Sales",
+    "customers": "Customers",
+    "reports": "Reports",
+    "users": "Users"
+  },
+  "users": {
+    "title": "User Management",
+    "create": "New User",
+    "edit": "Edit User"
   }
 }
 

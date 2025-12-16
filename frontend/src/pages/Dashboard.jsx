@@ -5,7 +5,7 @@ import { useDashboardOverview, useTopProducts, useSalesSummary } from '../hooks/
 import StatCard from '../components/dashboard/StatCard';
 import SalesChart from '../components/dashboard/SalesChart';
 import TopProductsChart from '../components/dashboard/TopProductsChart';
-import LanguageSwitcher from '../components/common/LanguageSwitcher';
+import PageLayout from '../components/layout/PageLayout';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -41,88 +41,10 @@ const Dashboard = () => {
     : null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4 md:space-x-8 flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-900 whitespace-nowrap">
-                🛍️ Vidalita Retail Manager
-              </h1>
-              <nav className="hidden md:flex space-x-2 items-center">
-                <Link
-                  to="/dashboard"
-                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
-                >
-                  {t('navigation.dashboard')}
-                </Link>
-                <Link
-                  to="/branches"
-                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
-                >
-                  {t('navigation.branches')}
-                </Link>
-                <Link
-                  to="/products"
-                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
-                >
-                  {t('navigation.products')}
-                </Link>
-                <Link
-                  to="/inventory"
-                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
-                >
-                  {t('navigation.inventory')}
-                </Link>
-                <Link
-                  to="/pos"
-                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
-                >
-                  {t('navigation.pos')}
-                </Link>
-                <Link
-                  to="/sales"
-                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
-                >
-                  Satış Geçmişi
-                </Link>
-                <Link
-                  to="/customers"
-                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
-                >
-                  {t('navigation.customers')}
-                </Link>
-                <Link
-                  to="/reports"
-                  className="text-gray-700 hover:text-primary-600 px-2 py-2 rounded-md text-sm font-medium whitespace-nowrap"
-                >
-                  Raporlar
-                </Link>
-              </nav>
-            </div>
-            <div className="flex items-center space-x-3 flex-shrink-0">
-              <LanguageSwitcher />
-              <span className="text-sm text-gray-700 whitespace-nowrap hidden lg:inline">
-                {t('auth.welcome')}, <strong>{user?.fullName || user?.username}</strong>
-              </span>
-              <button
-                onClick={handleLogout}
-                className="btn btn-secondary text-sm whitespace-nowrap"
-              >
-                {t('auth.logout')}
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">{t('dashboard.title')}</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            {t('dashboard.overview')}
-          </p>
-        </div>
+    <PageLayout
+      title={t('dashboard.title')}
+      description={t('dashboard.overview')}
+    >
 
         {overviewLoading ? (
           <div className="flex items-center justify-center py-12">
@@ -136,7 +58,6 @@ const Dashboard = () => {
                 title={t('dashboard.todayRevenue')}
                 value={`₺${(sales.today?.revenue || 0).toFixed(2)}`}
                 subtitle={`${sales.today?.count || 0} ${t('dashboard.sales')}`}
-                icon="💰"
                 color="green"
                 trend={revenueTrend && parseFloat(revenueTrend) > 0 ? 'up' : revenueTrend && parseFloat(revenueTrend) < 0 ? 'down' : null}
                 trendValue={revenueTrend ? `${Math.abs(parseFloat(revenueTrend))}%` : null}
@@ -145,30 +66,27 @@ const Dashboard = () => {
                 title={t('dashboard.last7Days')}
                 value={`₺${(sales.last7Days?.revenue || 0).toFixed(2)}`}
                 subtitle={`${sales.last7Days?.count || 0} ${t('dashboard.sales')}`}
-                icon="📊"
                 color="blue"
               />
               <StatCard
                 title={t('dashboard.lowStock')}
                 value={inventory.lowStockCount || 0}
                 subtitle={`${inventory.totalProducts || 0} ${t('dashboard.totalProducts')}`}
-                icon="⚠️"
                 color="red"
               />
               <StatCard
                 title={t('dashboard.totalDebt')}
                 value={`₺${(customers.totalDebt || 0).toFixed(2)}`}
                 subtitle={`${customers.debtorsCount || 0} ${t('dashboard.customers')}`}
-                icon="💳"
-                color="yellow"
+                color="gray"
               />
             </div>
 
             {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
               {/* Sales Chart */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">{t('dashboard.salesTrend')}</h3>
+              <div className="card p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('dashboard.salesTrend')}</h3>
                 {overviewLoading ? (
                   <div className="flex items-center justify-center h-64 text-gray-500">
                     {t('common.loading')}
@@ -179,8 +97,8 @@ const Dashboard = () => {
               </div>
 
               {/* Top Products Chart */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">{t('dashboard.topProducts')}</h3>
+              <div className="card p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('dashboard.topProducts')}</h3>
                 {topProductsLoading ? (
                   <div className="flex items-center justify-center h-64 text-gray-500">
                     {t('common.loading')}
@@ -192,57 +110,56 @@ const Dashboard = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold mb-4">{t('dashboard.quickActions')}</h3>
-              <div className="flex flex-wrap gap-4">
+            <div className="card p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('dashboard.quickActions')}</h3>
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 <Link
                   to="/pos"
-                  className="inline-block btn btn-primary text-lg px-6 py-3"
+                  className="btn btn-primary whitespace-nowrap"
                 >
-                  🛒 {t('pos.title')} →
+                  {t('pos.title')}
                 </Link>
                 <Link
                   to="/branches"
-                  className="inline-block btn btn-secondary"
+                  className="btn btn-secondary whitespace-nowrap"
                 >
-                  {t('branches.title')} →
+                  {t('branches.title')}
                 </Link>
                 <Link
                   to="/products"
-                  className="inline-block btn btn-secondary"
+                  className="btn btn-secondary whitespace-nowrap"
                 >
-                  {t('products.title')} →
+                  {t('products.title')}
                 </Link>
                 <Link
                   to="/inventory"
-                  className="inline-block btn btn-secondary"
+                  className="btn btn-secondary whitespace-nowrap"
                 >
-                  {t('inventory.title')} →
+                  {t('inventory.title')}
                 </Link>
                 <Link
                   to="/sales"
-                  className="inline-block btn btn-secondary"
+                  className="btn btn-secondary whitespace-nowrap"
                 >
-                  Satış Geçmişi →
+                  {t('navigation.sales')}
                 </Link>
                 <Link
                   to="/customers"
-                  className="inline-block btn btn-secondary"
+                  className="btn btn-secondary whitespace-nowrap"
                 >
-                  {t('customers.title')} →
+                  {t('customers.title')}
                 </Link>
                 <Link
                   to="/users"
-                  className="inline-block btn btn-secondary"
+                  className="btn btn-secondary whitespace-nowrap"
                 >
-                  Kullanıcı Yönetimi →
+                  {t('navigation.users')}
                 </Link>
               </div>
             </div>
           </>
         )}
-      </main>
-    </div>
+    </PageLayout>
   );
 };
 

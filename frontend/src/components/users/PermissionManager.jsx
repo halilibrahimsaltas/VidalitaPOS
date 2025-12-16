@@ -107,10 +107,10 @@ const PermissionManager = ({ userId, onClose }) => {
   return (
     <div className="space-y-4">
       <div className="text-sm text-gray-600 mb-4">
-        Kullanıcıya verilecek yetkileri seçin. Toggle ile modül bazında tüm yetkileri seçebilir veya tek tek yetki seçebilirsiniz.
+        Kullanıcıya verilecek yetkileri seçin. Modül bazında tüm yetkileri seçebilir veya tek tek yetki seçebilirsiniz.
       </div>
 
-      <div className="space-y-6 max-h-96 overflow-y-auto">
+      <div className="space-y-4 max-h-96 overflow-y-auto">
         {Object.keys(groupedPermissions).map((module) => {
           const modulePermissions = groupedPermissions[module];
           const modulePermissionIds = modulePermissions.map((p) => p.id);
@@ -118,9 +118,9 @@ const PermissionManager = ({ userId, onClose }) => {
           const someSelected = modulePermissionIds.some((id) => selectedPermissions.includes(id));
 
           return (
-            <div key={module} className="border rounded-lg p-4">
+            <div key={module} className="border border-gray-200 rounded-md p-4 bg-white">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="text-sm font-semibold text-gray-900">
                   {moduleLabels[module] || module}
                 </h3>
                 <label className="flex items-center cursor-pointer">
@@ -131,9 +131,9 @@ const PermissionManager = ({ userId, onClose }) => {
                       if (input) input.indeterminate = someSelected && !allSelected;
                     }}
                     onChange={() => handleToggleModule(module)}
-                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700">
+                  <span className="ml-2 text-xs text-gray-600 whitespace-nowrap">
                     Tümünü Seç
                   </span>
                 </label>
@@ -142,20 +142,20 @@ const PermissionManager = ({ userId, onClose }) => {
                 {modulePermissions.map((permission) => (
                   <label
                     key={permission.id}
-                    className="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
+                    className="flex items-start p-2 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
                   >
                     <input
                       type="checkbox"
                       checked={selectedPermissions.includes(permission.id)}
                       onChange={() => handleTogglePermission(permission.id)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                      className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <div className="ml-3 flex-1">
-                      <div className="text-sm font-medium text-gray-900">
+                    <div className="ml-3 flex-1 min-w-0">
+                      <div className="text-sm font-medium text-gray-900 truncate">
                         {permission.name}
                       </div>
                       {permission.description && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 mt-0.5 line-clamp-2">
                           {permission.description}
                         </div>
                       )}
@@ -168,7 +168,7 @@ const PermissionManager = ({ userId, onClose }) => {
         })}
       </div>
 
-      <div className="flex justify-end space-x-3 pt-4 border-t">
+      <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
         <Button
           type="button"
           variant="secondary"
@@ -181,7 +181,7 @@ const PermissionManager = ({ userId, onClose }) => {
           type="button"
           variant="primary"
           onClick={handleSave}
-          disabled={updatePermissions.isLoading}
+          disabled={updatePermissions.isLoading || selectedPermissions.length === 0}
         >
           {updatePermissions.isLoading ? 'Kaydediliyor...' : 'Kaydet'}
         </Button>

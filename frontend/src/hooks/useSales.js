@@ -50,3 +50,17 @@ export const useRefundSale = () => {
   );
 };
 
+export const useCancelSale = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (id) => saleService.cancel(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('sales');
+        queryClient.invalidateQueries('inventory');
+      },
+    }
+  );
+};
+

@@ -59,8 +59,18 @@ export const refundSale = async (req, res, next) => {
   try {
     const { id } = req.params;
     const refundItems = req.body.items || null;
-    const sale = await saleService.refundSale(id, refundItems);
+    const sale = await saleService.refundSale(id, refundItems, req.user.id);
     res.json(ApiResponse.success(sale, 'Sale refunded successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const cancelSale = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const sale = await saleService.cancelSale(id, req.user.id);
+    res.json(ApiResponse.success(sale, 'Sale cancelled successfully'));
   } catch (error) {
     next(error);
   }

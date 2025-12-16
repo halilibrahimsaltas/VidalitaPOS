@@ -1,25 +1,19 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from '../components/common/LanguageSwitcher';
+import PageLayout from '../components/layout/PageLayout';
 import { useCreateBranch, useUpdateBranch } from '../hooks/useBranches';
 import BranchList from '../components/branches/BranchList';
 import BranchForm from '../components/branches/BranchForm';
 import Modal from '../components/common/Modal';
+import Button from '../components/common/Button';
 
 const Branches = () => {
-  const { user, logout } = useAuth();
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState(null);
 
   const createBranch = useCreateBranch();
   const updateBranch = useUpdateBranch();
-
-  const handleLogout = () => {
-    logout();
-  };
 
   const handleCreate = () => {
     setEditingBranch(null);

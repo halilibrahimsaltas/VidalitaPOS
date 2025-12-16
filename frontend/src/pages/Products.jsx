@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from '../components/common/LanguageSwitcher';
+import PageLayout from '../components/layout/PageLayout';
 import { useCreateProduct, useUpdateProduct } from '../hooks/useProducts';
 import ProductList from '../components/products/ProductList';
 import ProductForm from '../components/products/ProductForm';
 import Modal from '../components/common/Modal';
+import Button from '../components/common/Button';
 
 const Products = () => {
   const { user, logout } = useAuth();

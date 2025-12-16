@@ -26,6 +26,11 @@ export const saleService = {
     return response.data;
   },
 
+  cancel: async (id) => {
+    const response = await api.post(`/sales/${id}/cancel`);
+    return response.data;
+  },
+
   getReceipt: async (id) => {
     const response = await api.get(`/sales/${id}/receipt`);
     return response.data;

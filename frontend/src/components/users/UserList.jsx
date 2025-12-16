@@ -86,17 +86,17 @@ const UserList = ({ onEdit }) => {
   };
 
   const roleColors = {
-    ADMIN: 'bg-purple-100 text-purple-800',
-    MANAGER: 'bg-blue-100 text-blue-800',
-    USER: 'bg-gray-100 text-gray-800',
-    CASHIER: 'bg-green-100 text-green-800',
+    ADMIN: 'badge-danger',
+    MANAGER: 'badge-info',
+    USER: 'badge-gray',
+    CASHIER: 'badge-success',
   };
 
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="card p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Input
             label="Ara"
             value={search}
@@ -128,38 +128,22 @@ const UserList = ({ onEdit }) => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      <div className="card overflow-hidden">
+        <div className="table-container">
+          <table className="table">
+            <thead className="table-header">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Kullanıcı Adı
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ad Soyad
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rol
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Şube
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Durum
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Oluşturulma
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  İşlemler
-                </th>
+                <th className="table-header-cell min-w-[120px]">Kullanıcı Adı</th>
+                <th className="table-header-cell min-w-[150px]">Ad Soyad</th>
+                <th className="table-header-cell min-w-[180px] hidden lg:table-cell">Email</th>
+                <th className="table-header-cell min-w-[100px]">Rol</th>
+                <th className="table-header-cell min-w-[120px] hidden md:table-cell">Şube</th>
+                <th className="table-header-cell min-w-[80px]">Durum</th>
+                <th className="table-header-cell min-w-[100px] hidden xl:table-cell">Oluşturulma</th>
+                <th className="table-header-cell text-right min-w-[200px]">İşlemler</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="table-body">
               {users.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
@@ -168,65 +152,65 @@ const UserList = ({ onEdit }) => {
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                  <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="table-cell">
+                      <div className="text-sm font-medium text-gray-900 truncate" title={user.username}>
+                        {user.username}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{user.fullName}</div>
+                    <td className="table-cell">
+                      <div className="text-sm text-gray-600 truncate" title={user.fullName}>
+                        {user.fullName}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{user.email}</div>
+                    <td className="table-cell hidden lg:table-cell">
+                      <div className="text-sm text-gray-600 truncate" title={user.email}>
+                        {user.email}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          roleColors[user.role] || 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
+                    <td className="table-cell">
+                      <span className={`badge ${roleColors[user.role] || 'badge-gray'}`}>
                         {roleLabels[user.role] || user.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{user.branch?.name || '-'}</div>
+                    <td className="table-cell hidden md:table-cell">
+                      <div className="text-sm text-gray-600 truncate" title={user.branch?.name || '-'}>
+                        {user.branch?.name || '-'}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.isActive
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
+                    <td className="table-cell">
+                      <span className={`badge ${user.isActive ? 'badge-success' : 'badge-danger'}`}>
                         {user.isActive ? 'Aktif' : 'Pasif'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{formatDate(user.createdAt)}</div>
+                    <td className="table-cell hidden xl:table-cell">
+                      <div className="text-sm text-gray-600">{formatDate(user.createdAt)}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => onEdit(user)}
-                        className="text-primary-600 hover:text-primary-900 mr-4"
-                      >
-                        Düzenle
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedUserId(user.id);
-                          setPermissionModalOpen(true);
-                        }}
-                        className="text-blue-600 hover:text-blue-900 mr-4"
-                      >
-                        Yetkiler
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user.id)}
-                        className="text-red-600 hover:text-red-900"
-                        disabled={deleteUser.isLoading}
-                      >
-                        Sil
-                      </button>
+                    <td className="table-cell text-right">
+                      <div className="flex items-center justify-end gap-2 flex-wrap">
+                        <button
+                          onClick={() => onEdit(user)}
+                          className="text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
+                        >
+                          Düzenle
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedUserId(user.id);
+                            setPermissionModalOpen(true);
+                          }}
+                          className="text-sm text-gray-600 hover:text-gray-700 font-medium whitespace-nowrap"
+                        >
+                          Yetkiler
+                        </button>
+                        <button
+                          onClick={() => handleDelete(user.id)}
+                          className="text-sm text-red-600 hover:text-red-700 font-medium whitespace-nowrap"
+                          disabled={deleteUser.isLoading}
+                        >
+                          Sil
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

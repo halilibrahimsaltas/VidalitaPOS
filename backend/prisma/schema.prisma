@@ -32,6 +32,7 @@ model User {
   createdStockAdjustments StockAdjustment[] @relation("StockAdjustmentCreatedBy")
   salesAsCashier      Sale[]                @relation("SaleCashier")
   customerTransactions CustomerTransaction[] @relation("CustomerTransactionCreatedBy")
+  cashRegisterTransactions CashRegisterTransaction[] @relation("CashRegisterTransactionCreatedBy")
   permissions         UserPermission[]
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
@@ -55,6 +56,7 @@ model Branch {
   stockTransfersTo   StockTransfer[]  @relation("StockTransferTo")
   stockAdjustments   StockAdjustment[]
   sales             Sale[]
+  cashRegisterTransactions CashRegisterTransaction[]
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -222,6 +224,7 @@ enum SaleStatus {
 model Sale {
   id                  String                @id @default(uuid())
   saleNumber          String                @unique
+  invoiceNumber       String?               @unique
   branchId            String
   branch              Branch                @relation(fields: [branchId], references: [id])
   customerId          String?
@@ -239,6 +242,7 @@ model Sale {
   notes               String?
   items               SaleItem[]
   customerTransactions CustomerTransaction[]
+  cashRegisterTransactions CashRegisterTransaction[]
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 
@@ -284,5 +288,31 @@ model UserPermission {
 
   @@unique([userId, permissionId])
   @@map("user_permissions")
+}
+
+enum CashRegisterTransactionType {
+  SALE_IN
+  REFUND_OUT
+  CANCEL_OUT
+  MANUAL_IN
+  MANUAL_OUT
+  ADJUSTMENT
+}
+
+model CashRegisterTransaction {
+  id            String                        @id @default(uuid())
+  branchId      String
+  branch        Branch                        @relation(fields: [branchId], references: [id])
+  saleId        String?
+  sale          Sale?                         @relation(fields: [saleId], references: [id])
+  type          CashRegisterTransactionType
+  amount        Decimal                       @db.Decimal(10, 2)
+  paymentMethod PaymentMethod?
+  description   String?
+  createdById   String
+  createdBy     User                          @relation("CashRegisterTransactionCreatedBy", fields: [createdById], references: [id])
+  createdAt     DateTime                      @default(now())
+
+  @@map("cash_register_transactions")
 }
 

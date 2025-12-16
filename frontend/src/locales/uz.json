@@ -166,7 +166,15 @@
     "products": "Mahsulotlar",
     "inventory": "Zaxira",
     "pos": "POS",
-    "customers": "Mijozlar"
+    "sales": "Sotuvlar",
+    "customers": "Mijozlar",
+    "reports": "Hisobotlar",
+    "users": "Foydalanuvchilar"
+  },
+  "users": {
+    "title": "Foydalanuvchi boshqaruvi",
+    "create": "Yangi foydalanuvchi",
+    "edit": "Foydalanuvchini tahrirlash"
   }
 }
 

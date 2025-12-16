@@ -166,7 +166,15 @@
     "products": "Ürünler",
     "inventory": "Stok",
     "pos": "POS",
-    "customers": "Müşteriler"
+    "sales": "Satışlar",
+    "customers": "Müşteriler",
+    "reports": "Raporlar",
+    "users": "Kullanıcılar"
+  },
+  "users": {
+    "title": "Kullanıcı Yönetimi",
+    "create": "Yeni Kullanıcı",
+    "edit": "Kullanıcı Düzenle"
   }
 }
 
