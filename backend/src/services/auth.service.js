@@ -87,14 +87,27 @@ export const login = async (username, password) => {
   // Save refresh token (optional: store in database for token revocation)
   // For now, we'll just return it
 
-  return {
-    user: {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      fullName: user.fullName,
-      role: user.role,
+  // Get user with branch info
+  const userWithBranch = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      fullName: true,
+      role: true,
+      branch: {
+        select: {
+          id: true,
+          name: true,
+          code: true,
+        },
+      },
     },
+  });
+
+  return {
+    user: userWithBranch,
     accessToken,
     refreshToken,
   };

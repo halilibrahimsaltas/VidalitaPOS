@@ -9,8 +9,6 @@ import PageLayout from '../components/layout/PageLayout';
 
 const Dashboard = () => {
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
 
   const { data: overviewData, isLoading: overviewLoading } = useDashboardOverview();
   const { data: topProductsData, isLoading: topProductsLoading } = useTopProducts({ limit: 5 });
@@ -22,11 +20,6 @@ const Dashboard = () => {
   const startDateStr = startDate.toISOString().split('T')[0];
   
   const { data: salesSummaryData } = useSalesSummary({ startDate: startDateStr, endDate });
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login', { replace: true });
-  };
 
   const overview = overviewData?.data || {};
   const sales = overview.sales || {};
@@ -109,54 +102,6 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="card p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('dashboard.quickActions')}</h3>
-              <div className="flex flex-wrap gap-2 sm:gap-3">
-                <Link
-                  to="/pos"
-                  className="btn btn-primary whitespace-nowrap"
-                >
-                  {t('pos.title')}
-                </Link>
-                <Link
-                  to="/branches"
-                  className="btn btn-secondary whitespace-nowrap"
-                >
-                  {t('branches.title')}
-                </Link>
-                <Link
-                  to="/products"
-                  className="btn btn-secondary whitespace-nowrap"
-                >
-                  {t('products.title')}
-                </Link>
-                <Link
-                  to="/inventory"
-                  className="btn btn-secondary whitespace-nowrap"
-                >
-                  {t('inventory.title')}
-                </Link>
-                <Link
-                  to="/sales"
-                  className="btn btn-secondary whitespace-nowrap"
-                >
-                  {t('navigation.sales')}
-                </Link>
-                <Link
-                  to="/customers"
-                  className="btn btn-secondary whitespace-nowrap"
-                >
-                  {t('customers.title')}
-                </Link>
-                <Link
-                  to="/users"
-                  className="btn btn-secondary whitespace-nowrap"
-                >
-                  {t('navigation.users')}
-                </Link>
-              </div>
-            </div>
           </>
         )}
     </PageLayout>

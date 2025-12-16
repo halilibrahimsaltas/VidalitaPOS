@@ -7,7 +7,7 @@ import Input from '../common/Input';
 import Select from '../common/Select';
 import Modal from '../common/Modal';
 
-const ProductList = ({ onEdit, onCreate }) => {
+const ProductList = ({ onEdit }) => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -116,12 +116,9 @@ const ProductList = ({ onEdit, onCreate }) => {
             <option value="true">Aktif</option>
             <option value="false">Pasif</option>
           </select>
-          <div className="flex gap-2">
+          <div>
             <Button onClick={() => setIsImportModalOpen(true)} variant="outline">
               📥 İçe Aktar
-            </Button>
-            <Button onClick={onCreate} variant="primary">
-              + Yeni Ürün
             </Button>
           </div>
         </div>

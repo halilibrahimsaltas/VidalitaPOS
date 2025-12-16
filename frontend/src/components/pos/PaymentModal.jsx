@@ -3,7 +3,7 @@ import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
 
-const PaymentModal = ({ isOpen, onClose, total, onSubmit }) => {
+const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment }) => {
   const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [paidAmount, setPaidAmount] = useState('');
   const [customerId, setCustomerId] = useState('');
@@ -137,6 +137,19 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit }) => {
           <Button type="button" variant="secondary" onClick={onClose}>
             İptal
           </Button>
+          {onSplitPayment && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                if (onSplitPayment) {
+                  onSplitPayment();
+                }
+              }}
+            >
+              Parçalı Ödeme
+            </Button>
+          )}
           <Button type="submit" variant="primary">
             Ödemeyi Tamamla
           </Button>

@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLowStockItems } from '../hooks/useInventory';
+import PageLayout from '../components/layout/PageLayout';
 import InventoryList from '../components/inventory/InventoryList';
 import InventoryEditModal from '../components/inventory/InventoryEditModal';
 import StockTransferModal from '../components/inventory/StockTransferModal';
 import StockAdjustmentModal from '../components/inventory/StockAdjustmentModal';
 
 const Inventory = () => {
+  const { t } = useTranslation();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
@@ -40,25 +43,20 @@ const Inventory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Stok Yönetimi</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Stok durumunu görüntüleyin ve yönetin
-          </p>
-        </div>
-
+    <PageLayout
+      title={t('inventory.title')}
+      description={t('inventory.subtitle')}
+    >
         {/* Low Stock Alert */}
         {lowStockItems.length > 0 && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium text-red-800">
-                  ⚠️ Düşük Stok Uyarısı
+                <h3 className="text-sm font-semibold text-red-800">
+                  {t('inventory.lowStockAlert')}
                 </h3>
                 <p className="mt-1 text-sm text-red-700">
-                  {lowStockItems.length} ürün minimum stok seviyesinin altında
+                  {lowStockItems.length} {t('inventory.lowStockCount')}
                 </p>
               </div>
             </div>
@@ -89,8 +87,7 @@ const Inventory = () => {
           inventoryItem={selectedItem}
           onSuccess={handleEditSuccess}
         />
-      </div>
-    </div>
+    </PageLayout>
   );
 };
 

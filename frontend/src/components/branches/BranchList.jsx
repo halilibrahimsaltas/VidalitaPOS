@@ -4,7 +4,7 @@ import { useBranches, useDeleteBranch } from '../../hooks/useBranches';
 import Button from '../common/Button';
 import Input from '../common/Input';
 
-const BranchList = ({ onEdit, onCreate }) => {
+const BranchList = ({ onEdit }) => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -68,15 +68,12 @@ const BranchList = ({ onEdit, onCreate }) => {
             setIsActiveFilter(e.target.value);
             setPage(1);
           }}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">{t('common.all')}</option>
           <option value="true">{t('common.active')}</option>
           <option value="false">{t('common.inactive')}</option>
         </select>
-        <Button onClick={onCreate} variant="primary">
-          + {t('branches.create')}
-        </Button>
       </div>
 
       {/* Table */}

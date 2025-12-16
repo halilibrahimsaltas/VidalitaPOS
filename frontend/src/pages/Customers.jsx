@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCreateCustomer, useUpdateCustomer, useRecordPayment } from '../hooks/useCustomers';
+import PageLayout from '../components/layout/PageLayout';
 import CustomerList from '../components/customers/CustomerList';
 import CustomerForm from '../components/customers/CustomerForm';
 import TransactionHistory from '../components/customers/TransactionHistory';
@@ -7,6 +9,7 @@ import PaymentForm from '../components/customers/PaymentForm';
 import Modal from '../components/common/Modal';
 
 const Customers = () => {
+  const { t } = useTranslation();
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -77,15 +80,10 @@ const Customers = () => {
   const isLoading = createCustomer.isLoading || updateCustomer.isLoading || recordPayment.isLoading;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Müşteri Yönetimi</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Müşterileri görüntüleyin, oluşturun ve cari hesaplarını yönetin
-          </p>
-        </div>
-
+    <PageLayout
+      title={t('customers.title')}
+      description={t('customers.subtitle')}
+    >
         <CustomerList
           onEdit={handleEdit}
           onCreate={handleCreate}
@@ -124,7 +122,7 @@ const Customers = () => {
         <Modal
           isOpen={isPaymentModalOpen}
           onClose={handleClose}
-          title="Ödeme Kaydet"
+          title={t('customers.recordPayment')}
           size="md"
         >
           {selectedCustomer && (
@@ -136,8 +134,7 @@ const Customers = () => {
             />
           )}
         </Modal>
-      </div>
-    </div>
+    </PageLayout>
   );
 };
 
