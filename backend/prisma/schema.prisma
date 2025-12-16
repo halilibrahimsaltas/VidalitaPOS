@@ -32,6 +32,7 @@ model User {
   createdStockAdjustments StockAdjustment[] @relation("StockAdjustmentCreatedBy")
   salesAsCashier      Sale[]                @relation("SaleCashier")
   customerTransactions CustomerTransaction[] @relation("CustomerTransactionCreatedBy")
+  permissions         UserPermission[]
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 
@@ -257,5 +258,31 @@ model SaleItem {
   createdAt   DateTime @default(now())
 
   @@map("sale_items")
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  code        String           @unique
+  name        String
+  description String?
+  module      String           // e.g., "users", "branches", "products"
+  action      String           // e.g., "create", "update", "delete", "view"
+  userPermissions UserPermission[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@map("permissions")
+}
+
+model UserPermission {
+  id           String     @id @default(uuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([userId, permissionId])
+  @@map("user_permissions")
 }
 

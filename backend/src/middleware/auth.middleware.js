@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { config } from '../config/database.js';
 import { ApiError } from '../utils/ApiError.js';
+import { permissionRepository } from '../repositories/permission.repository.js';
 
 export const authenticate = async (req, res, next) => {
   try {
@@ -43,6 +44,40 @@ export const authorize = (...roles) => {
     }
 
     next();
+  };
+};
+
+/**
+ * Middleware to check if user has a specific permission
+ * Admin users automatically have all permissions
+ */
+export const hasPermission = (...permissionCodes) => {
+  return async (req, res, next) => {
+    try {
+      if (!req.user) {
+        return next(new ApiError(401, 'Authentication required'));
+      }
+
+      // Admin always has all permissions
+      if (req.user.role === 'ADMIN') {
+        return next();
+      }
+
+      // Check if user has at least one of the required permissions
+      const userPermissions = await permissionRepository.getUserPermissionCodes(req.user.id);
+      
+      const hasAnyPermission = permissionCodes.some((code) => 
+        userPermissions.includes(code)
+      );
+
+      if (!hasAnyPermission) {
+        return next(new ApiError(403, 'Insufficient permissions'));
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
   };
 };
 

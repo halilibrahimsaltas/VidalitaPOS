@@ -69,3 +69,24 @@ export const updateUserRole = async (req, res, next) => {
   }
 };
 
+export const getUserPermissions = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const permissions = await userService.getUserPermissions(id);
+    res.json(ApiResponse.success(permissions, 'User permissions retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserPermissions = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { permissionIds } = req.body;
+    const permissions = await userService.updateUserPermissions(id, permissionIds);
+    res.json(ApiResponse.success(permissions, 'User permissions updated successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+

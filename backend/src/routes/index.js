@@ -10,6 +10,7 @@ import saleRoutes from './sale.routes.js';
 import customerRoutes from './customer.routes.js';
 import reportRoutes from './report.routes.js';
 import userRoutes from './user.routes.js';
+import permissionRoutes from './permission.routes.js';
 
 const router = express.Router();
 
@@ -24,6 +25,7 @@ router.use('/sales', saleRoutes);
 router.use('/customers', customerRoutes);
 router.use('/reports', reportRoutes);
 router.use('/users', userRoutes);
+router.use('/permissions', permissionRoutes);
 
 export default router;
 

@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { userRepository } from '../repositories/user.repository.js';
 import { ApiError } from '../utils/ApiError.js';
 import { prisma } from '../config/database.js';
+import permissionService from './permission.service.js';
 
 const userService = {
   getAllUsers: async (filters) => {
@@ -150,6 +151,22 @@ const userService = {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
+  },
+
+  getUserPermissions: async (id) => {
+    const user = await userRepository.findById(id);
+    if (!user) {
+      throw new ApiError(404, 'User not found');
+    }
+    return permissionService.getUserPermissions(id);
+  },
+
+  updateUserPermissions: async (id, permissionIds) => {
+    const user = await userRepository.findById(id);
+    if (!user) {
+      throw new ApiError(404, 'User not found');
+    }
+    return permissionService.assignPermissionsToUser(id, permissionIds);
   },
 };
 

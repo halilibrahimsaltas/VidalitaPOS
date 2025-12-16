@@ -3,12 +3,16 @@ import { useUsers, useDeleteUser } from '../../hooks/useUsers';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Select from '../common/Select';
+import Modal from '../common/Modal';
+import PermissionManager from './PermissionManager';
 
 const UserList = ({ onEdit }) => {
   const [page, setPage] = useState(1);
   const [roleFilter, setRoleFilter] = useState('');
   const [isActiveFilter, setIsActiveFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [permissionModalOpen, setPermissionModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   const { data, isLoading, error } = useUsers({
     page,
@@ -208,6 +212,15 @@ const UserList = ({ onEdit }) => {
                         Düzenle
                       </button>
                       <button
+                        onClick={() => {
+                          setSelectedUserId(user.id);
+                          setPermissionModalOpen(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-900 mr-4"
+                      >
+                        Yetkiler
+                      </button>
+                      <button
                         onClick={() => handleDelete(user.id)}
                         className="text-red-600 hover:text-red-900"
                         disabled={deleteUser.isLoading}
@@ -249,6 +262,27 @@ const UserList = ({ onEdit }) => {
           </div>
         </div>
       )}
+
+      {/* Permission Manager Modal */}
+      <Modal
+        isOpen={permissionModalOpen}
+        onClose={() => {
+          setPermissionModalOpen(false);
+          setSelectedUserId(null);
+        }}
+        title="Kullanıcı Yetkilerini Yönet"
+        size="lg"
+      >
+        {selectedUserId && (
+          <PermissionManager
+            userId={selectedUserId}
+            onClose={() => {
+              setPermissionModalOpen(false);
+              setSelectedUserId(null);
+            }}
+          />
+        )}
+      </Modal>
     </div>
   );
 };
