@@ -4,14 +4,29 @@ import { useBranches } from '../../hooks/useBranches';
 import Select from '../common/Select';
 import Button from '../common/Button';
 
-const CashRegisterReport = () => {
+const MonthlyReport = () => {
   const { data: branchesData } = useBranches({ limit: 100, isActive: true });
   const branches = branchesData?.data?.branches || [];
 
-  const [filters, setFilters] = useState({
-    branchId: '',
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0],
+  // Get current month's start and end dates
+  const getCurrentMonthDates = () => {
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return {
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0],
+    };
+  };
+
+  const [filters, setFilters] = useState(() => {
+    const dates = getCurrentMonthDates();
+    return {
+      branchId: '',
+      startDate: dates.startDate,
+      endDate: dates.endDate,
+      period: 'monthly',
+    };
   });
 
   const { data, isLoading, error, refetch } = useCashRegisterReport(filters);
@@ -32,6 +47,13 @@ const CashRegisterReport = () => {
     });
   };
 
+  const formatMonth = (dateString) => {
+    return new Date(dateString).toLocaleDateString('tr-TR', {
+      year: 'numeric',
+      month: 'long',
+    });
+  };
+
   const handlePrint = () => {
     try {
       window.print();
@@ -39,6 +61,19 @@ const CashRegisterReport = () => {
       console.error('Print error:', error);
       alert('Yazdırma işlemi başlatılamadı. Lütfen tarayıcınızın yazdırma ayarlarını kontrol edin.');
     }
+  };
+
+  // Update dates when month changes
+  const handleMonthChange = (field, value) => {
+    const date = new Date(value);
+    const startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+    const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    
+    setFilters((prev) => ({
+      ...prev,
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0],
+    }));
   };
 
   if (isLoading) {
@@ -74,7 +109,7 @@ const CashRegisterReport = () => {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="card p-4">
+      <div className="bg-white rounded-lg shadow p-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Select
             label="Şube"
@@ -87,37 +122,28 @@ const CashRegisterReport = () => {
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Başlangıç Tarihi</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Ay Seçin</label>
             <input
-              type="date"
-              value={filters.startDate}
-              onChange={(e) => setFilters((prev) => ({ ...prev, startDate: e.target.value }))}
+              type="month"
+              value={filters.startDate.substring(0, 7)}
+              onChange={(e) => handleMonthChange('startDate', e.target.value + '-01')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bitiş Tarihi</label>
-            <input
-              type="date"
-              value={filters.endDate}
-              onChange={(e) => setFilters((prev) => ({ ...prev, endDate: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <div className="flex items-end">
+            <Button onClick={refetch} variant="primary" className="w-full">
+              Raporu Yenile
+            </Button>
           </div>
-        </div>
-        <div className="mt-4 flex justify-end">
-          <Button onClick={refetch} variant="primary">
-            Raporu Yenile
-          </Button>
         </div>
       </div>
 
       {/* Report Summary */}
-      <div id="cash-register-report" className="card p-6 print:shadow-none">
+      <div id="monthly-report" className="bg-white rounded-lg shadow p-6 print:shadow-none">
         <div className="flex justify-between items-center mb-6 print:hidden">
           <h2 className="text-2xl font-semibold text-gray-900">
-            Gün Sonu Kasa Raporu
+            Ay Sonu Kasa Raporu
           </h2>
           <div className="flex gap-2">
             <Button onClick={refetch} variant="outline" size="sm">
@@ -132,7 +158,7 @@ const CashRegisterReport = () => {
         {/* Report Header */}
         <div className="border-b border-gray-200 pb-4 mb-6">
           <div className="text-sm text-gray-600 space-y-1">
-            <p><strong>Tarih:</strong> {formatDate(filters.startDate)} - {formatDate(filters.endDate)}</p>
+            <p><strong>Ay:</strong> {formatMonth(filters.startDate)}</p>
             {report.period?.branch && (
               <p><strong>Şube:</strong> {report.period.branch.name}</p>
             )}
@@ -213,12 +239,12 @@ const CashRegisterReport = () => {
             visibility: hidden;
           }
           
-          #cash-register-report,
-          #cash-register-report * {
+          #monthly-report,
+          #monthly-report * {
             visibility: visible;
           }
           
-          #cash-register-report {
+          #monthly-report {
             position: absolute;
             left: 0;
             top: 0;
@@ -243,4 +269,5 @@ const CashRegisterReport = () => {
   );
 };
 
-export default CashRegisterReport;
+export default MonthlyReport;
+

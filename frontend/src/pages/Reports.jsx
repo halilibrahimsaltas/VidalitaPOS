@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PageLayout from '../components/layout/PageLayout';
 import CashRegisterReport from '../components/reports/CashRegisterReport';
+import MonthlyReport from '../components/reports/MonthlyReport';
 import Button from '../components/common/Button';
 
 const Reports = () => {
@@ -9,7 +10,8 @@ const Reports = () => {
   const [activeReport, setActiveReport] = useState('cash-register');
 
   const reports = [
-    { id: 'cash-register', name: 'Gün Sonu Kasa Raporu', icon: '💰' },
+    { id: 'cash-register', name: 'Gün Sonu Kasa Raporu' },
+    { id: 'monthly', name: 'Ay Sonu Raporu' },
     // Future reports can be added here
     // { id: 'sales-summary', name: 'Satış Özet Raporu', icon: '📊' },
     // { id: 'inventory', name: 'Stok Durum Raporu', icon: '📦' },
@@ -29,7 +31,8 @@ const Reports = () => {
                 variant={activeReport === report.id ? 'primary' : 'secondary'}
                 onClick={() => setActiveReport(report.id)}
               >
-                {report.icon} {report.name}
+                {report.icon && <span className="mr-2">{report.icon}</span>}
+                {report.name}
               </Button>
             ))}
           </div>
@@ -38,6 +41,7 @@ const Reports = () => {
         {/* Active Report */}
         <div>
           {activeReport === 'cash-register' && <CashRegisterReport />}
+          {activeReport === 'monthly' && <MonthlyReport />}
           {/* Future reports can be added here */}
         </div>
     </PageLayout>

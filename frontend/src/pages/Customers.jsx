@@ -7,6 +7,8 @@ import CustomerForm from '../components/customers/CustomerForm';
 import TransactionHistory from '../components/customers/TransactionHistory';
 import PaymentForm from '../components/customers/PaymentForm';
 import CustomerStatistics from '../components/customers/CustomerStatistics';
+import CustomerPurchaseHistory from '../components/customers/CustomerPurchaseHistory';
+import InvoiceView from '../components/sales/InvoiceView';
 import Modal from '../components/common/Modal';
 
 const Customers = () => {
@@ -15,8 +17,11 @@ const Customers = () => {
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(false);
+  const [isPurchaseHistoryModalOpen, setIsPurchaseHistoryModalOpen] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedSaleId, setSelectedSaleId] = useState(null);
 
   const createCustomer = useCreateCustomer();
   const updateCustomer = useUpdateCustomer();
@@ -47,13 +52,26 @@ const Customers = () => {
     setIsStatisticsModalOpen(true);
   };
 
+  const handleViewPurchaseHistory = (customer) => {
+    setSelectedCustomer(customer);
+    setIsPurchaseHistoryModalOpen(true);
+  };
+
+  const handleViewInvoice = (saleId) => {
+    setSelectedSaleId(saleId);
+    setIsInvoiceModalOpen(true);
+  };
+
   const handleClose = () => {
     setIsFormModalOpen(false);
     setIsTransactionModalOpen(false);
     setIsPaymentModalOpen(false);
     setIsStatisticsModalOpen(false);
+    setIsPurchaseHistoryModalOpen(false);
+    setIsInvoiceModalOpen(false);
     setEditingCustomer(null);
     setSelectedCustomer(null);
+    setSelectedSaleId(null);
   };
 
   const handleFormSubmit = async (formData) => {
@@ -98,6 +116,7 @@ const Customers = () => {
           onViewTransactions={handleViewTransactions}
           onRecordPayment={handleRecordPayment}
           onViewStatistics={handleViewStatistics}
+          onViewPurchaseHistory={handleViewPurchaseHistory}
         />
 
         {/* Customer Form Modal */}
@@ -153,6 +172,33 @@ const Customers = () => {
         >
           {selectedCustomer && (
             <CustomerStatistics customerId={selectedCustomer.id} />
+          )}
+        </Modal>
+
+        {/* Purchase History Modal */}
+        <Modal
+          isOpen={isPurchaseHistoryModalOpen}
+          onClose={handleClose}
+          title={`${selectedCustomer?.name} - Satın Alma Geçmişi`}
+          size="xl"
+        >
+          {selectedCustomer && (
+            <CustomerPurchaseHistory 
+              customerId={selectedCustomer.id} 
+              onViewInvoice={handleViewInvoice}
+            />
+          )}
+        </Modal>
+
+        {/* Invoice Modal */}
+        <Modal
+          isOpen={isInvoiceModalOpen}
+          onClose={handleClose}
+          title="Fatura"
+          size="xl"
+        >
+          {selectedSaleId && (
+            <InvoiceView saleId={selectedSaleId} onClose={handleClose} />
           )}
         </Modal>
     </PageLayout>

@@ -3,7 +3,7 @@ import { useCustomers, useDeleteCustomer } from '../../hooks/useCustomers';
 import Button from '../common/Button';
 import Input from '../common/Input';
 
-const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, onViewStatistics }) => {
+const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, onViewStatistics, onViewPurchaseHistory }) => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [isActiveFilter, setIsActiveFilter] = useState('');
@@ -148,6 +148,13 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
                           title="İstatistikler"
                         >
                           📊
+                        </button>
+                        <button
+                          onClick={() => onViewPurchaseHistory(customer)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                          title="Satın Alma Geçmişi"
+                        >
+                          📋
                         </button>
                         <button
                           onClick={() => onViewTransactions(customer)}

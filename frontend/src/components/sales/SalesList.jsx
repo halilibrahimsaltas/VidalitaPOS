@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useSales, useSale, useRefundSale, useCancelSale } from '../../hooks/useSales';
+import { HiDocumentText } from 'react-icons/hi2';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Select from '../common/Select';
 import Modal from '../common/Modal';
 import BranchSelect from '../common/BranchSelect';
 import RefundModal from './RefundModal';
+import InvoiceView from './InvoiceView';
 
 const SalesList = () => {
   const [page, setPage] = useState(1);
@@ -16,6 +18,8 @@ const SalesList = () => {
   const [selectedSaleId, setSelectedSaleId] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [invoiceSaleId, setInvoiceSaleId] = useState(null);
   const [saleToRefund, setSaleToRefund] = useState(null);
 
   const refundSale = useRefundSale();
@@ -69,6 +73,11 @@ const SalesList = () => {
     } catch (error) {
       alert(error.response?.data?.message || 'İptal işlemi sırasında bir hata oluştu');
     }
+  };
+
+  const handleViewInvoice = (saleId) => {
+    setInvoiceSaleId(saleId);
+    setIsInvoiceModalOpen(true);
   };
 
   const formatDate = (dateString) => {
@@ -249,6 +258,14 @@ const SalesList = () => {
                     <td className="table-cell text-right">
                       <div className="flex items-center justify-end gap-2 flex-wrap">
                         <button
+                          onClick={() => handleViewInvoice(sale.id)}
+                          className="text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap flex items-center gap-1"
+                          title="Fatura"
+                        >
+                          <HiDocumentText className="w-4 h-4" />
+                          Fatura
+                        </button>
+                        <button
                           onClick={() => handleViewDetails(sale.id)}
                           className="text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
                         >
@@ -377,29 +394,41 @@ const SalesList = () => {
             </div>
 
             {/* Action Buttons */}
-            {saleDetail.data.status === 'COMPLETED' && (
-              <div className="border-t pt-4 flex justify-end space-x-3">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsDetailModalOpen(false);
-                    handleRefund(saleDetail.data);
-                  }}
-                >
-                  İade Et
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsDetailModalOpen(false);
-                    handleCancel(saleDetail.data.id);
-                  }}
-                  disabled={cancelSale.isLoading}
-                >
-                  İptal Et
-                </Button>
-              </div>
-            )}
+            <div className="border-t pt-4 flex justify-between items-center">
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setIsDetailModalOpen(false);
+                  handleViewInvoice(saleDetail.data.id);
+                }}
+              >
+                <HiDocumentText className="w-4 h-4 mr-2" />
+                Faturayı Görüntüle
+              </Button>
+              {saleDetail.data.status === 'COMPLETED' && (
+                <div className="flex space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsDetailModalOpen(false);
+                      handleRefund(saleDetail.data);
+                    }}
+                  >
+                    İade Et
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsDetailModalOpen(false);
+                      handleCancel(saleDetail.data.id);
+                    }}
+                    disabled={cancelSale.isLoading}
+                  >
+                    İptal Et
+                  </Button>
+                </div>
+              )}
+            </div>
             {saleDetail.data.status === 'PARTIALLY_REFUNDED' && (
               <div className="border-t pt-4 flex justify-end">
                 <Button
@@ -494,6 +523,24 @@ const SalesList = () => {
             }}
             isLoading={refundSale.isLoading}
           />
+        )}
+      </Modal>
+
+      {/* Invoice Modal */}
+      <Modal
+        isOpen={isInvoiceModalOpen}
+        onClose={() => {
+          setIsInvoiceModalOpen(false);
+          setInvoiceSaleId(null);
+        }}
+        title="Fatura"
+        size="xl"
+      >
+        {invoiceSaleId && (
+          <InvoiceView saleId={invoiceSaleId} onClose={() => {
+            setIsInvoiceModalOpen(false);
+            setInvoiceSaleId(null);
+          }} />
         )}
       </Modal>
     </div>

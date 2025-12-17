@@ -7,12 +7,16 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit, selectedCustomer 
   const [payments, setPayments] = useState([
     { method: 'CASH', amount: '', cardType: '' },
   ]);
+  const [discountType, setDiscountType] = useState('amount');
+  const [discountValue, setDiscountValue] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setPayments([{ method: 'CASH', amount: '', cardType: '' }]);
+      setDiscountType('amount');
+      setDiscountValue('');
     }
-  }, [isOpen]);
+  }, [isOpen, total]);
 
   const addPayment = () => {
     setPayments([...payments, { method: 'CASH', amount: '', cardType: '' }]);
@@ -30,11 +34,20 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit, selectedCustomer 
     setPayments(newPayments);
   };
 
+  // Calculate discount amount
+  const discountAmount = discountValue
+    ? discountType === 'percentage'
+      ? (total * parseFloat(discountValue)) / 100
+      : parseFloat(discountValue)
+    : 0;
+
+  const finalTotal = Math.max(0, total - discountAmount);
+
   const calculateTotal = () => {
     return payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
   };
 
-  const remaining = total - calculateTotal();
+  const remaining = finalTotal - calculateTotal();
   const isValid = Math.abs(remaining) < 0.01; // Allow small rounding differences
 
   const handleSubmit = (e) => {
@@ -74,12 +87,13 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit, selectedCustomer 
 
     const paidAmount = calculateTotal();
 
-    onSubmit({
-      paymentMethod,
-      paidAmount,
-      customerId: selectedCustomer?.id || null,
-      splitPayments: Object.values(paymentGroups), // For reference/notes
-    });
+            onSubmit({
+              paymentMethod,
+              paidAmount,
+              customerId: selectedCustomer?.id || null,
+              discount: discountAmount,
+              splitPayments: Object.values(paymentGroups), // For reference/notes
+            });
   };
 
   const getPaymentMethodLabel = (method) => {
@@ -113,26 +127,87 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit, selectedCustomer 
           </div>
         )}
 
-        <div className="bg-gray-50 p-4 rounded-lg mb-4">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600 font-medium">Toplam Tutar:</span>
-            <span className="font-bold text-2xl text-gray-900">₺{total.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between items-center mt-2">
-            <span className="text-gray-600">Ödenen:</span>
-            <span className={`font-semibold text-lg ${isValid ? 'text-green-600' : 'text-red-600'}`}>
-              ₺{calculateTotal().toFixed(2)}
-            </span>
-          </div>
-          {remaining !== 0 && (
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-gray-600">Kalan:</span>
-              <span className={`font-semibold ${remaining > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                {remaining > 0 ? '+' : ''}₺{Math.abs(remaining).toFixed(2)}
-              </span>
-            </div>
-          )}
-        </div>
+                {/* Discount Section */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    İndirim
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDiscountType('amount');
+                        setDiscountValue('');
+                      }}
+                      className={`flex-1 px-3 py-2 rounded-lg border-2 transition-colors ${
+                        discountType === 'amount'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      Tutar (₺)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDiscountType('percentage');
+                        setDiscountValue('');
+                      }}
+                      className={`flex-1 px-3 py-2 rounded-lg border-2 transition-colors ${
+                        discountType === 'percentage'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      Oran (%)
+                    </button>
+                  </div>
+                  <Input
+                    type="number"
+                    step={discountType === 'percentage' ? '0.01' : '0.01'}
+                    min="0"
+                    max={discountType === 'percentage' ? '100' : total}
+                    value={discountValue}
+                    onChange={(e) => setDiscountValue(e.target.value)}
+                    placeholder={discountType === 'percentage' ? '0.00' : '0.00'}
+                  />
+                  {discountAmount > 0 && (
+                    <div className="mt-2 text-sm text-green-700 font-medium">
+                      İndirim: -₺{discountAmount.toFixed(2)}
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600 font-medium">Ara Toplam:</span>
+                    <span className="font-semibold text-gray-900">₺{total.toFixed(2)}</span>
+                  </div>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between items-center mb-2 text-red-600">
+                      <span className="text-gray-600">İndirim:</span>
+                      <span className="font-semibold">-₺{discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center border-t border-gray-300 pt-2">
+                    <span className="text-gray-600 font-medium">Toplam Tutar:</span>
+                    <span className="font-bold text-2xl text-gray-900">₺{finalTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-gray-600">Ödenen:</span>
+                    <span className={`font-semibold text-lg ${isValid ? 'text-green-600' : 'text-red-600'}`}>
+                      ₺{calculateTotal().toFixed(2)}
+                    </span>
+                  </div>
+                  {remaining !== 0 && (
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-gray-600">Kalan:</span>
+                      <span className={`font-semibold ${remaining > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        {remaining > 0 ? '+' : ''}₺{Math.abs(remaining).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
         {/* Warning for credit payment without customer */}
         {payments.some(p => p.method === 'CREDIT' && parseFloat(p.amount) > 0) && !selectedCustomer && (

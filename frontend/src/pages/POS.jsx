@@ -5,6 +5,7 @@ import PageLayout from '../components/layout/PageLayout';
 import POSScreen from '../components/pos/POSScreen';
 import PaymentModal from '../components/pos/PaymentModal';
 import SplitPaymentModal from '../components/pos/SplitPaymentModal';
+import InvoiceView from '../components/sales/InvoiceView';
 import Modal from '../components/common/Modal';
 import Button from '../components/common/Button';
 
@@ -13,6 +14,7 @@ const POS = () => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isSplitPaymentModalOpen, setIsSplitPaymentModalOpen] = useState(false);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [checkoutData, setCheckoutData] = useState(null);
   const [completedSale, setCompletedSale] = useState(null);
 
@@ -28,7 +30,7 @@ const POS = () => {
       const saleData = {
         ...checkoutData,
         ...paymentData,
-        discount: 0,
+        discount: paymentData.discount || 0,
         customerId: paymentData.customerId || null,
       };
 
@@ -47,7 +49,7 @@ const POS = () => {
       const saleData = {
         ...checkoutData,
         ...paymentData,
-        discount: 0,
+        discount: paymentData.discount || 0,
         customerId: paymentData.customerId || null,
         notes: paymentData.splitPayments 
           ? `Parçalı ödeme: ${paymentData.splitPayments.map(p => `${p.method} ${p.amount.toFixed(2)}₺`).join(', ')}`
@@ -74,6 +76,13 @@ const POS = () => {
     window.location.reload();
   };
 
+  const handleViewInvoice = () => {
+    if (completedSale?.id) {
+      setIsReceiptModalOpen(false);
+      setIsInvoiceModalOpen(true);
+    }
+  };
+
   return (
     <PageLayout
       hideSidebar={true}
@@ -98,7 +107,7 @@ const POS = () => {
           total={checkoutData?.items?.reduce((sum, item) => {
             const itemTotal = (item.unitPrice * item.quantity) - (item.discount || 0);
             return sum + itemTotal;
-          }, 0) || 0}
+          }, 0) - (checkoutData?.discount || 0) || 0}
           onSubmit={handlePaymentSubmit}
           onSplitPayment={() => {
             setIsPaymentModalOpen(false);
@@ -116,7 +125,7 @@ const POS = () => {
           total={checkoutData?.items?.reduce((sum, item) => {
             const itemTotal = (item.unitPrice * item.quantity) - (item.discount || 0);
             return sum + itemTotal;
-          }, 0) || 0}
+          }, 0) - (checkoutData?.discount || 0) || 0}
           onSubmit={handleSplitPaymentSubmit}
           selectedCustomer={checkoutData?.customer || null}
         />
@@ -140,7 +149,10 @@ const POS = () => {
                   Toplam: ₺{parseFloat(completedSale.total).toFixed(2)}
                 </p>
               </div>
-              <div className="flex justify-end">
+              <div className="flex justify-end gap-2">
+                <Button onClick={handleViewInvoice} variant="outline">
+                  Faturayı Görüntüle
+                </Button>
                 <Button onClick={handleCloseReceipt} variant="primary">
                   Yeni Satış
                 </Button>
@@ -148,6 +160,24 @@ const POS = () => {
             </div>
           </Modal>
         )}
+
+        {/* Invoice Modal */}
+        <Modal
+          isOpen={isInvoiceModalOpen}
+          onClose={() => {
+            setIsInvoiceModalOpen(false);
+            handleCloseReceipt();
+          }}
+          title="Fatura"
+          size="xl"
+        >
+          {completedSale?.id && (
+            <InvoiceView saleId={completedSale.id} onClose={() => {
+              setIsInvoiceModalOpen(false);
+              handleCloseReceipt();
+            }} />
+          )}
+        </Modal>
     </PageLayout>
   );
 };

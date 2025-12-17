@@ -6,13 +6,36 @@ import Button from '../common/Button';
 const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, selectedCustomer }) => {
   const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [paidAmount, setPaidAmount] = useState('');
+  const [discountType, setDiscountType] = useState('amount'); // 'amount' or 'percentage'
+  const [discountValue, setDiscountValue] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setPaymentMethod('CASH');
-      setPaidAmount(total.toFixed(2));
+      setDiscountType('amount');
+      setDiscountValue('');
     }
-  }, [isOpen, total]);
+  }, [isOpen]);
+
+  // Calculate discount amount
+  const discountAmount = discountValue
+    ? discountType === 'percentage'
+      ? (total * parseFloat(discountValue)) / 100
+      : parseFloat(discountValue)
+    : 0;
+
+  const finalTotal = Math.max(0, total - discountAmount);
+
+  // Update paidAmount when total or discount changes - auto set to finalTotal
+  useEffect(() => {
+    if (isOpen) {
+      if (paymentMethod === 'CREDIT') {
+        setPaidAmount('0');
+      } else {
+        setPaidAmount(finalTotal.toFixed(2));
+      }
+    }
+  }, [isOpen, finalTotal, paymentMethod]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -25,12 +48,13 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, select
 
     onSubmit({
       paymentMethod,
-      paidAmount: parseFloat(paidAmount) || total,
+      paidAmount: paymentMethod === 'CREDIT' ? 0 : finalTotal,
       customerId: selectedCustomer?.id || null,
+      discount: discountAmount,
     });
   };
 
-  const changeAmount = Math.max(0, (parseFloat(paidAmount) || total) - total);
+  const changeAmount = Math.max(0, (parseFloat(paidAmount) || finalTotal) - finalTotal);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Ödeme" size="md">
@@ -44,7 +68,7 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, select
               type="button"
               onClick={() => {
                 setPaymentMethod('CASH');
-                setPaidAmount(total.toFixed(2));
+                setPaidAmount(finalTotal.toFixed(2));
               }}
               className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                 paymentMethod === 'CASH'
@@ -58,7 +82,7 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, select
               type="button"
               onClick={() => {
                 setPaymentMethod('CARD');
-                setPaidAmount(total.toFixed(2));
+                setPaidAmount(finalTotal.toFixed(2));
               }}
               className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                 paymentMethod === 'CARD'
@@ -86,7 +110,7 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, select
               type="button"
               onClick={() => {
                 setPaymentMethod('MIXED');
-                setPaidAmount(total.toFixed(2));
+                setPaidAmount(finalTotal.toFixed(2));
               }}
               className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                 paymentMethod === 'MIXED'
@@ -122,24 +146,82 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, select
           </div>
         )}
 
+        {/* Discount Section */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            İndirim
+          </label>
+          <div className="flex gap-2 mb-2">
+            <button
+              type="button"
+              onClick={() => {
+                setDiscountType('amount');
+                setDiscountValue('');
+              }}
+              className={`flex-1 px-3 py-2 rounded-lg border-2 transition-colors ${
+                discountType === 'amount'
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              Tutar (₺)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDiscountType('percentage');
+                setDiscountValue('');
+              }}
+              className={`flex-1 px-3 py-2 rounded-lg border-2 transition-colors ${
+                discountType === 'percentage'
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              Oran (%)
+            </button>
+          </div>
+          <Input
+            type="number"
+            step={discountType === 'percentage' ? '0.01' : '0.01'}
+            min="0"
+            max={discountType === 'percentage' ? '100' : total}
+            value={discountValue}
+            onChange={(e) => setDiscountValue(e.target.value)}
+            placeholder={discountType === 'percentage' ? '0.00' : '0.00'}
+          />
+          {discountAmount > 0 && (
+            <div className="mt-2 text-sm text-green-700 font-medium">
+              İndirim: -₺{discountAmount.toFixed(2)}
+            </div>
+          )}
+        </div>
+
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="flex justify-between mb-2">
-            <span className="text-gray-600">Toplam:</span>
-            <span className="font-semibold text-lg">₺{total.toFixed(2)}</span>
+            <span className="text-gray-600">Ara Toplam:</span>
+            <span className="font-semibold">₺{total.toFixed(2)}</span>
+          </div>
+          {discountAmount > 0 && (
+            <div className="flex justify-between mb-2 text-red-600">
+              <span className="text-gray-600">İndirim:</span>
+              <span className="font-semibold">-₺{discountAmount.toFixed(2)}</span>
+            </div>
+          )}
+          <div className="flex justify-between border-t border-gray-300 pt-2">
+            <span className="text-gray-600 font-semibold">Toplam:</span>
+            <span className="font-bold text-lg">₺{finalTotal.toFixed(2)}</span>
           </div>
         </div>
 
         {paymentMethod !== 'CREDIT' && (
-          <Input
-            label="Ödenen Tutar"
-            type="number"
-            step="0.01"
-            min="0"
-            value={paidAmount}
-            onChange={(e) => setPaidAmount(e.target.value)}
-            required
-            placeholder="0.00"
-          />
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-blue-900">Ödenen Tutar:</span>
+              <span className="text-lg font-bold text-blue-900">₺{finalTotal.toFixed(2)}</span>
+            </div>
+            <p className="mt-1 text-xs text-blue-700">Tam ödeme yapılmış kabul edilir</p>
+          </div>
         )}
 
         {paymentMethod === 'CREDIT' && !selectedCustomer && (
