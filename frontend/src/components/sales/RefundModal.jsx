@@ -62,13 +62,12 @@ const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
     <div className="space-y-4">
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-800">
-          <strong>İade İşlemi:</strong> İade edilecek ürünleri ve miktarlarını seçin.
-          Kısmi iade yapabilirsiniz. İade edilen ürünler stoka geri eklenecektir.
+          {t('sales.refundModal.description')}
         </p>
       </div>
 
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">İade Edilecek Ürünler</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{t('sales.refundModal.itemsToRefund')}</h3>
         <div className="flex space-x-2">
           <Button
             variant="outline"
@@ -76,7 +75,7 @@ const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
             onClick={handleSelectAll}
             disabled={isLoading}
           >
-            Tümünü Seç
+            {t('sales.refundModal.selectAll')}
           </Button>
           <Button
             variant="outline"
@@ -84,7 +83,7 @@ const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
             onClick={handleDeselectAll}
             disabled={isLoading}
           >
-            Tümünü Kaldır
+            {t('sales.refundModal.deselectAll')}
           </Button>
         </div>
       </div>

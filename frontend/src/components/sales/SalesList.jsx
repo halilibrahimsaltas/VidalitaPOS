@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSales, useSale, useRefundSale, useCancelSale } from '../../hooks/useSales';
 import { HiDocumentText } from 'react-icons/hi2';
 import Button from '../common/Button';
@@ -10,6 +11,7 @@ import RefundModal from './RefundModal';
 import InvoiceView from './InvoiceView';
 
 const SalesList = () => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [branchFilter, setBranchFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -57,12 +59,12 @@ const SalesList = () => {
       setIsDetailModalOpen(false);
       setSelectedSaleId(null);
     } catch (error) {
-      alert(error.response?.data?.message || 'İade işlemi sırasında bir hata oluştu');
+      alert(error.response?.data?.message || t('sales.refundError'));
     }
   };
 
   const handleCancel = async (saleId) => {
-    if (!window.confirm('Bu satışı iptal etmek istediğinizden emin misiniz? İptal edilen satışlar geri alınamaz.')) {
+    if (!window.confirm(t('sales.cancelConfirm'))) {
       return;
     }
 
@@ -71,7 +73,7 @@ const SalesList = () => {
       setIsDetailModalOpen(false);
       setSelectedSaleId(null);
     } catch (error) {
-      alert(error.response?.data?.message || 'İptal işlemi sırasında bir hata oluştu');
+      alert(error.response?.data?.message || t('sales.cancelError'));
     }
   };
 
@@ -102,7 +104,7 @@ const SalesList = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Yükleniyor...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -118,24 +120,25 @@ const SalesList = () => {
   const { sales, pagination } = data?.data || { sales: [], pagination: {} };
 
   const statusOptions = [
-    { value: '', label: 'Tüm Durumlar' },
-    { value: 'COMPLETED', label: 'Tamamlandı' },
-    { value: 'REFUNDED', label: 'İade Edildi' },
-    { value: 'PARTIALLY_REFUNDED', label: 'Kısmi İade' },
-    { value: 'CANCELLED', label: 'İptal Edildi' },
+    { value: '', label: t('sales.allStatuses') },
+    { value: 'COMPLETED', label: t('sales.statusLabels.COMPLETED') },
+    { value: 'REFUNDED', label: t('sales.statusLabels.REFUNDED') },
+    { value: 'PARTIALLY_REFUNDED', label: t('sales.statusLabels.PARTIALLY_REFUNDED') },
+    { value: 'CANCELLED', label: t('sales.statusLabels.CANCELLED') },
   ];
 
   const paymentMethodLabels = {
-    CASH: 'Nakit',
-    CARD: 'Kart',
-    CREDIT: 'Veresiye',
+    CASH: t('sales.paymentMethodLabels.CASH'),
+    CARD: t('sales.paymentMethodLabels.CARD'),
+    CREDIT: t('sales.paymentMethodLabels.CREDIT'),
+    MIXED: t('sales.paymentMethodLabels.MIXED'),
   };
 
   const statusLabels = {
-    COMPLETED: 'Tamamlandı',
-    REFUNDED: 'İade Edildi',
-    PARTIALLY_REFUNDED: 'Kısmi İade',
-    CANCELLED: 'İptal Edildi',
+    COMPLETED: t('sales.statusLabels.COMPLETED'),
+    REFUNDED: t('sales.statusLabels.REFUNDED'),
+    PARTIALLY_REFUNDED: t('sales.statusLabels.PARTIALLY_REFUNDED'),
+    CANCELLED: t('sales.statusLabels.CANCELLED'),
   };
 
   const statusColors = {
@@ -157,7 +160,7 @@ const SalesList = () => {
                 setBranchFilter(e.target.value);
                 setPage(1);
               }}
-              placeholder="Tüm Şubeler"
+              placeholder={t('sales.allBranches')}
             />
           </div>
           <div>
@@ -168,7 +171,7 @@ const SalesList = () => {
                 setPage(1);
               }}
               options={statusOptions}
-              placeholder="Tüm Durumlar"
+              placeholder={t('sales.allStatuses')}
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -179,7 +182,7 @@ const SalesList = () => {
                 setStartDate(e.target.value);
                 setPage(1);
               }}
-              placeholder="Başlangıç"
+              placeholder={t('sales.startDate')}
             />
             <Input
               type="date"
@@ -188,7 +191,7 @@ const SalesList = () => {
                 setEndDate(e.target.value);
                 setPage(1);
               }}
-              placeholder="Bitiş"
+              placeholder={t('sales.endDate')}
             />
           </div>
         </div>
@@ -200,21 +203,21 @@ const SalesList = () => {
           <table className="table">
             <thead className="table-header">
               <tr>
-                <th className="table-header-cell min-w-[100px]">Fiş No</th>
-                <th className="table-header-cell min-w-[120px]">Tarih</th>
-                <th className="table-header-cell min-w-[120px] hidden md:table-cell">Şube</th>
-                <th className="table-header-cell min-w-[120px] hidden lg:table-cell">Müşteri</th>
-                <th className="table-header-cell min-w-[80px] hidden sm:table-cell">Ödeme</th>
-                <th className="table-header-cell min-w-[100px] text-right">Toplam</th>
-                <th className="table-header-cell min-w-[100px]">Durum</th>
-                <th className="table-header-cell text-right min-w-[150px]">İşlemler</th>
+                <th className="table-header-cell min-w-[100px]">{t('sales.saleNumber')}</th>
+                <th className="table-header-cell min-w-[120px]">{t('sales.date')}</th>
+                <th className="table-header-cell min-w-[120px] hidden md:table-cell">{t('sales.branch')}</th>
+                <th className="table-header-cell min-w-[120px] hidden lg:table-cell">{t('sales.customer')}</th>
+                <th className="table-header-cell min-w-[80px] hidden sm:table-cell">{t('sales.paymentMethod')}</th>
+                <th className="table-header-cell min-w-[100px] text-right">{t('sales.total')}</th>
+                <th className="table-header-cell min-w-[100px]">{t('sales.status')}</th>
+                <th className="table-header-cell text-right min-w-[150px]">{t('sales.actions')}</th>
               </tr>
             </thead>
             <tbody className="table-body">
               {sales.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
-                    Satış bulunamadı
+                    {t('sales.noSales')}
                   </td>
                 </tr>
               ) : (
@@ -236,8 +239,8 @@ const SalesList = () => {
                       </div>
                     </td>
                     <td className="table-cell hidden lg:table-cell">
-                      <div className="text-sm text-gray-600 truncate" title={sale.customer?.name || 'Perakende'}>
-                        {sale.customer?.name || 'Perakende'}
+                      <div className="text-sm text-gray-600 truncate" title={sale.customer?.name || t('sales.retail')}>
+                        {sale.customer?.name || t('sales.retail')}
                       </div>
                     </td>
                     <td className="table-cell hidden sm:table-cell">
@@ -260,16 +263,16 @@ const SalesList = () => {
                         <button
                           onClick={() => handleViewInvoice(sale.id)}
                           className="text-sm text-indigo-600 hover:text-indigo-700 font-medium whitespace-nowrap flex items-center gap-1"
-                          title="Fatura"
+                          title={t('sales.invoice')}
                         >
                           <HiDocumentText className="w-4 h-4" />
-                          Fatura
+                          {t('sales.invoice')}
                         </button>
                         <button
                           onClick={() => handleViewDetails(sale.id)}
                           className="text-sm text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
                         >
-                          Detay
+                          {t('sales.detail')}
                         </button>
                         {sale.status === 'COMPLETED' && (
                           <>
@@ -277,14 +280,14 @@ const SalesList = () => {
                               onClick={() => handleRefund(sale)}
                               className="text-sm text-gray-600 hover:text-gray-700 font-medium whitespace-nowrap"
                             >
-                              İade
+                              {t('sales.refund')}
                             </button>
                             <button
                               onClick={() => handleCancel(sale.id)}
                               className="text-sm text-red-600 hover:text-red-700 font-medium whitespace-nowrap"
                               disabled={cancelSale.isLoading}
                             >
-                              İptal
+                              {t('sales.cancel')}
                             </button>
                           </>
                         )}
@@ -293,7 +296,7 @@ const SalesList = () => {
                             onClick={() => handleRefund(sale)}
                             className="text-sm text-gray-600 hover:text-gray-700 font-medium whitespace-nowrap"
                           >
-                            İade
+                            {t('sales.refund')}
                           </button>
                         )}
                       </div>
@@ -310,7 +313,7 @@ const SalesList = () => {
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Toplam {pagination.total} satış, Sayfa {pagination.page} / {pagination.totalPages}
+            {t('common.total')} {pagination.total} {t('sales.title').toLowerCase()}, {t('sales.page')} {pagination.page} {t('sales.of')} {pagination.totalPages}
           </div>
           <div className="flex space-x-2">
             <Button
@@ -319,7 +322,7 @@ const SalesList = () => {
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
             >
-              Önceki
+              {t('sales.previous')}
             </Button>
             <Button
               variant="outline"
@@ -327,7 +330,7 @@ const SalesList = () => {
               onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
               disabled={page === pagination.totalPages}
             >
-              Sonraki
+              {t('sales.next')}
             </Button>
           </div>
         </div>
@@ -340,7 +343,7 @@ const SalesList = () => {
           setIsDetailModalOpen(false);
           setSelectedSaleId(null);
         }}
-        title={`Satış Detayı - ${saleDetail?.data?.saleNumber || ''}`}
+        title={`${t('sales.detailTitle')} - ${saleDetail?.data?.saleNumber || ''}`}
         size="lg"
       >
         {saleDetail?.data ? (
@@ -348,43 +351,43 @@ const SalesList = () => {
             {/* Sale Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Fiş No</label>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('sales.saleNumber')}</label>
                 <p className="text-sm font-semibold text-gray-900 mt-1 truncate">
                   {saleDetail.data.saleNumber}
                 </p>
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Tarih</label>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('sales.date')}</label>
                 <p className="text-sm font-semibold text-gray-900 mt-1">
                   {formatDate(saleDetail.data.createdAt)}
                 </p>
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Şube</label>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('sales.branch')}</label>
                 <p className="text-sm font-semibold text-gray-900 mt-1 truncate">
                   {saleDetail.data.branch?.name || '-'}
                 </p>
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Kasiyer</label>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('sales.cashier')}</label>
                 <p className="text-sm font-semibold text-gray-900 mt-1 truncate">
                   {saleDetail.data.cashier?.fullName || saleDetail.data.cashier?.username || '-'}
                 </p>
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Müşteri</label>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('sales.customer')}</label>
                 <p className="text-sm font-semibold text-gray-900 mt-1 truncate">
-                  {saleDetail.data.customer?.name || 'Perakende'}
+                  {saleDetail.data.customer?.name || t('sales.retail')}
                 </p>
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Ödeme Yöntemi</label>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('sales.paymentMethodLabel')}</label>
                 <p className="text-sm font-semibold text-gray-900 mt-1 truncate">
                   {paymentMethodLabels[saleDetail.data.paymentMethod] || saleDetail.data.paymentMethod}
                 </p>
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Durum</label>
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('sales.status')}</label>
                 <div className="mt-1">
                   <span className={`badge ${statusColors[saleDetail.data.status] || 'badge-gray'}`}>
                     {statusLabels[saleDetail.data.status] || saleDetail.data.status}
@@ -403,7 +406,7 @@ const SalesList = () => {
                 }}
               >
                 <HiDocumentText className="w-4 h-4 mr-2" />
-                Faturayı Görüntüle
+                {t('sales.viewInvoice')}
               </Button>
               {saleDetail.data.status === 'COMPLETED' && (
                 <div className="flex space-x-3">
@@ -414,7 +417,7 @@ const SalesList = () => {
                       handleRefund(saleDetail.data);
                     }}
                   >
-                    İade Et
+                    {t('sales.refund')}
                   </Button>
                   <Button
                     variant="outline"
@@ -424,7 +427,7 @@ const SalesList = () => {
                     }}
                     disabled={cancelSale.isLoading}
                   >
-                    İptal Et
+                    {t('sales.cancel')}
                   </Button>
                 </div>
               )}
@@ -438,23 +441,23 @@ const SalesList = () => {
                     handleRefund(saleDetail.data);
                   }}
                 >
-                  İade Et
+                  {t('sales.refund')}
                 </Button>
               </div>
             )}
 
             {/* Sale Items */}
             <div className="border-t border-gray-200 pt-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-3">Satış Kalemleri</h3>
+              <h3 className="text-base font-semibold text-gray-900 mb-3">{t('sales.saleItems')}</h3>
               <div className="table-container">
                 <table className="table">
                   <thead className="table-header">
                     <tr>
-                      <th className="table-header-cell">Ürün</th>
-                      <th className="table-header-cell text-right">Miktar</th>
-                      <th className="table-header-cell text-right hidden sm:table-cell">Birim Fiyat</th>
-                      <th className="table-header-cell text-right hidden md:table-cell">İndirim</th>
-                      <th className="table-header-cell text-right">Toplam</th>
+                      <th className="table-header-cell">{t('sales.product')}</th>
+                      <th className="table-header-cell text-right">{t('sales.quantity')}</th>
+                      <th className="table-header-cell text-right hidden sm:table-cell">{t('sales.refundModal.unitPrice')}</th>
+                      <th className="table-header-cell text-right hidden md:table-cell">{t('sales.discount')}</th>
+                      <th className="table-header-cell text-right">{t('sales.total')}</th>
                     </tr>
                   </thead>
                   <tbody className="table-body">
@@ -487,7 +490,7 @@ const SalesList = () => {
                   <tfoot className="bg-gray-50">
                     <tr>
                       <td colSpan="4" className="px-4 py-2 text-right text-sm font-semibold text-gray-900">
-                        Toplam:
+                        {t('sales.total')}:
                       </td>
                       <td className="px-4 py-2 text-right text-base sm:text-lg font-bold text-blue-600">
                         {formatCurrency(parseFloat(saleDetail.data.total))}
@@ -499,7 +502,7 @@ const SalesList = () => {
             </div>
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500">Yükleniyor...</div>
+          <div className="text-center py-8 text-gray-500">{t('common.loading')}</div>
         )}
       </Modal>
 
@@ -510,7 +513,7 @@ const SalesList = () => {
           setIsRefundModalOpen(false);
           setSaleToRefund(null);
         }}
-        title={`İade İşlemi - ${saleToRefund?.saleNumber || ''}`}
+        title={`${t('sales.refundModal.title')} - ${saleToRefund?.saleNumber || ''}`}
         size="lg"
       >
         {saleToRefund && (
@@ -533,7 +536,7 @@ const SalesList = () => {
           setIsInvoiceModalOpen(false);
           setInvoiceSaleId(null);
         }}
-        title="Fatura"
+        title={t('sales.invoice')}
         size="xl"
       >
         {invoiceSaleId && (

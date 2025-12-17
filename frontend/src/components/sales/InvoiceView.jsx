@@ -61,37 +61,37 @@ const InvoiceView = ({ saleId, onClose }) => {
       {/* Header */}
       <div className="text-center border-b-2 border-gray-300 pb-3 mb-3 print:pb-2 print:mb-2">
         <h1 className="text-xl font-bold text-gray-900 mb-1 print:text-base">Vidalita</h1>
-        <p className="text-sm text-gray-600 print:text-xs">Satış Faturası</p>
+        <p className="text-sm text-gray-600 print:text-xs">{t('invoice.title')}</p>
       </div>
 
       {/* Invoice Info */}
       <div className="grid grid-cols-2 gap-4 mb-3 print:gap-2 print:mb-2 text-xs print:text-[10px]">
         <div>
-          <h3 className="font-semibold text-gray-900 mb-1 print:mb-0.5 print:text-[10px]">Fatura Bilgileri</h3>
+          <h3 className="font-semibold text-gray-900 mb-1 print:mb-0.5 print:text-[10px]">{t('invoice.invoiceInfo')}</h3>
           <div className="space-y-0.5 text-gray-600 print:space-y-0">
-            <p><strong>Fiş No:</strong> {sale.saleNumber}</p>
+            <p><strong>{t('invoice.saleNumber')}:</strong> {sale.saleNumber}</p>
             {sale.invoiceNumber && (
-              <p><strong>Fatura No:</strong> {sale.invoiceNumber}</p>
+              <p><strong>{t('invoice.invoiceNo')}:</strong> {sale.invoiceNumber}</p>
             )}
-            <p><strong>Tarih:</strong> {formatDate(sale.createdAt)}</p>
-            <p><strong>Şube:</strong> {sale.branch?.name || '-'}</p>
+            <p><strong>{t('invoice.date')}:</strong> {formatDate(sale.createdAt)}</p>
+            <p><strong>{t('invoice.branch')}:</strong> {sale.branch?.name || '-'}</p>
           </div>
         </div>
         <div>
-          <h3 className="font-semibold text-gray-900 mb-1 print:mb-0.5 print:text-[10px]">Müşteri Bilgileri</h3>
+          <h3 className="font-semibold text-gray-900 mb-1 print:mb-0.5 print:text-[10px]">{t('invoice.customerInfo')}</h3>
           <div className="space-y-0.5 text-gray-600 print:space-y-0">
             {sale.customer ? (
               <>
-                <p><strong>Ad:</strong> {sale.customer.name}</p>
+                <p><strong>{t('invoice.name')}:</strong> {sale.customer.name}</p>
                 {sale.customer.phone && (
-                  <p><strong>Telefon:</strong> {sale.customer.phone}</p>
+                  <p><strong>{t('invoice.phone')}:</strong> {sale.customer.phone}</p>
                 )}
                 {sale.customer.email && (
-                  <p><strong>Email:</strong> {sale.customer.email}</p>
+                  <p><strong>{t('invoice.email')}:</strong> {sale.customer.email}</p>
                 )}
               </>
             ) : (
-              <p className="text-gray-500">Anonim Müşteri</p>
+              <p className="text-gray-500">{t('invoice.anonymousCustomer')}</p>
             )}
           </div>
         </div>
@@ -102,10 +102,10 @@ const InvoiceView = ({ saleId, onClose }) => {
         <table className="w-full border-collapse text-xs print:text-[9px]">
           <thead>
             <tr className="bg-gray-50">
-              <th className="border border-gray-300 px-2 py-1 text-left font-semibold text-gray-900 print:px-1 print:py-0.5">Ürün</th>
-              <th className="border border-gray-300 px-2 py-1 text-center font-semibold text-gray-900 print:px-1 print:py-0.5">Miktar</th>
-              <th className="border border-gray-300 px-2 py-1 text-right font-semibold text-gray-900 print:px-1 print:py-0.5">Birim Fiyat</th>
-              <th className="border border-gray-300 px-2 py-1 text-right font-semibold text-gray-900 print:px-1 print:py-0.5">Toplam</th>
+              <th className="border border-gray-300 px-2 py-1 text-left font-semibold text-gray-900 print:px-1 print:py-0.5">{t('invoice.product')}</th>
+              <th className="border border-gray-300 px-2 py-1 text-center font-semibold text-gray-900 print:px-1 print:py-0.5">{t('invoice.quantity')}</th>
+              <th className="border border-gray-300 px-2 py-1 text-right font-semibold text-gray-900 print:px-1 print:py-0.5">{t('invoice.unitPrice')}</th>
+              <th className="border border-gray-300 px-2 py-1 text-right font-semibold text-gray-900 print:px-1 print:py-0.5">{t('invoice.total')}</th>
             </tr>
           </thead>
           <tbody>
@@ -114,7 +114,7 @@ const InvoiceView = ({ saleId, onClose }) => {
                 <td className="border border-gray-300 px-2 py-1 print:px-1 print:py-0.5">
                   <div className="font-medium text-gray-900">{item.product?.name || '-'}</div>
                   {item.product?.barcode && (
-                    <div className="text-[10px] text-gray-500 font-mono print:text-[8px]">Barkod: {item.product.barcode}</div>
+                    <div className="text-[10px] text-gray-500 font-mono print:text-[8px]">{t('invoice.barcode')}: {item.product.barcode}</div>
                   )}
                 </td>
                 <td className="border border-gray-300 px-2 py-1 text-center text-gray-900 print:px-1 print:py-0.5">
@@ -136,23 +136,23 @@ const InvoiceView = ({ saleId, onClose }) => {
       <div className="flex justify-end mb-3 print:mb-2">
         <div className="w-64 space-y-1 print:w-48 print:space-y-0.5">
           <div className="flex justify-between text-xs print:text-[10px]">
-            <span className="text-gray-600">Ara Toplam:</span>
+            <span className="text-gray-600">{t('invoice.subtotal')}:</span>
             <span className="font-medium text-gray-900">{formatCurrency(subtotal)}</span>
           </div>
           {totalDiscount > 0 && (
             <div className="flex justify-between text-xs print:text-[10px]">
-              <span className="text-gray-600">İndirim:</span>
+              <span className="text-gray-600">{t('invoice.discount')}:</span>
               <span className="font-medium text-red-600">-{formatCurrency(totalDiscount)}</span>
             </div>
           )}
           {parseFloat(sale.tax || 0) > 0 && (
             <div className="flex justify-between text-xs print:text-[10px]">
-              <span className="text-gray-600">KDV:</span>
+              <span className="text-gray-600">{t('invoice.tax')}:</span>
               <span className="font-medium text-gray-900">{formatCurrency(parseFloat(sale.tax))}</span>
             </div>
           )}
           <div className="flex justify-between text-sm font-bold border-t-2 border-gray-300 pt-1 print:text-xs print:pt-0.5">
-            <span className="text-gray-900">TOPLAM:</span>
+            <span className="text-gray-900">{t('invoice.total')}:</span>
             <span className="text-gray-900">{formatCurrency(total)}</span>
           </div>
         </div>
@@ -162,30 +162,30 @@ const InvoiceView = ({ saleId, onClose }) => {
       <div className="border-t border-gray-300 pt-2 mb-2 print:pt-1 print:mb-1">
         <div className="grid grid-cols-2 gap-2 text-xs print:text-[9px]">
           <div>
-            <span className="text-gray-600">Ödeme:</span>
+            <span className="text-gray-600">{t('invoice.payment')}:</span>
             <span className="ml-1 font-medium text-gray-900">
-              {sale.paymentMethod === 'CASH' ? 'Nakit' :
-               sale.paymentMethod === 'CARD' ? 'Kart' :
-               sale.paymentMethod === 'CREDIT' ? 'Veresiye' :
-               sale.paymentMethod === 'MIXED' ? 'Karma' : sale.paymentMethod}
+              {sale.paymentMethod === 'CASH' ? t('pos.cash') :
+               sale.paymentMethod === 'CARD' ? t('pos.card') :
+               sale.paymentMethod === 'CREDIT' ? t('pos.credit') :
+               sale.paymentMethod === 'MIXED' ? t('pos.mixed') : sale.paymentMethod}
             </span>
           </div>
           <div>
-            <span className="text-gray-600">Ödenen:</span>
+            <span className="text-gray-600">{t('invoice.paid')}:</span>
             <span className="ml-1 font-medium text-gray-900">
               {formatCurrency(parseFloat(sale.paidAmount || sale.total))}
             </span>
           </div>
           {parseFloat(sale.changeAmount || 0) > 0 && (
             <div>
-              <span className="text-gray-600">Para Üstü:</span>
+              <span className="text-gray-600">{t('invoice.change')}:</span>
               <span className="ml-1 font-medium text-green-600">
                 {formatCurrency(parseFloat(sale.changeAmount))}
               </span>
             </div>
           )}
           <div>
-            <span className="text-gray-600">Kasiyer:</span>
+            <span className="text-gray-600">{t('invoice.cashier')}:</span>
             <span className="ml-1 font-medium text-gray-900">
               {sale.cashier?.fullName || sale.cashier?.username || '-'}
             </span>
@@ -195,8 +195,8 @@ const InvoiceView = ({ saleId, onClose }) => {
 
       {/* Footer */}
       <div className="border-t border-gray-300 pt-2 text-center text-[10px] text-gray-500 print:pt-1 print:text-[8px]">
-        <p>Teşekkür ederiz!</p>
-        <p className="mt-0.5 print:mt-0">Bu belge elektronik faturadır.</p>
+        <p>{t('invoice.thankYou')}</p>
+        <p className="mt-0.5 print:mt-0">{t('invoice.electronicDocument')}</p>
       </div>
     </div>
   );
@@ -231,48 +231,64 @@ const InvoiceView = ({ saleId, onClose }) => {
             margin: 0.2cm;
           }
           
-          html {
+          html, body {
             margin: 0 !important;
             padding: 0 !important;
-            height: 100% !important;
-          }
-          
-          body {
-            margin: 0 !important;
-            padding: 0 !important;
-            height: 100% !important;
+            width: 100% !important;
+            height: auto !important;
             overflow: visible !important;
-            position: relative !important;
+            background: white !important;
           }
           
           * {
             box-sizing: border-box;
           }
           
-          body > *:not(.invoice-container) {
+          /* Hide all body children except root */
+          body > *:not(#root) {
             display: none !important;
           }
           
-          body * {
-            visibility: hidden;
+          /* Hide root children except invoice content */
+          #root > *:not(#invoice-content) {
+            display: none !important;
           }
           
-          .invoice-container,
-          .invoice-container * {
-            visibility: visible !important;
+          /* Hide modal elements */
+          .fixed,
+          .fixed.inset-0,
+          div[class*="z-50"],
+          div[class*="overflow-y-auto"],
+          div[class*="bg-black"][class*="bg-opacity"],
+          div[class*="flex"][class*="min-h-full"],
+          div[class*="rounded-lg"][class*="shadow-xl"]:not(.invoice-copy),
+          div[class*="px-4"][class*="sm:px-6"],
+          div[class*="max-h-"] {
+            display: none !important;
           }
           
-          .invoice-container {
-            position: fixed !important;
+          /* Show root */
+          #root {
+            display: block !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            position: relative !important;
+          }
+          
+          /* Show invoice content */
+          #invoice-content {
+            display: block !important;
+            position: relative !important;
             left: 0 !important;
             top: 0 !important;
             width: 100% !important;
-            padding: 0 !important;
             margin: 0 !important;
-            transform: none !important;
+            padding: 0 !important;
+            background: white !important;
+            page-break-after: auto;
           }
           
-          .invoice-container > div {
+          #invoice-content > div {
             display: flex !important;
             flex-direction: column !important;
             gap: 0.2cm !important;
@@ -282,18 +298,24 @@ const InvoiceView = ({ saleId, onClose }) => {
           }
           
           .invoice-copy {
+            display: block !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             width: 100% !important;
             margin: 0 !important;
-            margin-top: 0 !important;
+            margin-bottom: 0.2cm !important;
             padding: 0.3cm !important;
             border: 1px solid #ccc !important;
+            background: white !important;
+            color: black !important;
           }
           
           .invoice-copy:first-child {
             margin-top: 0 !important;
-            padding-top: 0.3cm !important;
+          }
+          
+          .invoice-copy:last-child {
+            margin-bottom: 0 !important;
           }
           
           .print\\:hidden {
