@@ -1,9 +1,11 @@
 import { useSale } from '../../hooks/useSales';
+import { useTranslation } from 'react-i18next';
 import { HiPrinter } from 'react-icons/hi2';
 import { HiDownload } from 'react-icons/hi';
 import Button from '../common/Button';
 
 const InvoiceView = ({ saleId, onClose }) => {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useSale(saleId);
   const sale = data?.data;
 
@@ -29,39 +31,14 @@ const InvoiceView = ({ saleId, onClose }) => {
   };
 
   const handleDownload = () => {
-    // Create a printable version
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Fatura - ${sale?.saleNumber}</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              .invoice-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 20px; }
-              .invoice-info { display: flex; justify-content: space-between; margin-bottom: 30px; }
-              .invoice-items { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-              .invoice-items th, .invoice-items td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-              .invoice-items th { background-color: #f2f2f2; }
-              .invoice-total { text-align: right; margin-top: 20px; }
-              .invoice-footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
-            </style>
-          </head>
-          <body>
-            ${document.getElementById('invoice-content')?.innerHTML || ''}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
-    }
+    // Trigger print which will show both copies
+    handlePrint();
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Fatura yükleniyor...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -69,7 +46,7 @@ const InvoiceView = ({ saleId, onClose }) => {
   if (error || !sale) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-        Fatura yüklenirken bir hata oluştu
+        {t('invoice.loadError')}
       </div>
     );
   }
@@ -78,189 +55,230 @@ const InvoiceView = ({ saleId, onClose }) => {
   const totalDiscount = parseFloat(sale.discount || 0);
   const total = parseFloat(sale.total);
 
+  // Invoice Content Component
+  const InvoiceContent = ({ copyType = 'customer' }) => (
+    <div className={`invoice-copy invoice-${copyType} bg-white border-2 border-gray-300 rounded-lg p-4 print:p-3`}>
+      {/* Copy Type Label */}
+      <div className="text-center mb-2 print:mb-1">
+        <span className="inline-block px-3 py-1 bg-gray-800 text-white text-xs font-bold rounded print:text-[10px] print:px-2 print:py-0.5">
+          {copyType === 'customer' ? 'MÜŞTERİ' : 'KASA'}
+        </span>
+      </div>
+
+      {/* Header */}
+      <div className="text-center border-b-2 border-gray-300 pb-3 mb-3 print:pb-2 print:mb-2">
+        <h1 className="text-xl font-bold text-gray-900 mb-1 print:text-base">Vidalita</h1>
+        <p className="text-sm text-gray-600 print:text-xs">Satış Faturası</p>
+      </div>
+
+      {/* Invoice Info */}
+      <div className="grid grid-cols-2 gap-4 mb-3 print:gap-2 print:mb-2 text-xs print:text-[10px]">
+        <div>
+          <h3 className="font-semibold text-gray-900 mb-1 print:mb-0.5 print:text-[10px]">Fatura Bilgileri</h3>
+          <div className="space-y-0.5 text-gray-600 print:space-y-0">
+            <p><strong>Fiş No:</strong> {sale.saleNumber}</p>
+            {sale.invoiceNumber && (
+              <p><strong>Fatura No:</strong> {sale.invoiceNumber}</p>
+            )}
+            <p><strong>Tarih:</strong> {formatDate(sale.createdAt)}</p>
+            <p><strong>Şube:</strong> {sale.branch?.name || '-'}</p>
+          </div>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 mb-1 print:mb-0.5 print:text-[10px]">Müşteri Bilgileri</h3>
+          <div className="space-y-0.5 text-gray-600 print:space-y-0">
+            {sale.customer ? (
+              <>
+                <p><strong>Ad:</strong> {sale.customer.name}</p>
+                {sale.customer.phone && (
+                  <p><strong>Telefon:</strong> {sale.customer.phone}</p>
+                )}
+                {sale.customer.email && (
+                  <p><strong>Email:</strong> {sale.customer.email}</p>
+                )}
+              </>
+            ) : (
+              <p className="text-gray-500">Anonim Müşteri</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Items Table */}
+      <div className="mb-3 print:mb-2">
+        <table className="w-full border-collapse text-xs print:text-[9px]">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="border border-gray-300 px-2 py-1 text-left font-semibold text-gray-900 print:px-1 print:py-0.5">Ürün</th>
+              <th className="border border-gray-300 px-2 py-1 text-center font-semibold text-gray-900 print:px-1 print:py-0.5">Miktar</th>
+              <th className="border border-gray-300 px-2 py-1 text-right font-semibold text-gray-900 print:px-1 print:py-0.5">Birim Fiyat</th>
+              <th className="border border-gray-300 px-2 py-1 text-right font-semibold text-gray-900 print:px-1 print:py-0.5">Toplam</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sale.items?.map((item, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="border border-gray-300 px-2 py-1 print:px-1 print:py-0.5">
+                  <div className="font-medium text-gray-900">{item.product?.name || '-'}</div>
+                  {item.product?.barcode && (
+                    <div className="text-[10px] text-gray-500 font-mono print:text-[8px]">Barkod: {item.product.barcode}</div>
+                  )}
+                </td>
+                <td className="border border-gray-300 px-2 py-1 text-center text-gray-900 print:px-1 print:py-0.5">
+                  {item.quantity}
+                </td>
+                <td className="border border-gray-300 px-2 py-1 text-right text-gray-900 print:px-1 print:py-0.5">
+                  {formatCurrency(parseFloat(item.unitPrice))}
+                </td>
+                <td className="border border-gray-300 px-2 py-1 text-right font-semibold text-gray-900 print:px-1 print:py-0.5">
+                  {formatCurrency(parseFloat(item.total))}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Totals */}
+      <div className="flex justify-end mb-3 print:mb-2">
+        <div className="w-64 space-y-1 print:w-48 print:space-y-0.5">
+          <div className="flex justify-between text-xs print:text-[10px]">
+            <span className="text-gray-600">Ara Toplam:</span>
+            <span className="font-medium text-gray-900">{formatCurrency(subtotal)}</span>
+          </div>
+          {totalDiscount > 0 && (
+            <div className="flex justify-between text-xs print:text-[10px]">
+              <span className="text-gray-600">İndirim:</span>
+              <span className="font-medium text-red-600">-{formatCurrency(totalDiscount)}</span>
+            </div>
+          )}
+          {parseFloat(sale.tax || 0) > 0 && (
+            <div className="flex justify-between text-xs print:text-[10px]">
+              <span className="text-gray-600">KDV:</span>
+              <span className="font-medium text-gray-900">{formatCurrency(parseFloat(sale.tax))}</span>
+            </div>
+          )}
+          <div className="flex justify-between text-sm font-bold border-t-2 border-gray-300 pt-1 print:text-xs print:pt-0.5">
+            <span className="text-gray-900">TOPLAM:</span>
+            <span className="text-gray-900">{formatCurrency(total)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Payment Info */}
+      <div className="border-t border-gray-300 pt-2 mb-2 print:pt-1 print:mb-1">
+        <div className="grid grid-cols-2 gap-2 text-xs print:text-[9px]">
+          <div>
+            <span className="text-gray-600">Ödeme:</span>
+            <span className="ml-1 font-medium text-gray-900">
+              {sale.paymentMethod === 'CASH' ? 'Nakit' :
+               sale.paymentMethod === 'CARD' ? 'Kart' :
+               sale.paymentMethod === 'CREDIT' ? 'Veresiye' :
+               sale.paymentMethod === 'MIXED' ? 'Karma' : sale.paymentMethod}
+            </span>
+          </div>
+          <div>
+            <span className="text-gray-600">Ödenen:</span>
+            <span className="ml-1 font-medium text-gray-900">
+              {formatCurrency(parseFloat(sale.paidAmount || sale.total))}
+            </span>
+          </div>
+          {parseFloat(sale.changeAmount || 0) > 0 && (
+            <div>
+              <span className="text-gray-600">Para Üstü:</span>
+              <span className="ml-1 font-medium text-green-600">
+                {formatCurrency(parseFloat(sale.changeAmount))}
+              </span>
+            </div>
+          )}
+          <div>
+            <span className="text-gray-600">Kasiyer:</span>
+            <span className="ml-1 font-medium text-gray-900">
+              {sale.cashier?.fullName || sale.cashier?.username || '-'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-gray-300 pt-2 text-center text-[10px] text-gray-500 print:pt-1 print:text-[8px]">
+        <p>Teşekkür ederiz!</p>
+        <p className="mt-0.5 print:mt-0">Bu belge elektronik faturadır.</p>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       {/* Action Buttons */}
       <div className="flex justify-end gap-2 print:hidden">
         <Button onClick={handlePrint} variant="primary" size="sm">
           <HiPrinter className="w-4 h-4 mr-2" />
-          Yazdır
+          {t('invoice.print')}
         </Button>
         <Button onClick={handleDownload} variant="outline" size="sm">
           <HiDownload className="w-4 h-4 mr-2" />
-          İndir
+          {t('invoice.download')}
         </Button>
       </div>
 
-      {/* Invoice Content */}
-      <div id="invoice-content" className="bg-white border-2 border-gray-300 rounded-lg p-8 max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center border-b-2 border-gray-300 pb-6 mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">VIDALITA RETAIL</h1>
-          <p className="text-gray-600">Satış Faturası</p>
-        </div>
-
-        {/* Invoice Info */}
-        <div className="grid grid-cols-2 gap-8 mb-6">
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Fatura Bilgileri</h3>
-            <div className="space-y-1 text-sm text-gray-600">
-              <p><strong>Fiş No:</strong> {sale.saleNumber}</p>
-              {sale.invoiceNumber && (
-                <p><strong>Fatura No:</strong> {sale.invoiceNumber}</p>
-              )}
-              <p><strong>Tarih:</strong> {formatDate(sale.createdAt)}</p>
-              <p><strong>Şube:</strong> {sale.branch?.name || '-'}</p>
-            </div>
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Müşteri Bilgileri</h3>
-            <div className="space-y-1 text-sm text-gray-600">
-              {sale.customer ? (
-                <>
-                  <p><strong>Ad:</strong> {sale.customer.name}</p>
-                  {sale.customer.phone && (
-                    <p><strong>Telefon:</strong> {sale.customer.phone}</p>
-                  )}
-                  {sale.customer.email && (
-                    <p><strong>Email:</strong> {sale.customer.email}</p>
-                  )}
-                </>
-              ) : (
-                <p className="text-gray-500">Anonim Müşteri</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Items Table */}
-        <div className="mb-6">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-900">Ürün</th>
-                <th className="border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-900">Miktar</th>
-                <th className="border border-gray-300 px-4 py-2 text-right text-sm font-semibold text-gray-900">Birim Fiyat</th>
-                <th className="border border-gray-300 px-4 py-2 text-right text-sm font-semibold text-gray-900">İndirim</th>
-                <th className="border border-gray-300 px-4 py-2 text-right text-sm font-semibold text-gray-900">Toplam</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sale.items?.map((item, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="border border-gray-300 px-4 py-3">
-                    <div className="font-medium text-gray-900">{item.product?.name || '-'}</div>
-                    {item.product?.barcode && (
-                      <div className="text-xs text-gray-500 font-mono">Barkod: {item.product.barcode}</div>
-                    )}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-3 text-center text-gray-900">
-                    {item.quantity}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-3 text-right text-gray-900">
-                    {formatCurrency(parseFloat(item.unitPrice))}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-3 text-right text-gray-900">
-                    {parseFloat(item.discount || 0) > 0 ? formatCurrency(parseFloat(item.discount)) : '-'}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-3 text-right font-semibold text-gray-900">
-                    {formatCurrency(parseFloat(item.total))}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Totals */}
-        <div className="flex justify-end mb-6">
-          <div className="w-80 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Ara Toplam:</span>
-              <span className="font-medium text-gray-900">{formatCurrency(subtotal)}</span>
-            </div>
-            {totalDiscount > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">İndirim:</span>
-                <span className="font-medium text-red-600">-{formatCurrency(totalDiscount)}</span>
-              </div>
-            )}
-            {parseFloat(sale.tax || 0) > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">KDV:</span>
-                <span className="font-medium text-gray-900">{formatCurrency(parseFloat(sale.tax))}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-lg font-bold border-t-2 border-gray-300 pt-2">
-              <span className="text-gray-900">TOPLAM:</span>
-              <span className="text-gray-900">{formatCurrency(total)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Payment Info */}
-        <div className="border-t border-gray-300 pt-4 mb-6">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-600">Ödeme Yöntemi:</span>
-              <span className="ml-2 font-medium text-gray-900">
-                {sale.paymentMethod === 'CASH' ? 'Nakit' :
-                 sale.paymentMethod === 'CARD' ? 'Kredi Kartı' :
-                 sale.paymentMethod === 'CREDIT' ? 'Veresiye' :
-                 sale.paymentMethod === 'MIXED' ? 'Karma' : sale.paymentMethod}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-600">Ödenen Tutar:</span>
-              <span className="ml-2 font-medium text-gray-900">
-                {formatCurrency(parseFloat(sale.paidAmount || sale.total))}
-              </span>
-            </div>
-            {parseFloat(sale.changeAmount || 0) > 0 && (
-              <div>
-                <span className="text-gray-600">Para Üstü:</span>
-                <span className="ml-2 font-medium text-green-600">
-                  {formatCurrency(parseFloat(sale.changeAmount))}
-                </span>
-              </div>
-            )}
-            <div>
-              <span className="text-gray-600">Kasiyer:</span>
-              <span className="ml-2 font-medium text-gray-900">
-                {sale.cashier?.fullName || sale.cashier?.username || '-'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="border-t border-gray-300 pt-4 text-center text-xs text-gray-500">
-          <p>Teşekkür ederiz!</p>
-          <p className="mt-1">Bu belge elektronik faturadır.</p>
+      {/* Invoice Content - Two Copies */}
+      <div id="invoice-content" className="invoice-container max-w-4xl mx-auto print:max-w-full">
+        {/* Screen View - Show both copies stacked */}
+        <div className="space-y-4 print:space-y-2">
+          <InvoiceContent copyType="customer" />
+          <InvoiceContent copyType="cashier" />
         </div>
       </div>
-
       {/* Print Styles */}
       <style>{`
         @media print {
+          @page {
+            size: A4;
+            margin: 0.5cm;
+          }
+          
           body * {
             visibility: hidden;
           }
           
-          #invoice-content,
-          #invoice-content * {
+          .invoice-container,
+          .invoice-container * {
             visibility: visible;
           }
           
-          #invoice-content {
+          .invoice-container {
             position: absolute;
             left: 0;
             top: 0;
             width: 100%;
+            padding: 0;
+            margin: 0;
+          }
+          
+          .invoice-container > div {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5cm;
+            width: 100%;
+          }
+          
+          .invoice-copy {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            width: 100%;
+            margin: 0;
+            padding: 0.4cm !important;
           }
           
           .print\\:hidden {
             display: none !important;
+          }
+        }
+        
+        @media screen {
+          .invoice-copy {
+            min-height: 400px;
           }
         }
       `}</style>

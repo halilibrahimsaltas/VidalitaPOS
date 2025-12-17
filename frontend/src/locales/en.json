@@ -21,7 +21,16 @@
     "yes": "Yes",
     "no": "No",
     "total": "Total",
-    "page": "Page"
+    "page": "Page",
+    "saving": "Saving...",
+    "select": "Select...",
+    "selectOptional": "Select (Optional)",
+    "errorOccurred": "An error occurred",
+    "required": "Required",
+    "optional": "Optional",
+    "or": "or",
+    "uploading": "Uploading...",
+    "unknown": "Unknown"
   },
   "auth": {
     "login": "Login",
@@ -58,7 +67,18 @@
     "edit": "Edit Branch",
     "deleteConfirm": "Are you sure you want to delete branch",
     "searchPlaceholder": "Search by branch name, code or address...",
-    "noBranches": "No branches found"
+    "noBranches": "No branches found",
+    "form": {
+      "nameRequired": "Branch name is required",
+      "codeRequired": "Branch code is required",
+      "codeMaxLength": "Branch code cannot exceed 50 characters",
+      "invalidEmail": "Please enter a valid email address",
+      "namePlaceholder": "e.g. Main Branch",
+      "codePlaceholder": "e.g. MAIN-01 or main-01",
+      "addressPlaceholder": "Branch address",
+      "phonePlaceholder": "+1 555 123 4567",
+      "emailPlaceholder": "branch@example.com"
+    }
   },
   "products": {
     "title": "Product Management",
@@ -83,6 +103,36 @@
       "USD": "USD - US Dollar",
       "TRY": "TRY - Turkish Lira",
       "EUR": "EUR - Euro"
+    },
+    "form": {
+      "nameRequired": "Product name is required",
+      "priceRequired": "Please enter a valid price",
+      "costPriceInvalid": "Cost price cannot be negative",
+      "barcodeMinLength": "Barcode must be at least 8 characters",
+      "barcodeDuplicate": "This barcode number is already in use",
+      "namePlaceholder": "e.g. Coca Cola 330ml",
+      "barcodePlaceholder": "Will be generated automatically",
+      "skuPlaceholder": "Stock code",
+      "pricePlaceholder": "0.00",
+      "costPricePlaceholder": "0.00",
+      "descriptionPlaceholder": "Product description",
+      "imageUrlPlaceholder": "https://example.com/image.jpg",
+      "imageUploadError": "An error occurred while uploading image",
+      "imageFileOnly": "Only image files can be uploaded",
+      "imageSizeLimit": "File size must be less than 5MB",
+      "stockInfo": "Stock Information",
+      "quantityPlaceholder": "0",
+      "minStockPlaceholder": "0",
+      "maxStockPlaceholder": "Unlimited",
+      "newCategory": "+ New",
+      "newCategoryTitle": "Add New Category",
+      "categoryNameRequired": "Category name is required",
+      "categoryNamePlaceholder": "e.g. Beverages",
+      "parentCategory": "Parent Category (Optional)",
+      "rootCategory": "Root category (no parent)",
+      "categoryCreateError": "An error occurred while creating category",
+      "creating": "Creating...",
+      "branchSelect": "Select Branch (Optional)"
     }
   },
   "inventory": {
@@ -100,7 +150,68 @@
     "lowStockAlert": "Low Stock Alert",
     "lowStockCount": "products below minimum stock level",
     "allBranches": "All Branches",
-    "noInventory": "No inventory records found"
+    "noInventory": "No inventory records found",
+    "form": {
+      "branchRequired": "Branch selection is required",
+      "productRequired": "Product selection is required",
+      "quantityRequired": "Please enter a valid stock quantity",
+      "minStockRequired": "Please enter a valid minimum stock level",
+      "maxStockInvalid": "Maximum stock level cannot be negative",
+      "maxStockLessThanMin": "Maximum stock level cannot be less than minimum stock level",
+      "updateError": "An error occurred while updating stock",
+      "editTitle": "Edit Stock",
+      "createTitle": "Add New Stock",
+      "quantityPlaceholder": "0",
+      "minStockPlaceholder": "0",
+      "maxStockPlaceholder": "Unlimited",
+      "unknownProduct": "Unknown Product"
+    },
+    "adjustment": {
+      "title": "Stock Adjustment",
+      "branchRequired": "Branch selection is required",
+      "productRequired": "Product selection is required",
+      "quantityRequired": "Quantity is required (positive or negative)",
+      "productNotFound": "No stock record found for this product. Please create stock first.",
+      "negativeStock": "This adjustment would result in negative stock",
+      "currentStock": "Current stock",
+      "newStock": "New stock",
+      "quantityChange": "Quantity Change",
+      "quantityPlaceholder": "Positive: Increase, Negative: Decrease",
+      "quantityHelp": "Positive value increases stock, negative value decreases stock",
+      "reason": "Reason (Optional)",
+      "reasonPlaceholder": "e.g. Count difference, Loss, Gift, etc.",
+      "notes": "Notes (Optional)",
+      "notesPlaceholder": "Additional notes...",
+      "productSearch": "Search product (name, barcode, SKU)...",
+      "productSelect": "Select Product",
+      "createError": "An error occurred while creating stock adjustment",
+      "createButton": "Create Adjustment"
+    },
+    "transfer": {
+      "title": "Stock Transfer",
+      "fromBranchRequired": "Source branch selection is required",
+      "toBranchRequired": "Destination branch selection is required",
+      "sameBranch": "Source and destination branches cannot be the same",
+      "itemProductRequired": "Product selection is required",
+      "itemQuantityRequired": "Please enter a valid quantity",
+      "insufficientStock": "Insufficient stock",
+      "availableStock": "Available stock",
+      "fromBranch": "Source Branch",
+      "toBranch": "Destination Branch",
+      "fromBranchSelect": "Select Source Branch",
+      "toBranchSelect": "Select Destination Branch",
+      "notes": "Notes (Optional)",
+      "notesPlaceholder": "Transfer notes...",
+      "items": "Transfer Items",
+      "addProduct": "+ Add Product",
+      "item": "Item",
+      "remove": "Remove",
+      "productSearch": "Search product (name, barcode, SKU)...",
+      "productSelect": "Select Product",
+      "quantity": "Quantity",
+      "createError": "An error occurred while creating stock transfer",
+      "createButton": "Create Transfer"
+    }
   },
   "pos": {
     "title": "POS Screen",
@@ -127,7 +238,64 @@
     "saleNumber": "Receipt No",
     "quickActions": "Quick Actions",
     "productList": "Product List",
-    "selectBranch": "Select branch..."
+    "selectBranch": "Select branch...",
+    "paymentModal": {
+      "title": "Payment",
+      "customer": "Customer",
+      "phone": "Tel",
+      "currentDebt": "Current Debt",
+      "anonymousCustomer": "Anonymous Customer",
+      "discount": "Discount",
+      "amount": "Amount ($)",
+      "percentage": "Rate (%)",
+      "discountAmount": "Discount",
+      "subtotal": "Subtotal",
+      "total": "Total",
+      "paidAmountLabel": "Paid Amount",
+      "paidAmountNote": "Full payment is assumed",
+      "creditWarning": "Customer selection is required for credit payment. Please select customer from POS screen.",
+      "creditRequired": "Customer selection is required for credit payment!",
+      "splitPayment": "Split Payment",
+      "completeButton": "Complete Payment"
+    },
+    "splitPaymentModal": {
+      "title": "Split Payment",
+      "customer": "Customer",
+      "phone": "Tel",
+      "currentDebt": "Current Debt",
+      "anonymousCustomer": "Anonymous Customer",
+      "discount": "Discount",
+      "amount": "Amount ($)",
+      "percentage": "Rate (%)",
+      "discountAmount": "Discount",
+      "subtotal": "Subtotal",
+      "totalAmount": "Total Amount",
+      "paid": "Paid",
+      "remaining": "Remaining",
+      "paymentMethods": "Payment Methods",
+      "addPayment": "+ Add Payment",
+      "payment": "Payment",
+      "method": "Method",
+      "cardType": "Card Type",
+      "cardTypeSelect": "Select",
+      "uzcard": "UzCard",
+      "humo": "Humo",
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "other": "Other",
+      "amountLabel": "Amount",
+      "remove": "Remove",
+      "totalMismatch": "Total payment amount must equal total amount",
+      "creditWarning": "Customer selection is required for credit payment. Please select customer from POS screen.",
+      "completeButton": "Complete Payment"
+    },
+    "customerSelector": {
+      "title": "Customer Selection",
+      "anonymous": "Anonymous Customer",
+      "selectCustomer": "Select Customer",
+      "searchPlaceholder": "Search customer...",
+      "noCustomers": "No customers found"
+    }
   },
   "customers": {
     "title": "Customer Management",
@@ -152,15 +320,35 @@
     "paymentDescription": "Description (Optional)",
     "currentDebt": "Current Debt",
     "savePayment": "Save Payment",
+    "statistics": "Statistics",
+    "purchaseHistory": "Purchase History",
     "transactionType": {
       "sale": "Sale",
       "payment": "Payment",
       "adjustment": "Adjustment"
     },
-    "noTransactions": "No transaction records found"
+    "noTransactions": "No transaction records found",
+    "form": {
+      "nameRequired": "Customer name is required",
+      "invalidEmail": "Please enter a valid email address",
+      "namePlaceholder": "e.g. John Doe",
+      "phonePlaceholder": "+1 555 123 4567",
+      "emailPlaceholder": "customer@example.com",
+      "addressPlaceholder": "Customer address",
+      "taxNumberPlaceholder": "Tax number"
+    },
+    "paymentForm": {
+      "customer": "Customer",
+      "currentDebt": "Current Debt",
+      "amountRequired": "Please enter a valid amount",
+      "amountPlaceholder": "0.00",
+      "descriptionPlaceholder": "Payment description",
+      "saveButton": "Save Payment"
+    }
   },
   "sales": {
     "title": "Sales History",
+    "subtitle": "View all sales, examine details and perform refund/cancel operations",
     "saleNumber": "Receipt No",
     "date": "Date",
     "customer": "Customer",
@@ -170,17 +358,36 @@
     "cancel": "Cancel",
     "invoice": "Invoice",
     "viewInvoice": "View Invoice",
+    "statusLabels": {
+      "COMPLETED": "Completed",
+      "REFUNDED": "Refunded",
+      "PARTIALLY_REFUNDED": "Partially Refunded",
+      "CANCELLED": "Cancelled"
+    },
     "refundModal": {
       "title": "Sale Refund",
-      "fullRefund": "Full Refund",
-      "partialRefund": "Partial Refund",
+      "description": "Refund Process: Select products and quantities to refund. You can make partial refunds. Refunded products will be added back to stock.",
+      "itemsToRefund": "Products to Refund",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "product": "Product",
+      "sold": "Sold",
+      "refundQuantity": "Refund Quantity",
+      "unitPrice": "Unit Price",
       "refundAmount": "Refund Amount",
-      "reason": "Refund Reason",
-      "confirm": "Confirm Refund"
-    }
+      "selectedItems": "Selected Products",
+      "totalRefundAmount": "Total Refund Amount",
+      "refundButton": "Refund",
+      "processing": "Processing..."
+    },
+    "cancelConfirm": "Are you sure you want to cancel this sale? Cancelled sales cannot be undone.",
+    "refundError": "An error occurred during refund process",
+    "cancelError": "An error occurred during cancel process",
+    "loadError": "An error occurred while loading sales"
   },
   "reports": {
     "title": "Reports",
+    "subtitle": "View sales, cash register and stock reports",
     "endOfDay": "End of Day Cash Report",
     "monthEnd": "Month End Report",
     "cashReceived": "Cash Received",
@@ -188,7 +395,8 @@
     "totalRefunds": "Total Refunds",
     "totalCash": "Total Cash",
     "selectMonth": "Select Month",
-    "selectDate": "Select Date"
+    "selectDate": "Select Date",
+    "loadError": "An error occurred while loading report"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -203,6 +411,7 @@
   },
   "users": {
     "title": "User Management",
+    "subtitle": "Create, edit and manage user permissions",
     "create": "New User",
     "edit": "Edit User",
     "username": "Username",
@@ -220,6 +429,80 @@
       "MANAGER": "Manager",
       "USER": "User",
       "CASHIER": "Cashier"
+    },
+    "form": {
+      "usernameRequired": "Username is required",
+      "usernameLength": "Username must be between 3 and 50 characters",
+      "usernameInvalid": "Username can only contain letters, numbers and underscores",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "fullNameRequired": "Full name is required",
+      "fullNameLength": "Full name must be between 2 and 100 characters",
+      "passwordLabel": "Password",
+      "passwordLabelEdit": "New Password (Leave blank to keep unchanged)",
+      "passwordPlaceholder": "At least 6 characters",
+      "usernamePlaceholder": "e.g. john_doe",
+      "emailPlaceholder": "example@email.com",
+      "fullNamePlaceholder": "e.g. John Doe",
+      "branchSelect": "Select Branch (Optional)",
+      "activeUser": "Active User"
+    },
+    "permissions": {
+      "title": "Permission Management",
+      "search": "Search permissions...",
+      "filterByModule": "Filter by module",
+      "allModules": "All Modules",
+      "selectedCount": "Selected Permissions",
+      "noPermissions": "No permissions defined yet",
+      "seedMessage": "Please seed the database: npx prisma db seed",
+      "loadError": "An error occurred while loading permissions",
+      "userLoadError": "An error occurred while loading user permissions",
+      "updateError": "An error occurred while updating permissions",
+      "modules": {
+        "users": "User Management",
+        "branches": "Branch Management",
+        "products": "Product Management",
+        "inventory": "Inventory Management",
+        "sales": "Sales Management",
+        "customers": "Customer Management",
+        "reports": "Reports",
+        "dashboard": "Dashboard",
+        "pos": "POS (Point of Sale)"
+      },
+      "actions": {
+        "view": "View",
+        "create": "Create",
+        "update": "Update",
+        "delete": "Delete",
+        "manage_permissions": "Manage Permissions",
+        "use": "Use",
+        "refund": "Refund"
+      },
+      "cancel": "Cancel"
     }
+  },
+  "invoice": {
+    "loadError": "An error occurred while loading invoice",
+    "print": "Print",
+    "download": "Download"
+  },
+  "customerStatistics": {
+    "loadError": "An error occurred while loading statistics"
+  },
+  "customerPurchaseHistory": {
+    "loadError": "An error occurred while loading purchase history"
+  },
+  "errors": {
+    "deleteUser": "An error occurred while deleting user",
+    "deleteCustomer": "An error occurred while deleting customer",
+    "deleteProduct": "An error occurred while deleting product",
+    "loadUsers": "An error occurred while loading users",
+    "loadCustomers": "An error occurred while loading customers",
+    "loadProducts": "An error occurred while loading products",
+    "loadInventory": "An error occurred while loading inventory",
+    "savePayment": "An error occurred while saving payment",
+    "createdAt": "Created At"
   }
 }

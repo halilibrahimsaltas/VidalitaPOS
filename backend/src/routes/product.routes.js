@@ -10,7 +10,7 @@ import {
   importProducts,
   getImportTemplate,
 } from '../controllers/product.controller.js';
-import { authenticate, authorize } from '../middleware/auth.middleware.js';
+import { authenticate, authorize, hasPermission } from '../middleware/auth.middleware.js';
 import { validateCreateProduct, validateUpdateProduct } from '../middleware/product.validation.middleware.js';
 import { uploadSingleImage, uploadCSVFile, handleUploadError } from '../middleware/upload.middleware.js';
 
@@ -19,16 +19,16 @@ const router = express.Router();
 // All routes require authentication
 router.use(authenticate);
 
-// Get all products (with pagination and filters)
-router.get('/', getAllProducts);
+// Get all products (with pagination and filters) - requires products.view permission
+router.get('/', hasPermission('products.view'), getAllProducts);
 
-// Get product by ID
-router.get('/:id', getProductById);
+// Get product by ID - requires products.view permission
+router.get('/:id', hasPermission('products.view'), getProductById);
 
-// Get product by barcode
-router.get('/barcode/:barcode', getProductByBarcode);
+// Get product by barcode - requires products.view permission
+router.get('/barcode/:barcode', hasPermission('products.view'), getProductByBarcode);
 
-// Get import template
+// Get import template (only ADMIN and MANAGER)
 router.get('/import/template', authorize('ADMIN', 'MANAGER'), getImportTemplate);
 
 // Upload product image (only ADMIN and MANAGER)
@@ -37,14 +37,14 @@ router.post('/upload-image', authorize('ADMIN', 'MANAGER'), uploadSingleImage, h
 // Import products from CSV (only ADMIN and MANAGER)
 router.post('/import', authorize('ADMIN', 'MANAGER'), uploadCSVFile, handleUploadError, importProducts);
 
-// Create product (only ADMIN and MANAGER)
-router.post('/', authorize('ADMIN', 'MANAGER'), validateCreateProduct, createProduct);
+// Create product - requires products.create permission (CASHIER, MANAGER, ADMIN can create)
+router.post('/', hasPermission('products.create'), validateCreateProduct, createProduct);
 
-// Update product (only ADMIN and MANAGER)
-router.put('/:id', authorize('ADMIN', 'MANAGER'), validateUpdateProduct, updateProduct);
+// Update product - requires products.update permission (CASHIER, MANAGER, ADMIN can update)
+router.put('/:id', hasPermission('products.update'), validateUpdateProduct, updateProduct);
 
-// Delete product (only ADMIN)
-router.delete('/:id', authorize('ADMIN'), deleteProduct);
+// Delete product - requires products.delete permission (CASHIER, MANAGER, ADMIN can delete)
+router.delete('/:id', hasPermission('products.delete'), deleteProduct);
 
 export default router;
 

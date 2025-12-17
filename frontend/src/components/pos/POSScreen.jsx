@@ -202,7 +202,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
   };
 
   const clearCart = () => {
-    if (cart.length > 0 && window.confirm('Sepeti temizlemek istediğinize emin misiniz?')) {
+    if (cart.length > 0 && window.confirm(t('pos.clear') + '?')) {
       setCart([]);
       localStorage.removeItem('pos_cart');
     }

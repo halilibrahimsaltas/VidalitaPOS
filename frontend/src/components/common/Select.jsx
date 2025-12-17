@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 const Select = ({
   label,
   options = [],
@@ -5,10 +7,12 @@ const Select = ({
   onChange,
   error,
   required = false,
-  placeholder = 'Seçiniz...',
+  placeholder,
   className = '',
   ...props
 }) => {
+  const { t } = useTranslation();
+  const defaultPlaceholder = placeholder || t('common.select');
   return (
     <div className="w-full">
       {label && (
@@ -23,7 +27,7 @@ const Select = ({
         className={`input ${error ? 'border-red-500 focus:ring-red-500' : ''} ${className}`}
         {...props}
       >
-        <option value="">{placeholder}</option>
+        <option value="">{defaultPlaceholder}</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

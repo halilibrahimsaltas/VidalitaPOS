@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Input from '../common/Input';
 import Button from '../common/Button';
 
 const BranchForm = ({ branch, onSubmit, onCancel, isLoading }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -43,17 +45,17 @@ const BranchForm = ({ branch, onSubmit, onCancel, isLoading }) => {
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Şube adı gereklidir';
+      newErrors.name = t('branches.form.nameRequired');
     }
 
     if (!formData.code.trim()) {
-      newErrors.code = 'Şube kodu gereklidir';
+      newErrors.code = t('branches.form.codeRequired');
     } else if (formData.code.trim().length > 50) {
-      newErrors.code = 'Şube kodu en fazla 50 karakter olabilir';
+      newErrors.code = t('branches.form.codeMaxLength');
     }
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Geçerli bir email adresi girin';
+      newErrors.email = t('branches.form.invalidEmail');
     }
 
     setErrors(newErrors);
@@ -70,53 +72,53 @@ const BranchForm = ({ branch, onSubmit, onCancel, isLoading }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        label="Şube Adı"
+        label={t('branches.name')}
         name="name"
         value={formData.name}
         onChange={handleChange}
         error={errors.name}
         required
-        placeholder="Örn: Merkez Şube"
+        placeholder={t('branches.form.namePlaceholder')}
       />
 
       <Input
-        label="Şube Kodu"
+        label={t('branches.code')}
         name="code"
         value={formData.code}
         onChange={handleChange}
         error={errors.code}
         required
-        placeholder="Örn: MERKEZ-01 veya merkez-01"
+        placeholder={t('branches.form.codePlaceholder')}
         maxLength={50}
       />
 
       <Input
-        label="Adres"
+        label={t('branches.address')}
         name="address"
         value={formData.address}
         onChange={handleChange}
         error={errors.address}
-        placeholder="Şube adresi"
+        placeholder={t('branches.form.addressPlaceholder')}
       />
 
       <Input
-        label="Telefon"
+        label={t('branches.phone')}
         name="phone"
         type="tel"
         value={formData.phone}
         onChange={handleChange}
         error={errors.phone}
-        placeholder="+90 555 123 4567"
+        placeholder={t('branches.form.phonePlaceholder')}
       />
 
       <Input
-        label="Email"
+        label={t('branches.email')}
         name="email"
         type="email"
         value={formData.email}
         onChange={handleChange}
         error={errors.email}
-        placeholder="sube@example.com"
+        placeholder={t('branches.form.emailPlaceholder')}
       />
 
       <div className="flex items-center">
@@ -129,16 +131,16 @@ const BranchForm = ({ branch, onSubmit, onCancel, isLoading }) => {
           className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
         />
         <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
-          Aktif
+          {t('common.active')}
         </label>
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
         <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>
-          İptal
+          {t('common.cancel')}
         </Button>
         <Button type="submit" variant="primary" disabled={isLoading}>
-          {isLoading ? 'Kaydediliyor...' : branch ? 'Güncelle' : 'Oluştur'}
+          {isLoading ? t('common.saving') : branch ? t('common.update') : t('common.create')}
         </Button>
       </div>
     </form>

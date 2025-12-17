@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Select from '../common/Select';
 import Input from '../common/Input';
 import Button from '../common/Button';
@@ -9,6 +10,7 @@ import { useCreateStockTransfer } from '../../hooks/useStockTransfers';
 import { useInventoryByBranch } from '../../hooks/useInventory';
 
 const StockTransferModal = ({ isOpen, onClose, onSuccess }) => {
+  const { t } = useTranslation();
   const { data: branchesData } = useBranches({ limit: 100, isActive: true });
   const branches = branchesData?.data?.branches || [];
   const createTransfer = useCreateStockTransfer();

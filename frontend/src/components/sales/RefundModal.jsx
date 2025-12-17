@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Button from '../common/Button';
 
 const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
+  const { t } = useTranslation();
   const [refundItems, setRefundItems] = useState(
     sale?.items?.map((item) => ({
       itemId: item.id,
@@ -92,19 +94,19 @@ const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
           <thead className="bg-gray-50 sticky top-0">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Ürün
+                {t('sales.refundModal.product')}
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                Satılan
+                {t('sales.refundModal.sold')}
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                İade Miktarı
+                {t('sales.refundModal.refundQuantity')}
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                Birim Fiyat
+                {t('sales.refundModal.unitPrice')}
               </th>
               <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                İade Tutarı
+                {t('sales.refundModal.refundAmount')}
               </th>
             </tr>
           </thead>
@@ -182,11 +184,11 @@ const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
         <div className="flex justify-between items-center">
           <div>
             <p className="text-sm text-gray-600">
-              Seçili Ürün: {selectedItems.length} / {sale?.items?.length || 0}
+              {t('sales.refundModal.selectedItems')}: {selectedItems.length} / {sale?.items?.length || 0}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-600">Toplam İade Tutarı:</p>
+            <p className="text-sm text-gray-600">{t('sales.refundModal.totalRefundAmount')}:</p>
             <p className="text-2xl font-bold text-primary-600">
               {formatCurrency(calculateRefundTotal())}
             </p>
@@ -201,7 +203,7 @@ const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
           onClick={onCancel}
           disabled={isLoading}
         >
-          İptal
+          {t('common.cancel')}
         </Button>
         <Button
           type="button"
@@ -209,7 +211,7 @@ const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
           onClick={() => onConfirm(selectedItems)}
           disabled={!hasSelectedItems || isLoading}
         >
-          {isLoading ? 'İşleniyor...' : 'İade Et'}
+          {isLoading ? t('sales.refundModal.processing') : t('sales.refundModal.refundButton')}
         </Button>
       </div>
     </div>

@@ -10,8 +10,8 @@ const Reports = () => {
   const [activeReport, setActiveReport] = useState('cash-register');
 
   const reports = [
-    { id: 'cash-register', name: 'Gün Sonu Kasa Raporu' },
-    { id: 'monthly', name: 'Ay Sonu Raporu' },
+    { id: 'cash-register', name: t('reports.endOfDay') },
+    { id: 'monthly', name: t('reports.monthEnd') },
     // Future reports can be added here
     // { id: 'sales-summary', name: 'Satış Özet Raporu', icon: '📊' },
     // { id: 'inventory', name: 'Stok Durum Raporu', icon: '📦' },
@@ -20,7 +20,7 @@ const Reports = () => {
   return (
     <PageLayout
       title={t('navigation.reports')}
-      description="Satış, kasa ve stok raporlarını görüntüleyin"
+      description={t('reports.subtitle')}
     >
         {/* Report Type Selector */}
         <div className="mb-6 card p-4">

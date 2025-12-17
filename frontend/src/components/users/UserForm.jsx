@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import Select from '../common/Select';
 import { useBranches } from '../../hooks/useBranches';
 
 const UserForm = ({ user, onSubmit, onCancel, isLoading }) => {
+  const { t } = useTranslation();
   const { data: branchesData } = useBranches({ limit: 100, isActive: true });
   const branches = branchesData?.data?.branches || [];
 
@@ -50,29 +52,29 @@ const UserForm = ({ user, onSubmit, onCancel, isLoading }) => {
     const newErrors = {};
 
     if (!formData.username.trim()) {
-      newErrors.username = 'Kullanıcı adı gereklidir';
+      newErrors.username = t('users.form.usernameRequired');
     } else if (formData.username.length < 3 || formData.username.length > 50) {
-      newErrors.username = 'Kullanıcı adı 3 ile 50 karakter arasında olmalıdır';
+      newErrors.username = t('users.form.usernameLength');
     } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-      newErrors.username = 'Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir';
+      newErrors.username = t('users.form.usernameInvalid');
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email gereklidir';
+      newErrors.email = t('users.form.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Geçerli bir email adresi girin';
+      newErrors.email = t('users.form.emailInvalid');
     }
 
     if (!user && !formData.password) {
-      newErrors.password = 'Şifre gereklidir';
+      newErrors.password = t('users.form.passwordRequired');
     } else if (formData.password && formData.password.length < 6) {
-      newErrors.password = 'Şifre en az 6 karakter olmalıdır';
+      newErrors.password = t('users.form.passwordMinLength');
     }
 
     if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Ad soyad gereklidir';
+      newErrors.fullName = t('users.form.fullNameRequired');
     } else if (formData.fullName.length < 2 || formData.fullName.length > 100) {
-      newErrors.fullName = 'Ad soyad 2 ile 100 karakter arasında olmalıdır';
+      newErrors.fullName = t('users.form.fullNameLength');
     }
 
     setErrors(newErrors);
@@ -96,64 +98,64 @@ const UserForm = ({ user, onSubmit, onCancel, isLoading }) => {
   };
 
   const roleOptions = [
-    { value: 'ADMIN', label: 'Admin' },
-    { value: 'MANAGER', label: 'Yönetici' },
-    { value: 'USER', label: 'Kullanıcı' },
-    { value: 'CASHIER', label: 'Kasiyer' },
+    { value: 'ADMIN', label: t('users.roles.ADMIN') },
+    { value: 'MANAGER', label: t('users.roles.MANAGER') },
+    { value: 'USER', label: t('users.roles.USER') },
+    { value: 'CASHIER', label: t('users.roles.CASHIER') },
   ];
 
   const branchOptions = [
-    { value: '', label: 'Şube Seçiniz (Opsiyonel)' },
+    { value: '', label: t('users.form.branchSelect') },
     ...branches.map((b) => ({ value: b.id, label: `${b.name} (${b.code})` })),
   ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        label="Kullanıcı Adı"
+        label={t('users.username')}
         name="username"
         value={formData.username}
         onChange={handleChange}
         error={errors.username}
         required
-        placeholder="Örn: john_doe"
+        placeholder={t('users.form.usernamePlaceholder')}
         disabled={!!user} // Disable username when editing
       />
 
       <Input
-        label="Email"
+        label={t('users.email')}
         name="email"
         type="email"
         value={formData.email}
         onChange={handleChange}
         error={errors.email}
         required
-        placeholder="ornek@email.com"
+        placeholder={t('users.form.emailPlaceholder')}
       />
 
       <Input
-        label={user ? 'Yeni Şifre (Boş bırakılırsa değiştirilmez)' : 'Şifre'}
+        label={user ? t('users.form.passwordLabelEdit') : t('users.form.passwordLabel')}
         name="password"
         type="password"
         value={formData.password}
         onChange={handleChange}
         error={errors.password}
         required={!user}
-        placeholder="En az 6 karakter"
+        placeholder={t('users.form.passwordPlaceholder')}
       />
 
       <Input
-        label="Ad Soyad"
+        label={t('users.fullName')}
         name="fullName"
         value={formData.fullName}
         onChange={handleChange}
         error={errors.fullName}
         required
-        placeholder="Örn: John Doe"
+        placeholder={t('users.form.fullNamePlaceholder')}
       />
 
       <Select
-        label="Rol"
+        label={t('users.role')}
         name="role"
         value={formData.role}
         onChange={handleChange}
@@ -162,7 +164,7 @@ const UserForm = ({ user, onSubmit, onCancel, isLoading }) => {
       />
 
       <Select
-        label="Şube (Opsiyonel)"
+        label={`${t('users.branch')} (${t('common.optional')})`}
         name="branchId"
         value={formData.branchId}
         onChange={handleChange}
@@ -179,16 +181,16 @@ const UserForm = ({ user, onSubmit, onCancel, isLoading }) => {
           className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
         />
         <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-          Aktif Kullanıcı
+          {t('users.form.activeUser')}
         </label>
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
         <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>
-          İptal
+          {t('common.cancel')}
         </Button>
         <Button type="submit" variant="primary" disabled={isLoading}>
-          {isLoading ? 'Kaydediliyor...' : user ? 'Güncelle' : 'Oluştur'}
+          {isLoading ? t('common.saving') : user ? t('common.update') : t('common.create')}
         </Button>
       </div>
     </form>

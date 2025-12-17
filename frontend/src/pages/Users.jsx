@@ -42,7 +42,7 @@ const Users = () => {
       }
       handleClose();
     } catch (error) {
-      alert(error.response?.data?.message || 'Bir hata oluştu');
+      alert(error.response?.data?.message || t('common.errorOccurred'));
     }
   };
 
@@ -51,7 +51,7 @@ const Users = () => {
   return (
     <PageLayout
       title={t('navigation.users')}
-      description="Kullanıcıları oluşturun, düzenleyin ve yetkilerini yönetin"
+      description={t('users.subtitle')}
       actions={
         <Button variant="primary" onClick={handleCreate}>
           {t('users.create')}

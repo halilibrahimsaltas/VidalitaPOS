@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePermissions, useUserPermissions, useUpdateUserPermissions } from '../../hooks/usePermissions';
 import Button from '../common/Button';
 
 const PermissionManager = ({ userId, onClose }) => {
+  const { t } = useTranslation();
   const { data: allPermissionsData, isLoading: permissionsLoading, error: permissionsError } = usePermissions();
   const { data: userPermissionsData, isLoading: userPermissionsLoading, error: userPermissionsError } = useUserPermissions(userId);
   const updatePermissions = useUpdateUserPermissions();
@@ -148,7 +150,7 @@ const PermissionManager = ({ userId, onClose }) => {
   if (permissionsError) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-        <p className="font-semibold">Yetkiler yüklenirken bir hata oluştu</p>
+        <p className="font-semibold">{t('users.permissions.loadError')}</p>
         <p className="text-sm mt-1">{permissionsError.response?.data?.message || permissionsError.message}</p>
         <p className="text-xs mt-2 text-red-600">
           Not: Yetkileri görüntülemek için ADMIN yetkisine sahip olmanız gerekmektedir.
@@ -160,7 +162,7 @@ const PermissionManager = ({ userId, onClose }) => {
   if (userPermissionsError) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-        <p className="font-semibold">Kullanıcı yetkileri yüklenirken bir hata oluştu</p>
+        <p className="font-semibold">{t('users.permissions.userLoadError')}</p>
         <p className="text-sm mt-1">{userPermissionsError.response?.data?.message || userPermissionsError.message}</p>
       </div>
     );

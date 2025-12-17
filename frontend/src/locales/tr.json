@@ -21,7 +21,16 @@
     "yes": "Evet",
     "no": "Hayır",
     "total": "Toplam",
-    "page": "Sayfa"
+    "page": "Sayfa",
+    "saving": "Kaydediliyor...",
+    "select": "Seçiniz...",
+    "selectOptional": "Seçiniz (Opsiyonel)",
+    "errorOccurred": "Bir hata oluştu",
+    "required": "Gerekli",
+    "optional": "Opsiyonel",
+    "or": "veya",
+    "uploading": "Yükleniyor...",
+    "unknown": "Bilinmeyen"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -58,7 +67,18 @@
     "edit": "Şube Düzenle",
     "deleteConfirm": "şubesini silmek istediğinize emin misiniz?",
     "searchPlaceholder": "Şube adı, kodu veya adres ile ara...",
-    "noBranches": "Şube bulunamadı"
+    "noBranches": "Şube bulunamadı",
+    "form": {
+      "nameRequired": "Şube adı gereklidir",
+      "codeRequired": "Şube kodu gereklidir",
+      "codeMaxLength": "Şube kodu en fazla 50 karakter olabilir",
+      "invalidEmail": "Geçerli bir email adresi girin",
+      "namePlaceholder": "Örn: Merkez Şube",
+      "codePlaceholder": "Örn: MERKEZ-01 veya merkez-01",
+      "addressPlaceholder": "Şube adresi",
+      "phonePlaceholder": "+90 555 123 4567",
+      "emailPlaceholder": "sube@example.com"
+    }
   },
   "products": {
     "title": "Ürün Yönetimi",
@@ -83,6 +103,36 @@
       "USD": "USD - US Dollar",
       "TRY": "TRY - Türk Lirası",
       "EUR": "EUR - Euro"
+    },
+    "form": {
+      "nameRequired": "Ürün adı gereklidir",
+      "priceRequired": "Geçerli bir fiyat girin",
+      "costPriceInvalid": "Maliyet fiyatı negatif olamaz",
+      "barcodeMinLength": "Barkod en az 8 karakter olmalıdır",
+      "barcodeDuplicate": "Bu barkod numarası zaten kullanılıyor",
+      "namePlaceholder": "Örn: Coca Cola 330ml",
+      "barcodePlaceholder": "Otomatik oluşturulacak",
+      "skuPlaceholder": "Stok kodu",
+      "pricePlaceholder": "0.00",
+      "costPricePlaceholder": "0.00",
+      "descriptionPlaceholder": "Ürün açıklaması",
+      "imageUrlPlaceholder": "https://example.com/image.jpg",
+      "imageUploadError": "Resim yüklenirken bir hata oluştu",
+      "imageFileOnly": "Sadece resim dosyaları yüklenebilir",
+      "imageSizeLimit": "Dosya boyutu 5MB'dan küçük olmalıdır",
+      "stockInfo": "Stok Bilgisi",
+      "quantityPlaceholder": "0",
+      "minStockPlaceholder": "0",
+      "maxStockPlaceholder": "Sınırsız",
+      "newCategory": "+ Yeni",
+      "newCategoryTitle": "Yeni Kategori Ekle",
+      "categoryNameRequired": "Kategori adı gereklidir",
+      "categoryNamePlaceholder": "Örn: İçecekler",
+      "parentCategory": "Üst Kategori (Opsiyonel)",
+      "rootCategory": "Kök kategori (üst kategori yok)",
+      "categoryCreateError": "Kategori oluşturulurken bir hata oluştu",
+      "creating": "Oluşturuluyor...",
+      "branchSelect": "Şube Seçiniz (Opsiyonel)"
     }
   },
   "inventory": {
@@ -100,7 +150,68 @@
     "lowStockAlert": "Düşük Stok Uyarısı",
     "lowStockCount": "ürün minimum stok seviyesinin altında",
     "allBranches": "Tüm Şubeler",
-    "noInventory": "Stok kaydı bulunamadı"
+    "noInventory": "Stok kaydı bulunamadı",
+    "form": {
+      "branchRequired": "Şube seçimi gereklidir",
+      "productRequired": "Ürün seçimi gereklidir",
+      "quantityRequired": "Geçerli bir stok miktarı girin",
+      "minStockRequired": "Geçerli bir minimum stok seviyesi girin",
+      "maxStockInvalid": "Maksimum stok seviyesi negatif olamaz",
+      "maxStockLessThanMin": "Maksimum stok seviyesi minimum stok seviyesinden küçük olamaz",
+      "updateError": "Stok güncellenirken bir hata oluştu",
+      "editTitle": "Stok Düzenle",
+      "createTitle": "Yeni Stok Ekle",
+      "quantityPlaceholder": "0",
+      "minStockPlaceholder": "0",
+      "maxStockPlaceholder": "Sınırsız",
+      "unknownProduct": "Bilinmeyen Ürün"
+    },
+    "adjustment": {
+      "title": "Stok Düzeltmesi",
+      "branchRequired": "Şube seçimi gereklidir",
+      "productRequired": "Ürün seçimi gereklidir",
+      "quantityRequired": "Miktar gereklidir (pozitif veya negatif)",
+      "productNotFound": "Bu ürün için stok kaydı bulunamadı. Önce stok oluşturun.",
+      "negativeStock": "Bu düzeltme stoku negatif yapar",
+      "currentStock": "Mevcut stok",
+      "newStock": "Yeni stok",
+      "quantityChange": "Miktar Değişikliği",
+      "quantityPlaceholder": "Pozitif: Artış, Negatif: Azalış",
+      "quantityHelp": "Pozitif değer stok artışı, negatif değer stok azalışı yapar",
+      "reason": "Sebep (Opsiyonel)",
+      "reasonPlaceholder": "Örn: Sayım farkı, Fire, Hediye, vb.",
+      "notes": "Notlar (Opsiyonel)",
+      "notesPlaceholder": "Ek açıklamalar...",
+      "productSearch": "Ürün ara (isim, barkod, SKU)...",
+      "productSelect": "Ürün Seçiniz",
+      "createError": "Stok düzeltmesi oluşturulurken bir hata oluştu",
+      "createButton": "Düzeltme Oluştur"
+    },
+    "transfer": {
+      "title": "Stok Transferi",
+      "fromBranchRequired": "Kaynak şube seçimi gereklidir",
+      "toBranchRequired": "Hedef şube seçimi gereklidir",
+      "sameBranch": "Kaynak ve hedef şube aynı olamaz",
+      "itemProductRequired": "Ürün seçimi gereklidir",
+      "itemQuantityRequired": "Geçerli bir miktar girin",
+      "insufficientStock": "Yetersiz stok",
+      "availableStock": "Mevcut stok",
+      "fromBranch": "Kaynak Şube",
+      "toBranch": "Hedef Şube",
+      "fromBranchSelect": "Kaynak Şube Seçiniz",
+      "toBranchSelect": "Hedef Şube Seçiniz",
+      "notes": "Notlar (Opsiyonel)",
+      "notesPlaceholder": "Transfer notları...",
+      "items": "Transfer Kalemleri",
+      "addProduct": "+ Ürün Ekle",
+      "item": "Kalem",
+      "remove": "Kaldır",
+      "productSearch": "Ürün ara (isim, barkod, SKU)...",
+      "productSelect": "Ürün Seçiniz",
+      "quantity": "Miktar",
+      "createError": "Stok transferi oluşturulurken bir hata oluştu",
+      "createButton": "Transfer Oluştur"
+    }
   },
   "pos": {
     "title": "POS Ekranı",
@@ -127,7 +238,64 @@
     "saleNumber": "Fiş No",
     "quickActions": "Hızlı İşlemler",
     "productList": "Ürün Listesi",
-    "selectBranch": "Şube seçin..."
+    "selectBranch": "Şube seçin...",
+    "paymentModal": {
+      "title": "Ödeme",
+      "customer": "Müşteri",
+      "phone": "Tel",
+      "currentDebt": "Mevcut Borç",
+      "anonymousCustomer": "Anonim Müşteri",
+      "discount": "İndirim",
+      "amount": "Tutar (₺)",
+      "percentage": "Oran (%)",
+      "discountAmount": "İndirim",
+      "subtotal": "Ara Toplam",
+      "total": "Toplam",
+      "paidAmountLabel": "Ödenen Tutar",
+      "paidAmountNote": "Tam ödeme yapılmış kabul edilir",
+      "creditWarning": "Veresiye ödemesi için müşteri seçilmesi zorunludur. Lütfen POS ekranından müşteri seçin.",
+      "creditRequired": "Veresiye ödemesi için müşteri seçilmesi zorunludur!",
+      "splitPayment": "Parçalı Ödeme",
+      "completeButton": "Ödemeyi Tamamla"
+    },
+    "splitPaymentModal": {
+      "title": "Parçalı Ödeme",
+      "customer": "Müşteri",
+      "phone": "Tel",
+      "currentDebt": "Mevcut Borç",
+      "anonymousCustomer": "Anonim Müşteri",
+      "discount": "İndirim",
+      "amount": "Tutar (₺)",
+      "percentage": "Oran (%)",
+      "discountAmount": "İndirim",
+      "subtotal": "Ara Toplam",
+      "totalAmount": "Toplam Tutar",
+      "paid": "Ödenen",
+      "remaining": "Kalan",
+      "paymentMethods": "Ödeme Yöntemleri",
+      "addPayment": "+ Ödeme Ekle",
+      "payment": "Ödeme",
+      "method": "Yöntem",
+      "cardType": "Kart Tipi",
+      "cardTypeSelect": "Seçiniz",
+      "uzcard": "UzCard",
+      "humo": "Humo",
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "other": "Diğer",
+      "amountLabel": "Tutar",
+      "remove": "Kaldır",
+      "totalMismatch": "Toplam ödeme tutarı toplam tutara eşit olmalıdır",
+      "creditWarning": "Veresiye ödemesi için müşteri seçilmesi zorunludur. Lütfen POS ekranından müşteri seçin.",
+      "completeButton": "Ödemeyi Tamamla"
+    },
+    "customerSelector": {
+      "title": "Müşteri Seçimi",
+      "anonymous": "Anonim Müşteri",
+      "selectCustomer": "Müşteri Seçin",
+      "searchPlaceholder": "Müşteri ara...",
+      "noCustomers": "Müşteri bulunamadı"
+    }
   },
   "customers": {
     "title": "Müşteri Yönetimi",
@@ -152,15 +320,35 @@
     "paymentDescription": "Açıklama (Opsiyonel)",
     "currentDebt": "Mevcut Borç",
     "savePayment": "Ödemeyi Kaydet",
+    "statistics": "İstatistikler",
+    "purchaseHistory": "Satın Alma Geçmişi",
     "transactionType": {
       "sale": "Satış",
       "payment": "Ödeme",
       "adjustment": "Düzeltme"
     },
-    "noTransactions": "İşlem kaydı bulunamadı"
+    "noTransactions": "İşlem kaydı bulunamadı",
+    "form": {
+      "nameRequired": "Müşteri adı gereklidir",
+      "invalidEmail": "Geçerli bir email adresi girin",
+      "namePlaceholder": "Örn: Ahmet Yılmaz",
+      "phonePlaceholder": "+90 555 123 4567",
+      "emailPlaceholder": "musteri@example.com",
+      "addressPlaceholder": "Müşteri adresi",
+      "taxNumberPlaceholder": "Vergi numarası"
+    },
+    "paymentForm": {
+      "customer": "Müşteri",
+      "currentDebt": "Mevcut Borç",
+      "amountRequired": "Geçerli bir tutar girin",
+      "amountPlaceholder": "0.00",
+      "descriptionPlaceholder": "Ödeme açıklaması",
+      "saveButton": "Ödemeyi Kaydet"
+    }
   },
   "sales": {
     "title": "Satış Geçmişi",
+    "subtitle": "Tüm satışları görüntüleyin, detaylarını inceleyin ve iade/iptal işlemleri yapın",
     "saleNumber": "Fiş No",
     "date": "Tarih",
     "customer": "Müşteri",
@@ -170,17 +358,36 @@
     "cancel": "İptal",
     "invoice": "Fatura",
     "viewInvoice": "Faturayı Görüntüle",
+    "statusLabels": {
+      "COMPLETED": "Tamamlandı",
+      "REFUNDED": "İade Edildi",
+      "PARTIALLY_REFUNDED": "Kısmen İade Edildi",
+      "CANCELLED": "İptal Edildi"
+    },
     "refundModal": {
       "title": "Satış İadesi",
-      "fullRefund": "Tam İade",
-      "partialRefund": "Kısmi İade",
+      "description": "İade İşlemi: İade edilecek ürünleri ve miktarlarını seçin. Kısmi iade yapabilirsiniz. İade edilen ürünler stoka geri eklenecektir.",
+      "itemsToRefund": "İade Edilecek Ürünler",
+      "selectAll": "Tümünü Seç",
+      "deselectAll": "Tümünü Kaldır",
+      "product": "Ürün",
+      "sold": "Satılan",
+      "refundQuantity": "İade Miktarı",
+      "unitPrice": "Birim Fiyat",
       "refundAmount": "İade Tutarı",
-      "reason": "İade Nedeni",
-      "confirm": "İadeyi Onayla"
-    }
+      "selectedItems": "Seçili Ürün",
+      "totalRefundAmount": "Toplam İade Tutarı",
+      "refundButton": "İade Et",
+      "processing": "İşleniyor..."
+    },
+    "cancelConfirm": "Bu satışı iptal etmek istediğinizden emin misiniz? İptal edilen satışlar geri alınamaz.",
+    "refundError": "İade işlemi sırasında bir hata oluştu",
+    "cancelError": "İptal işlemi sırasında bir hata oluştu",
+    "loadError": "Satışlar yüklenirken bir hata oluştu"
   },
   "reports": {
     "title": "Raporlar",
+    "subtitle": "Satış, kasa ve stok raporlarını görüntüleyin",
     "endOfDay": "Gün Sonu Kasa Raporu",
     "monthEnd": "Ay Sonu Raporu",
     "cashReceived": "Alınan Nakit",
@@ -188,7 +395,8 @@
     "totalRefunds": "Toplam İadeler",
     "totalCash": "Toplam Kasa",
     "selectMonth": "Ay Seçin",
-    "selectDate": "Tarih Seçin"
+    "selectDate": "Tarih Seçin",
+    "loadError": "Rapor yüklenirken bir hata oluştu"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -203,6 +411,7 @@
   },
   "users": {
     "title": "Kullanıcı Yönetimi",
+    "subtitle": "Kullanıcıları oluşturun, düzenleyin ve yetkilerini yönetin",
     "create": "Yeni Kullanıcı",
     "edit": "Kullanıcı Düzenle",
     "username": "Kullanıcı Adı",
@@ -220,7 +429,80 @@
       "MANAGER": "Müdür",
       "USER": "Kullanıcı",
       "CASHIER": "Kasiyer"
+    },
+    "form": {
+      "usernameRequired": "Kullanıcı adı gereklidir",
+      "usernameLength": "Kullanıcı adı 3 ile 50 karakter arasında olmalıdır",
+      "usernameInvalid": "Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir",
+      "emailRequired": "Email gereklidir",
+      "emailInvalid": "Geçerli bir email adresi girin",
+      "passwordRequired": "Şifre gereklidir",
+      "passwordMinLength": "Şifre en az 6 karakter olmalıdır",
+      "fullNameRequired": "Ad soyad gereklidir",
+      "fullNameLength": "Ad soyad 2 ile 100 karakter arasında olmalıdır",
+      "passwordLabel": "Şifre",
+      "passwordLabelEdit": "Yeni Şifre (Boş bırakılırsa değiştirilmez)",
+      "passwordPlaceholder": "En az 6 karakter",
+      "usernamePlaceholder": "Örn: john_doe",
+      "emailPlaceholder": "ornek@email.com",
+      "fullNamePlaceholder": "Örn: John Doe",
+      "branchSelect": "Şube Seçiniz (Opsiyonel)",
+      "activeUser": "Aktif Kullanıcı"
+    },
+    "permissions": {
+      "title": "Yetki Yönetimi",
+      "search": "Yetki ara...",
+      "filterByModule": "Modüle göre filtrele",
+      "allModules": "Tüm Modüller",
+      "selectedCount": "Seçili Yetki",
+      "noPermissions": "Henüz yetki tanımlanmamış",
+      "seedMessage": "Lütfen veritabanını seed edin: npx prisma db seed",
+      "loadError": "Yetkiler yüklenirken bir hata oluştu",
+      "userLoadError": "Kullanıcı yetkileri yüklenirken bir hata oluştu",
+      "updateError": "Yetkiler güncellenirken bir hata oluştu",
+      "modules": {
+        "users": "Kullanıcı Yönetimi",
+        "branches": "Şube Yönetimi",
+        "products": "Ürün Yönetimi",
+        "inventory": "Stok Yönetimi",
+        "sales": "Satış Yönetimi",
+        "customers": "Müşteri Yönetimi",
+        "reports": "Raporlar",
+        "dashboard": "Dashboard",
+        "pos": "POS (Satış Noktası)"
+      },
+      "actions": {
+        "view": "Görüntüle",
+        "create": "Oluştur",
+        "update": "Güncelle",
+        "delete": "Sil",
+        "manage_permissions": "Yetki Yönet",
+        "use": "Kullan",
+        "refund": "İade"
+      },
+      "cancel": "İptal Et"
     }
+  },
+  "invoice": {
+    "loadError": "Fatura yüklenirken bir hata oluştu",
+    "print": "Yazdır",
+    "download": "İndir"
+  },
+  "customerStatistics": {
+    "loadError": "İstatistikler yüklenirken bir hata oluştu"
+  },
+  "customerPurchaseHistory": {
+    "loadError": "Satış geçmişi yüklenirken bir hata oluştu"
+  },
+  "errors": {
+    "deleteUser": "Kullanıcı silinirken bir hata oluştu",
+    "deleteCustomer": "Müşteri silinirken bir hata oluştu",
+    "deleteProduct": "Ürün silinirken bir hata oluştu",
+    "loadUsers": "Kullanıcılar yüklenirken bir hata oluştu",
+    "loadCustomers": "Müşteriler yüklenirken bir hata oluştu",
+    "loadProducts": "Ürünler yüklenirken bir hata oluştu",
+    "loadInventory": "Stok bilgileri yüklenirken bir hata oluştu",
+    "savePayment": "Ödeme kaydedilirken bir hata oluştu",
+    "createdAt": "Oluşturulma"
   }
 }
-

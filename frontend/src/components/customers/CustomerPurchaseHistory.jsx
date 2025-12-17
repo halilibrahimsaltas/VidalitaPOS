@@ -42,7 +42,7 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
       COMPLETED: 'Tamamlandı',
       REFUNDED: 'İade Edildi',
       PARTIALLY_REFUNDED: 'Kısmen İade',
-      CANCELLED: 'İptal Edildi',
+      CANCELLED: t('sales.statusLabels.CANCELLED'),
     };
     return labels[status] || status;
   };

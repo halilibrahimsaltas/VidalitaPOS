@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Input from '../common/Input';
 import Select from '../common/Select';
 import Button from '../common/Button';
@@ -7,6 +8,7 @@ import { useBranches } from '../../hooks/useBranches';
 import { useCreateOrUpdateInventory } from '../../hooks/useInventory';
 
 const InventoryEditModal = ({ isOpen, onClose, inventoryItem, onSuccess }) => {
+  const { t } = useTranslation();
   const { data: branchesData } = useBranches({ limit: 100, isActive: true });
   const branches = branchesData?.data?.branches || [];
   const createOrUpdateInventory = useCreateOrUpdateInventory();

@@ -21,7 +21,16 @@
     "yes": "Да",
     "no": "Нет",
     "total": "Всего",
-    "page": "Страница"
+    "page": "Страница",
+    "saving": "Сохранение...",
+    "select": "Выберите...",
+    "selectOptional": "Выберите (Необязательно)",
+    "errorOccurred": "Произошла ошибка",
+    "required": "Обязательно",
+    "optional": "Необязательно",
+    "or": "или",
+    "uploading": "Загрузка...",
+    "unknown": "Неизвестно"
   },
   "auth": {
     "login": "Войти",
@@ -58,7 +67,18 @@
     "edit": "Редактировать филиал",
     "deleteConfirm": "Вы уверены, что хотите удалить филиал",
     "searchPlaceholder": "Поиск по названию, коду или адресу филиала...",
-    "noBranches": "Филиалы не найдены"
+    "noBranches": "Филиалы не найдены",
+    "form": {
+      "nameRequired": "Название филиала обязательно",
+      "codeRequired": "Код филиала обязателен",
+      "codeMaxLength": "Код филиала не может превышать 50 символов",
+      "invalidEmail": "Введите действительный email адрес",
+      "namePlaceholder": "Напр.: Центральный филиал",
+      "codePlaceholder": "Напр.: CENTRAL-01 или central-01",
+      "addressPlaceholder": "Адрес филиала",
+      "phonePlaceholder": "+90 555 123 4567",
+      "emailPlaceholder": "branch@example.com"
+    }
   },
   "products": {
     "title": "Управление продуктами",
@@ -83,6 +103,36 @@
       "USD": "USD - Доллар США",
       "TRY": "TRY - Турецкая лира",
       "EUR": "EUR - Евро"
+    },
+    "form": {
+      "nameRequired": "Название продукта обязательно",
+      "priceRequired": "Введите действительную цену",
+      "costPriceInvalid": "Себестоимость не может быть отрицательной",
+      "barcodeMinLength": "Штрих-код должен содержать не менее 8 символов",
+      "barcodeDuplicate": "Этот штрих-код уже используется",
+      "namePlaceholder": "Напр.: Coca Cola 330ml",
+      "barcodePlaceholder": "Будет создан автоматически",
+      "skuPlaceholder": "Код склада",
+      "pricePlaceholder": "0.00",
+      "costPricePlaceholder": "0.00",
+      "descriptionPlaceholder": "Описание продукта",
+      "imageUrlPlaceholder": "https://example.com/image.jpg",
+      "imageUploadError": "Ошибка при загрузке изображения",
+      "imageFileOnly": "Можно загружать только файлы изображений",
+      "imageSizeLimit": "Размер файла должен быть менее 5MB",
+      "stockInfo": "Информация о запасе",
+      "quantityPlaceholder": "0",
+      "minStockPlaceholder": "0",
+      "maxStockPlaceholder": "Без ограничений",
+      "newCategory": "+ Новый",
+      "newCategoryTitle": "Добавить новую категорию",
+      "categoryNameRequired": "Название категории обязательно",
+      "categoryNamePlaceholder": "Напр.: Напитки",
+      "parentCategory": "Родительская категория (Необязательно)",
+      "rootCategory": "Корневая категория (нет родительской)",
+      "categoryCreateError": "Ошибка при создании категории",
+      "creating": "Создание...",
+      "branchSelect": "Выберите филиал (Необязательно)"
     }
   },
   "inventory": {
@@ -100,7 +150,68 @@
     "lowStockAlert": "Предупреждение о низком запасе",
     "lowStockCount": "продуктов ниже минимального уровня запаса",
     "allBranches": "Все филиалы",
-    "noInventory": "Записи о запасах не найдены"
+    "noInventory": "Записи о запасах не найдены",
+    "form": {
+      "branchRequired": "Выбор филиала обязателен",
+      "productRequired": "Выбор продукта обязателен",
+      "quantityRequired": "Введите действительное количество запаса",
+      "minStockRequired": "Введите действительный минимальный уровень запаса",
+      "maxStockInvalid": "Максимальный уровень запаса не может быть отрицательным",
+      "maxStockLessThanMin": "Максимальный уровень запаса не может быть меньше минимального",
+      "updateError": "Ошибка при обновлении запаса",
+      "editTitle": "Редактировать запас",
+      "createTitle": "Добавить новый запас",
+      "quantityPlaceholder": "0",
+      "minStockPlaceholder": "0",
+      "maxStockPlaceholder": "Без ограничений",
+      "unknownProduct": "Неизвестный продукт"
+    },
+    "adjustment": {
+      "title": "Корректировка запаса",
+      "branchRequired": "Выбор филиала обязателен",
+      "productRequired": "Выбор продукта обязателен",
+      "quantityRequired": "Количество обязательно (положительное или отрицательное)",
+      "productNotFound": "Запись о запасе для этого продукта не найдена. Сначала создайте запас.",
+      "negativeStock": "Эта корректировка сделает запас отрицательным",
+      "currentStock": "Текущий запас",
+      "newStock": "Новый запас",
+      "quantityChange": "Изменение количества",
+      "quantityPlaceholder": "Положительное: Увеличение, Отрицательное: Уменьшение",
+      "quantityHelp": "Положительное значение увеличивает запас, отрицательное уменьшает",
+      "reason": "Причина (Необязательно)",
+      "reasonPlaceholder": "Напр.: Разница в подсчете, Брак, Подарок, и т.д.",
+      "notes": "Примечания (Необязательно)",
+      "notesPlaceholder": "Дополнительные пояснения...",
+      "productSearch": "Поиск продукта (название, штрих-код, SKU)...",
+      "productSelect": "Выберите продукт",
+      "createError": "Ошибка при создании корректировки запаса",
+      "createButton": "Создать корректировку"
+    },
+    "transfer": {
+      "title": "Перевод запасов",
+      "fromBranchRequired": "Выбор исходного филиала обязателен",
+      "toBranchRequired": "Выбор целевого филиала обязателен",
+      "sameBranch": "Исходный и целевой филиал не могут быть одинаковыми",
+      "itemProductRequired": "Выбор продукта обязателен",
+      "itemQuantityRequired": "Введите действительное количество",
+      "insufficientStock": "Недостаточно запаса",
+      "availableStock": "Доступный запас",
+      "fromBranch": "Исходный филиал",
+      "toBranch": "Целевой филиал",
+      "fromBranchSelect": "Выберите исходный филиал",
+      "toBranchSelect": "Выберите целевой филиал",
+      "notes": "Примечания (Необязательно)",
+      "notesPlaceholder": "Примечания к переводу...",
+      "items": "Позиции перевода",
+      "addProduct": "+ Добавить продукт",
+      "item": "Позиция",
+      "remove": "Удалить",
+      "productSearch": "Поиск продукта (название, штрих-код, SKU)...",
+      "productSelect": "Выберите продукт",
+      "quantity": "Количество",
+      "createError": "Ошибка при создании перевода запасов",
+      "createButton": "Создать перевод"
+    }
   },
   "pos": {
     "title": "Экран POS",
@@ -127,7 +238,64 @@
     "saleNumber": "Номер чека",
     "quickActions": "Быстрые действия",
     "productList": "Список продуктов",
-    "selectBranch": "Выберите филиал..."
+    "selectBranch": "Выберите филиал...",
+    "paymentModal": {
+      "title": "Оплата",
+      "customer": "Клиент",
+      "phone": "Тел",
+      "currentDebt": "Текущий долг",
+      "anonymousCustomer": "Анонимный клиент",
+      "discount": "Скидка",
+      "amount": "Сумма (₺)",
+      "percentage": "Процент (%)",
+      "discountAmount": "Скидка",
+      "subtotal": "Промежуточный итог",
+      "total": "Итого",
+      "paidAmountLabel": "Оплаченная сумма",
+      "paidAmountNote": "Считается полной оплатой",
+      "creditWarning": "Для кредитной оплаты необходимо выбрать клиента. Пожалуйста, выберите клиента на экране POS.",
+      "creditRequired": "Для кредитной оплаты необходимо выбрать клиента!",
+      "splitPayment": "Раздельная оплата",
+      "completeButton": "Завершить оплату"
+    },
+    "splitPaymentModal": {
+      "title": "Раздельная оплата",
+      "customer": "Клиент",
+      "phone": "Тел",
+      "currentDebt": "Текущий долг",
+      "anonymousCustomer": "Анонимный клиент",
+      "discount": "Скидка",
+      "amount": "Сумма (₺)",
+      "percentage": "Процент (%)",
+      "discountAmount": "Скидка",
+      "subtotal": "Промежуточный итог",
+      "totalAmount": "Общая сумма",
+      "paid": "Оплачено",
+      "remaining": "Остаток",
+      "paymentMethods": "Способы оплаты",
+      "addPayment": "+ Добавить оплату",
+      "payment": "Оплата",
+      "method": "Способ",
+      "cardType": "Тип карты",
+      "cardTypeSelect": "Выберите",
+      "uzcard": "UzCard",
+      "humo": "Humo",
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "other": "Другое",
+      "amountLabel": "Сумма",
+      "remove": "Удалить",
+      "totalMismatch": "Общая сумма оплаты должна равняться общей сумме",
+      "creditWarning": "Для кредитной оплаты необходимо выбрать клиента. Пожалуйста, выберите клиента на экране POS.",
+      "completeButton": "Завершить оплату"
+    },
+    "customerSelector": {
+      "title": "Выбор клиента",
+      "anonymous": "Анонимный клиент",
+      "selectCustomer": "Выберите клиента",
+      "searchPlaceholder": "Поиск клиента...",
+      "noCustomers": "Клиенты не найдены"
+    }
   },
   "customers": {
     "title": "Управление клиентами",
@@ -152,15 +320,35 @@
     "paymentDescription": "Описание (Необязательно)",
     "currentDebt": "Текущий долг",
     "savePayment": "Сохранить оплату",
+    "statistics": "Статистика",
+    "purchaseHistory": "История покупок",
     "transactionType": {
       "sale": "Продажа",
       "payment": "Оплата",
       "adjustment": "Корректировка"
     },
-    "noTransactions": "Записи о транзакциях не найдены"
+    "noTransactions": "Записи о транзакциях не найдены",
+    "form": {
+      "nameRequired": "Имя клиента обязательно",
+      "invalidEmail": "Введите действительный email адрес",
+      "namePlaceholder": "Напр.: Иван Иванов",
+      "phonePlaceholder": "+90 555 123 4567",
+      "emailPlaceholder": "client@example.com",
+      "addressPlaceholder": "Адрес клиента",
+      "taxNumberPlaceholder": "Налоговый номер"
+    },
+    "paymentForm": {
+      "customer": "Клиент",
+      "currentDebt": "Текущий долг",
+      "amountRequired": "Введите действительную сумму",
+      "amountPlaceholder": "0.00",
+      "descriptionPlaceholder": "Описание оплаты",
+      "saveButton": "Сохранить оплату"
+    }
   },
   "sales": {
     "title": "История продаж",
+    "subtitle": "Просмотр всех продаж, их деталей и выполнение возвратов/отмен",
     "saleNumber": "Номер чека",
     "date": "Дата",
     "customer": "Клиент",
@@ -170,17 +358,36 @@
     "cancel": "Отмена",
     "invoice": "Счет",
     "viewInvoice": "Просмотреть счет",
+    "statusLabels": {
+      "COMPLETED": "Завершено",
+      "REFUNDED": "Возвращено",
+      "PARTIALLY_REFUNDED": "Частично возвращено",
+      "CANCELLED": "Отменено"
+    },
     "refundModal": {
       "title": "Возврат продажи",
-      "fullRefund": "Полный возврат",
-      "partialRefund": "Частичный возврат",
+      "description": "Процесс возврата: Выберите продукты и количества для возврата. Вы можете выполнить частичный возврат. Возвращенные продукты будут добавлены обратно на склад.",
+      "itemsToRefund": "Продукты для возврата",
+      "selectAll": "Выбрать все",
+      "deselectAll": "Снять все",
+      "product": "Продукт",
+      "sold": "Продано",
+      "refundQuantity": "Количество возврата",
+      "unitPrice": "Цена за единицу",
       "refundAmount": "Сумма возврата",
-      "reason": "Причина возврата",
-      "confirm": "Подтвердить возврат"
-    }
+      "selectedItems": "Выбранные продукты",
+      "totalRefundAmount": "Общая сумма возврата",
+      "refundButton": "Вернуть",
+      "processing": "Обработка..."
+    },
+    "cancelConfirm": "Вы уверены, что хотите отменить эту продажу? Отмененные продажи нельзя восстановить.",
+    "refundError": "Ошибка при возврате",
+    "cancelError": "Ошибка при отмене",
+    "loadError": "Ошибка при загрузке продаж"
   },
   "reports": {
     "title": "Отчеты",
+    "subtitle": "Просмотр отчетов о продажах, кассе и запасах",
     "endOfDay": "Отчет о кассе на конец дня",
     "monthEnd": "Отчет на конец месяца",
     "cashReceived": "Получено наличными",
@@ -188,7 +395,8 @@
     "totalRefunds": "Всего возвратов",
     "totalCash": "Всего в кассе",
     "selectMonth": "Выберите месяц",
-    "selectDate": "Выберите дату"
+    "selectDate": "Выберите дату",
+    "loadError": "Ошибка при загрузке отчета"
   },
   "navigation": {
     "dashboard": "Панель управления",
@@ -203,6 +411,7 @@
   },
   "users": {
     "title": "Управление пользователями",
+    "subtitle": "Создание, редактирование и управление разрешениями пользователей",
     "create": "Новый пользователь",
     "edit": "Редактировать пользователя",
     "username": "Имя пользователя",
@@ -220,6 +429,80 @@
       "MANAGER": "Менеджер",
       "USER": "Пользователь",
       "CASHIER": "Кассир"
+    },
+    "form": {
+      "usernameRequired": "Имя пользователя обязательно",
+      "usernameLength": "Имя пользователя должно содержать от 3 до 50 символов",
+      "usernameInvalid": "Имя пользователя может содержать только буквы, цифры и подчеркивания",
+      "emailRequired": "Email обязателен",
+      "emailInvalid": "Введите действительный email адрес",
+      "passwordRequired": "Пароль обязателен",
+      "passwordMinLength": "Пароль должен содержать не менее 6 символов",
+      "fullNameRequired": "Полное имя обязательно",
+      "fullNameLength": "Полное имя должно содержать от 2 до 100 символов",
+      "passwordLabel": "Пароль",
+      "passwordLabelEdit": "Новый пароль (Оставьте пустым, чтобы не изменять)",
+      "passwordPlaceholder": "Не менее 6 символов",
+      "usernamePlaceholder": "Напр.: ivan_ivanov",
+      "emailPlaceholder": "example@email.com",
+      "fullNamePlaceholder": "Напр.: Иван Иванов",
+      "branchSelect": "Выберите филиал (Необязательно)",
+      "activeUser": "Активный пользователь"
+    },
+    "permissions": {
+      "title": "Управление разрешениями",
+      "search": "Поиск разрешений...",
+      "filterByModule": "Фильтр по модулю",
+      "allModules": "Все модули",
+      "selectedCount": "Выбранные разрешения",
+      "noPermissions": "Разрешения еще не определены",
+      "seedMessage": "Пожалуйста, выполните seed базы данных: npx prisma db seed",
+      "loadError": "Ошибка при загрузке разрешений",
+      "userLoadError": "Ошибка при загрузке разрешений пользователя",
+      "updateError": "Ошибка при обновлении разрешений",
+      "modules": {
+        "users": "Управление пользователями",
+        "branches": "Управление филиалами",
+        "products": "Управление продуктами",
+        "inventory": "Управление запасами",
+        "sales": "Управление продажами",
+        "customers": "Управление клиентами",
+        "reports": "Отчеты",
+        "dashboard": "Панель управления",
+        "pos": "POS (Точка продажи)"
+      },
+      "actions": {
+        "view": "Просмотр",
+        "create": "Создание",
+        "update": "Обновление",
+        "delete": "Удаление",
+        "manage_permissions": "Управление разрешениями",
+        "use": "Использование",
+        "refund": "Возврат"
+      },
+      "cancel": "Отмена"
     }
+  },
+  "invoice": {
+    "loadError": "Ошибка при загрузке счета",
+    "print": "Печать",
+    "download": "Скачать"
+  },
+  "customerStatistics": {
+    "loadError": "Ошибка при загрузке статистики"
+  },
+  "customerPurchaseHistory": {
+    "loadError": "Ошибка при загрузке истории покупок"
+  },
+  "errors": {
+    "deleteUser": "Ошибка при удалении пользователя",
+    "deleteCustomer": "Ошибка при удалении клиента",
+    "deleteProduct": "Ошибка при удалении продукта",
+    "loadUsers": "Ошибка при загрузке пользователей",
+    "loadCustomers": "Ошибка при загрузке клиентов",
+    "loadProducts": "Ошибка при загрузке продуктов",
+    "loadInventory": "Ошибка при загрузке информации о запасах",
+    "savePayment": "Ошибка при сохранении оплаты",
+    "createdAt": "Создано"
   }
 }

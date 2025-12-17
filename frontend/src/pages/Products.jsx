@@ -42,7 +42,7 @@ const Products = () => {
       }
       handleClose();
     } catch (error) {
-      alert(error.response?.data?.message || 'Bir hata oluştu');
+      alert(error.response?.data?.message || t('common.errorOccurred'));
     }
   };
 

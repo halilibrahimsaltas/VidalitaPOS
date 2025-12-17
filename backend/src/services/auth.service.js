@@ -111,19 +111,39 @@ export const login = async (username, password) => {
   // Get user permissions (for non-admin users)
   let permissions = [];
   if (user.role !== 'ADMIN') {
-    permissions = await permissionRepository.getUserPermissionCodes(user.id);
+    try {
+      permissions = await permissionRepository.getUserPermissionCodes(user.id);
+      // Ensure permissions is always an array
+      if (!Array.isArray(permissions)) {
+        console.warn(`⚠️ User ${user.username} (${user.id}) has invalid permissions format. Resetting to empty array.`);
+        permissions = [];
+      }
+      
+      // Log if user has no permissions (should not happen for properly created users)
+      if (permissions.length === 0) {
+        console.warn(`⚠️ User ${user.username} (${user.id}) has no permissions assigned. Please assign permissions.`);
+      }
+    } catch (permError) {
+      console.error(`❌ Error fetching permissions for user ${user.username}:`, permError);
+      permissions = [];
+    }
   } else {
     // Admin has all permissions - get all permission codes
-    const allPerms = await prisma.permission.findMany({
-      select: { code: true },
-    });
-    permissions = allPerms.map(p => p.code);
+    try {
+      const allPerms = await prisma.permission.findMany({
+        select: { code: true },
+      });
+      permissions = allPerms.map(p => p.code);
+    } catch (permError) {
+      console.error('❌ Error fetching all permissions for admin:', permError);
+      permissions = [];
+    }
   }
 
   return {
     user: {
       ...userWithBranch,
-      permissions,
+      permissions: permissions || [], // Ensure it's always an array
     },
     accessToken,
     refreshToken,

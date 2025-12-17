@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUsers, useDeleteUser } from '../../hooks/useUsers';
 import Button from '../common/Button';
 import Input from '../common/Input';
@@ -7,6 +8,7 @@ import Modal from '../common/Modal';
 import PermissionManager from './PermissionManager';
 
 const UserList = ({ onEdit }) => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [roleFilter, setRoleFilter] = useState('');
   const [isActiveFilter, setIsActiveFilter] = useState('');

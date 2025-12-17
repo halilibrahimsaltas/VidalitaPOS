@@ -21,7 +21,16 @@
     "yes": "Ha",
     "no": "Yo'q",
     "total": "Jami",
-    "page": "Sahifa"
+    "page": "Sahifa",
+    "saving": "Saqlanmoqda...",
+    "select": "Tanlang...",
+    "selectOptional": "Tanlang (Ixtiyoriy)",
+    "errorOccurred": "Xato yuz berdi",
+    "required": "Majburiy",
+    "optional": "Ixtiyoriy",
+    "or": "yoki",
+    "uploading": "Yuklanmoqda...",
+    "unknown": "Noma'lum"
   },
   "auth": {
     "login": "Kirish",
@@ -58,7 +67,18 @@
     "edit": "Filialni tahrirlash",
     "deleteConfirm": "filialni o'chirmoqchimisiz",
     "searchPlaceholder": "Filial nomi, kodi yoki manzili bo'yicha qidiring...",
-    "noBranches": "Filiallar topilmadi"
+    "noBranches": "Filiallar topilmadi",
+    "form": {
+      "nameRequired": "Filial nomi majburiy",
+      "codeRequired": "Filial kodi majburiy",
+      "codeMaxLength": "Filial kodi 50 belgidan oshmasligi kerak",
+      "invalidEmail": "To'g'ri email manzilini kiriting",
+      "namePlaceholder": "Masalan: Markaziy filial",
+      "codePlaceholder": "Masalan: MARKAZ-01 yoki markaz-01",
+      "addressPlaceholder": "Filial manzili",
+      "phonePlaceholder": "+90 555 123 4567",
+      "emailPlaceholder": "filial@example.com"
+    }
   },
   "products": {
     "title": "Mahsulot boshqaruvi",
@@ -83,6 +103,36 @@
       "USD": "USD - AQSH dollari",
       "TRY": "TRY - Turk lirasi",
       "EUR": "EUR - Yevro"
+    },
+    "form": {
+      "nameRequired": "Mahsulot nomi majburiy",
+      "priceRequired": "To'g'ri narx kiriting",
+      "costPriceInvalid": "Xarajat narxi manfiy bo'lishi mumkin emas",
+      "barcodeMinLength": "Shtrix-kod kamida 8 belgidan iborat bo'lishi kerak",
+      "barcodeDuplicate": "Bu shtrix-kod allaqachon ishlatilmoqda",
+      "namePlaceholder": "Masalan: Coca Cola 330ml",
+      "barcodePlaceholder": "Avtomatik yaratiladi",
+      "skuPlaceholder": "Ombor kodi",
+      "pricePlaceholder": "0.00",
+      "costPricePlaceholder": "0.00",
+      "descriptionPlaceholder": "Mahsulot tavsifi",
+      "imageUrlPlaceholder": "https://example.com/image.jpg",
+      "imageUploadError": "Rasm yuklashda xato yuz berdi",
+      "imageFileOnly": "Faqat rasm fayllari yuklanishi mumkin",
+      "imageSizeLimit": "Fayl hajmi 5MB dan kichik bo'lishi kerak",
+      "stockInfo": "Ombor ma'lumoti",
+      "quantityPlaceholder": "0",
+      "minStockPlaceholder": "0",
+      "maxStockPlaceholder": "Cheksiz",
+      "newCategory": "+ Yangi",
+      "newCategoryTitle": "Yangi kategoriya qo'shish",
+      "categoryNameRequired": "Kategoriya nomi majburiy",
+      "categoryNamePlaceholder": "Masalan: Ichimliklar",
+      "parentCategory": "Ota kategoriya (Ixtiyoriy)",
+      "rootCategory": "Asosiy kategoriya (ota kategoriya yo'q)",
+      "categoryCreateError": "Kategoriya yaratishda xato yuz berdi",
+      "creating": "Yaratilmoqda...",
+      "branchSelect": "Filialni tanlang (Ixtiyoriy)"
     }
   },
   "inventory": {
@@ -100,7 +150,68 @@
     "lowStockAlert": "Past zaxira ogohlantirishi",
     "lowStockCount": "mahsulot minimal zaxira darajasidan past",
     "allBranches": "Barcha filiallar",
-    "noInventory": "Zaxira yozuvlari topilmadi"
+    "noInventory": "Zaxira yozuvlari topilmadi",
+    "form": {
+      "branchRequired": "Filial tanlash majburiy",
+      "productRequired": "Mahsulot tanlash majburiy",
+      "quantityRequired": "To'g'ri zaxira miqdorini kiriting",
+      "minStockRequired": "To'g'ri minimal zaxira darajasini kiriting",
+      "maxStockInvalid": "Maksimal zaxira darajasi manfiy bo'lishi mumkin emas",
+      "maxStockLessThanMin": "Maksimal zaxira darajasi minimal darajadan kichik bo'lishi mumkin emas",
+      "updateError": "Zaxirani yangilashda xato yuz berdi",
+      "editTitle": "Zaxirani tahrirlash",
+      "createTitle": "Yangi zaxira qo'shish",
+      "quantityPlaceholder": "0",
+      "minStockPlaceholder": "0",
+      "maxStockPlaceholder": "Cheksiz",
+      "unknownProduct": "Noma'lum mahsulot"
+    },
+    "adjustment": {
+      "title": "Zaxira tuzatishi",
+      "branchRequired": "Filial tanlash majburiy",
+      "productRequired": "Mahsulot tanlash majburiy",
+      "quantityRequired": "Miqdor majburiy (musbat yoki manfiy)",
+      "productNotFound": "Bu mahsulot uchun zaxira yozuvi topilmadi. Avval zaxira yarating.",
+      "negativeStock": "Bu tuzatish zaxirani manfiy qiladi",
+      "currentStock": "Joriy zaxira",
+      "newStock": "Yangi zaxira",
+      "quantityChange": "Miqdor o'zgarishi",
+      "quantityPlaceholder": "Musbat: O'sish, Manfiy: Kamayish",
+      "quantityHelp": "Musbat qiymat zaxirani oshiradi, manfiy qiymat kamaytiradi",
+      "reason": "Sabab (Ixtiyoriy)",
+      "reasonPlaceholder": "Masalan: Hisob farqi, Yo'qotish, Sovg'a, va h.k.",
+      "notes": "Eslatmalar (Ixtiyoriy)",
+      "notesPlaceholder": "Qo'shimcha tushuntirishlar...",
+      "productSearch": "Mahsulot qidirish (nomi, shtrix-kod, SKU)...",
+      "productSelect": "Mahsulotni tanlang",
+      "createError": "Zaxira tuzatishini yaratishda xato yuz berdi",
+      "createButton": "Tuzatish yaratish"
+    },
+    "transfer": {
+      "title": "Zaxira o'tkazish",
+      "fromBranchRequired": "Manba filialni tanlash majburiy",
+      "toBranchRequired": "Maqsad filialni tanlash majburiy",
+      "sameBranch": "Manba va maqsad filial bir xil bo'lishi mumkin emas",
+      "itemProductRequired": "Mahsulot tanlash majburiy",
+      "itemQuantityRequired": "To'g'ri miqdorni kiriting",
+      "insufficientStock": "Zaxira yetarli emas",
+      "availableStock": "Mavjud zaxira",
+      "fromBranch": "Manba filial",
+      "toBranch": "Maqsad filial",
+      "fromBranchSelect": "Manba filialni tanlang",
+      "toBranchSelect": "Maqsad filialni tanlang",
+      "notes": "Eslatmalar (Ixtiyoriy)",
+      "notesPlaceholder": "O'tkazish eslatmalari...",
+      "items": "O'tkazish elementlari",
+      "addProduct": "+ Mahsulot qo'shish",
+      "item": "Element",
+      "remove": "O'chirish",
+      "productSearch": "Mahsulot qidirish (nomi, shtrix-kod, SKU)...",
+      "productSelect": "Mahsulotni tanlang",
+      "quantity": "Miqdor",
+      "createError": "Zaxira o'tkazishini yaratishda xato yuz berdi",
+      "createButton": "O'tkazish yaratish"
+    }
   },
   "pos": {
     "title": "POS ekrani",
@@ -127,7 +238,64 @@
     "saleNumber": "Kvitansiya raqami",
     "quickActions": "Tezkor amallar",
     "productList": "Mahsulotlar ro'yxati",
-    "selectBranch": "Filialni tanlang..."
+    "selectBranch": "Filialni tanlang...",
+    "paymentModal": {
+      "title": "To'lov",
+      "customer": "Mijoz",
+      "phone": "Tel",
+      "currentDebt": "Joriy qarz",
+      "anonymousCustomer": "Anonim mijoz",
+      "discount": "Chegirma",
+      "amount": "Summa (₺)",
+      "percentage": "Foiz (%)",
+      "discountAmount": "Chegirma",
+      "subtotal": "Oraliq summa",
+      "total": "Jami",
+      "paidAmountLabel": "To'langan summa",
+      "paidAmountNote": "To'liq to'lov qilingan deb hisoblanadi",
+      "creditWarning": "Kredit to'lovi uchun mijozni tanlash majburiy. Iltimos, POS ekranidan mijozni tanlang.",
+      "creditRequired": "Kredit to'lovi uchun mijozni tanlash majburiy!",
+      "splitPayment": "Bo'linadigan to'lov",
+      "completeButton": "To'lovni yakunlash"
+    },
+    "splitPaymentModal": {
+      "title": "Bo'linadigan to'lov",
+      "customer": "Mijoz",
+      "phone": "Tel",
+      "currentDebt": "Joriy qarz",
+      "anonymousCustomer": "Anonim mijoz",
+      "discount": "Chegirma",
+      "amount": "Summa (₺)",
+      "percentage": "Foiz (%)",
+      "discountAmount": "Chegirma",
+      "subtotal": "Oraliq summa",
+      "totalAmount": "Jami summa",
+      "paid": "To'langan",
+      "remaining": "Qolgan",
+      "paymentMethods": "To'lov usullari",
+      "addPayment": "+ To'lov qo'shish",
+      "payment": "To'lov",
+      "method": "Usul",
+      "cardType": "Karta turi",
+      "cardTypeSelect": "Tanlang",
+      "uzcard": "UzCard",
+      "humo": "Humo",
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "other": "Boshqa",
+      "amountLabel": "Summa",
+      "remove": "O'chirish",
+      "totalMismatch": "Jami to'lov summasi jami summaga teng bo'lishi kerak",
+      "creditWarning": "Kredit to'lovi uchun mijozni tanlash majburiy. Iltimos, POS ekranidan mijozni tanlang.",
+      "completeButton": "To'lovni yakunlash"
+    },
+    "customerSelector": {
+      "title": "Mijoz tanlash",
+      "anonymous": "Anonim mijoz",
+      "selectCustomer": "Mijozni tanlang",
+      "searchPlaceholder": "Mijoz qidirish...",
+      "noCustomers": "Mijozlar topilmadi"
+    }
   },
   "customers": {
     "title": "Mijoz boshqaruvi",
@@ -152,15 +320,35 @@
     "paymentDescription": "Tavsif (Ixtiyoriy)",
     "currentDebt": "Joriy qarz",
     "savePayment": "To'lovni saqlash",
+    "statistics": "Statistika",
+    "purchaseHistory": "Xarid tarixi",
     "transactionType": {
       "sale": "Sotuv",
       "payment": "To'lov",
       "adjustment": "Tuzatish"
     },
-    "noTransactions": "Tranzaksiya yozuvlari topilmadi"
+    "noTransactions": "Tranzaksiya yozuvlari topilmadi",
+    "form": {
+      "nameRequired": "Mijoz nomi majburiy",
+      "invalidEmail": "To'g'ri email manzilini kiriting",
+      "namePlaceholder": "Masalan: Ahmad Yuldashev",
+      "phonePlaceholder": "+90 555 123 4567",
+      "emailPlaceholder": "mijoz@example.com",
+      "addressPlaceholder": "Mijoz manzili",
+      "taxNumberPlaceholder": "Soliq raqami"
+    },
+    "paymentForm": {
+      "customer": "Mijoz",
+      "currentDebt": "Joriy qarz",
+      "amountRequired": "To'g'ri summani kiriting",
+      "amountPlaceholder": "0.00",
+      "descriptionPlaceholder": "To'lov tavsifi",
+      "saveButton": "To'lovni saqlash"
+    }
   },
   "sales": {
     "title": "Sotuv tarixi",
+    "subtitle": "Barcha sotuvlarni ko'rish, ularning tafsilotlarini o'rganish va qaytarish/bekor qilish amallarini bajarish",
     "saleNumber": "Kvitansiya raqami",
     "date": "Sana",
     "customer": "Mijoz",
@@ -170,17 +358,36 @@
     "cancel": "Bekor qilish",
     "invoice": "Hisob-faktura",
     "viewInvoice": "Hisob-fakturani ko'rish",
+    "statusLabels": {
+      "COMPLETED": "Yakunlangan",
+      "REFUNDED": "Qaytarilgan",
+      "PARTIALLY_REFUNDED": "Qisman qaytarilgan",
+      "CANCELLED": "Bekor qilingan"
+    },
     "refundModal": {
       "title": "Sotuvni qaytarish",
-      "fullRefund": "To'liq qaytarish",
-      "partialRefund": "Qisman qaytarish",
+      "description": "Qaytarish jarayoni: Qaytariladigan mahsulotlar va miqdorlarini tanlang. Qisman qaytarish amalga oshirishingiz mumkin. Qaytarilgan mahsulotlar omborga qaytadi.",
+      "itemsToRefund": "Qaytariladigan mahsulotlar",
+      "selectAll": "Barchasini tanlash",
+      "deselectAll": "Barchasini olib tashlash",
+      "product": "Mahsulot",
+      "sold": "Sotilgan",
+      "refundQuantity": "Qaytarish miqdori",
+      "unitPrice": "Birlik narxi",
       "refundAmount": "Qaytarish summasi",
-      "reason": "Qaytarish sababi",
-      "confirm": "Qaytarishni tasdiqlash"
-    }
+      "selectedItems": "Tanlangan mahsulotlar",
+      "totalRefundAmount": "Jami qaytarish summasi",
+      "refundButton": "Qaytarish",
+      "processing": "Ishlanmoqda..."
+    },
+    "cancelConfirm": "Bu sotuvni bekor qilmoqchimisiz? Bekor qilingan sotuvlar tiklanmaydi.",
+    "refundError": "Qaytarishda xato yuz berdi",
+    "cancelError": "Bekor qilishda xato yuz berdi",
+    "loadError": "Sotuvlarni yuklashda xato yuz berdi"
   },
   "reports": {
     "title": "Hisobotlar",
+    "subtitle": "Sotuv, kassa va zaxira hisobotlarini ko'rish",
     "endOfDay": "Kun oxiridagi kassa hisoboti",
     "monthEnd": "Oy oxiridagi hisobot",
     "cashReceived": "Naqd pul olingan",
@@ -188,7 +395,8 @@
     "totalRefunds": "Jami qaytarilgan",
     "totalCash": "Jami kassa",
     "selectMonth": "Oyni tanlang",
-    "selectDate": "Sanani tanlang"
+    "selectDate": "Sanani tanlang",
+    "loadError": "Hisobotni yuklashda xato yuz berdi"
   },
   "navigation": {
     "dashboard": "Boshqaruv paneli",
@@ -203,6 +411,7 @@
   },
   "users": {
     "title": "Foydalanuvchi boshqaruvi",
+    "subtitle": "Foydalanuvchilarni yaratish, tahrirlash va ularning ruxsatlarini boshqarish",
     "create": "Yangi foydalanuvchi",
     "edit": "Foydalanuvchini tahrirlash",
     "username": "Foydalanuvchi nomi",
@@ -220,6 +429,80 @@
       "MANAGER": "Menejer",
       "USER": "Foydalanuvchi",
       "CASHIER": "Kassir"
+    },
+    "form": {
+      "usernameRequired": "Foydalanuvchi nomi majburiy",
+      "usernameLength": "Foydalanuvchi nomi 3 dan 50 gacha belgidan iborat bo'lishi kerak",
+      "usernameInvalid": "Foydalanuvchi nomi faqat harf, raqam va pastki chiziqdan iborat bo'lishi mumkin",
+      "emailRequired": "Email majburiy",
+      "emailInvalid": "To'g'ri email manzilini kiriting",
+      "passwordRequired": "Parol majburiy",
+      "passwordMinLength": "Parol kamida 6 belgidan iborat bo'lishi kerak",
+      "fullNameRequired": "To'liq ism majburiy",
+      "fullNameLength": "To'liq ism 2 dan 100 gacha belgidan iborat bo'lishi kerak",
+      "passwordLabel": "Parol",
+      "passwordLabelEdit": "Yangi parol (O'zgartirmaslik uchun bo'sh qoldiring)",
+      "passwordPlaceholder": "Kamida 6 belgi",
+      "usernamePlaceholder": "Masalan: ahmad_yuldashev",
+      "emailPlaceholder": "misol@email.com",
+      "fullNamePlaceholder": "Masalan: Ahmad Yuldashev",
+      "branchSelect": "Filialni tanlang (Ixtiyoriy)",
+      "activeUser": "Faol foydalanuvchi"
+    },
+    "permissions": {
+      "title": "Ruxsatlar boshqaruvi",
+      "search": "Ruxsatlarni qidirish...",
+      "filterByModule": "Modul bo'yicha filtrlash",
+      "allModules": "Barcha modullar",
+      "selectedCount": "Tanlangan ruxsatlar",
+      "noPermissions": "Ruxsatlar hali aniqlanmagan",
+      "seedMessage": "Iltimos, ma'lumotlar bazasini seed qiling: npx prisma db seed",
+      "loadError": "Ruxsatlarni yuklashda xato yuz berdi",
+      "userLoadError": "Foydalanuvchi ruxsatlarini yuklashda xato yuz berdi",
+      "updateError": "Ruxsatlarni yangilashda xato yuz berdi",
+      "modules": {
+        "users": "Foydalanuvchi boshqaruvi",
+        "branches": "Filial boshqaruvi",
+        "products": "Mahsulot boshqaruvi",
+        "inventory": "Zaxira boshqaruvi",
+        "sales": "Sotuv boshqaruvi",
+        "customers": "Mijoz boshqaruvi",
+        "reports": "Hisobotlar",
+        "dashboard": "Boshqaruv paneli",
+        "pos": "POS (Sotish nuqtasi)"
+      },
+      "actions": {
+        "view": "Ko'rish",
+        "create": "Yaratish",
+        "update": "Yangilash",
+        "delete": "O'chirish",
+        "manage_permissions": "Ruxsatlar boshqaruvi",
+        "use": "Ishlatish",
+        "refund": "Qaytarish"
+      },
+      "cancel": "Bekor qilish"
     }
+  },
+  "invoice": {
+    "loadError": "Hisob-fakturani yuklashda xato yuz berdi",
+    "print": "Chop etish",
+    "download": "Yuklab olish"
+  },
+  "customerStatistics": {
+    "loadError": "Statistikani yuklashda xato yuz berdi"
+  },
+  "customerPurchaseHistory": {
+    "loadError": "Xarid tarixini yuklashda xato yuz berdi"
+  },
+  "errors": {
+    "deleteUser": "Foydalanuvchini o'chirishda xato yuz berdi",
+    "deleteCustomer": "Mijozni o'chirishda xato yuz berdi",
+    "deleteProduct": "Mahsulotni o'chirishda xato yuz berdi",
+    "loadUsers": "Foydalanuvchilarni yuklashda xato yuz berdi",
+    "loadCustomers": "Mijozlarni yuklashda xato yuz berdi",
+    "loadProducts": "Mahsulotlarni yuklashda xato yuz berdi",
+    "loadInventory": "Zaxira ma'lumotlarini yuklashda xato yuz berdi",
+    "savePayment": "To'lovni saqlashda xato yuz berdi",
+    "createdAt": "Yaratilgan"
   }
 }

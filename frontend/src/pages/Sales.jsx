@@ -8,7 +8,7 @@ const Sales = () => {
   return (
     <PageLayout
       title={t('sales.title')}
-      description="Tüm satışları görüntüleyin, detaylarını inceleyin ve iade/iptal işlemleri yapın"
+      description={t('sales.subtitle')}
     >
       <SalesList />
     </PageLayout>

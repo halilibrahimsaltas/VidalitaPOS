@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Input from '../common/Input';
 import Button from '../common/Button';
 
 const CustomerForm = ({ customer, onSubmit, onCancel, isLoading }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -42,11 +44,11 @@ const CustomerForm = ({ customer, onSubmit, onCancel, isLoading }) => {
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Müşteri adı gereklidir';
+      newErrors.name = t('customers.form.nameRequired');
     }
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Geçerli bir email adresi girin';
+      newErrors.email = t('customers.form.invalidEmail');
     }
 
     setErrors(newErrors);
@@ -63,53 +65,53 @@ const CustomerForm = ({ customer, onSubmit, onCancel, isLoading }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        label="Müşteri Adı"
+        label={t('customers.name')}
         name="name"
         value={formData.name}
         onChange={handleChange}
         error={errors.name}
         required
-        placeholder="Örn: Ahmet Yılmaz"
+        placeholder={t('customers.form.namePlaceholder')}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
-          label="Telefon"
+          label={t('customers.phone')}
           name="phone"
           type="tel"
           value={formData.phone}
           onChange={handleChange}
           error={errors.phone}
-          placeholder="+90 555 123 4567"
+          placeholder={t('customers.form.phonePlaceholder')}
         />
 
         <Input
-          label="Email"
+          label={t('customers.email')}
           name="email"
           type="email"
           value={formData.email}
           onChange={handleChange}
           error={errors.email}
-          placeholder="musteri@example.com"
+          placeholder={t('customers.form.emailPlaceholder')}
         />
       </div>
 
       <Input
-        label="Adres"
+        label={t('customers.address')}
         name="address"
         value={formData.address}
         onChange={handleChange}
         error={errors.address}
-        placeholder="Müşteri adresi"
+        placeholder={t('customers.form.addressPlaceholder')}
       />
 
       <Input
-        label="Vergi Numarası"
+        label={t('customers.taxNumber')}
         name="taxNumber"
         value={formData.taxNumber}
         onChange={handleChange}
         error={errors.taxNumber}
-        placeholder="Vergi numarası"
+        placeholder={t('customers.form.taxNumberPlaceholder')}
       />
 
       <div className="flex items-center">
@@ -122,16 +124,16 @@ const CustomerForm = ({ customer, onSubmit, onCancel, isLoading }) => {
           className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
         />
         <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
-          Aktif
+          {t('common.active')}
         </label>
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
         <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>
-          İptal
+          {t('common.cancel')}
         </Button>
         <Button type="submit" variant="primary" disabled={isLoading}>
-          {isLoading ? 'Kaydediliyor...' : customer ? 'Güncelle' : 'Oluştur'}
+          {isLoading ? t('common.saving') : customer ? t('common.update') : t('common.create')}
         </Button>
       </div>
     </form>

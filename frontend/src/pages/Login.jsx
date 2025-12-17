@@ -30,27 +30,48 @@ const Login = () => {
       // Small delay to ensure state is updated
       setTimeout(() => {
         // Determine redirect path based on user role and permissions
-        // Cashier should go to POS, others to dashboard
         const userData = JSON.parse(localStorage.getItem('user') || '{}');
         const permissions = userData.permissions || [];
         
         console.log('Redirecting user:', {
           role: userData.role,
           permissions: permissions,
+          permissionsCount: permissions.length,
           hasPosUse: permissions.includes('pos.use'),
           hasDashboardView: permissions.includes('dashboard.view'),
         });
 
+        // Admin always goes to dashboard
+        if (userData.role === 'ADMIN') {
+          navigate('/dashboard', { replace: true });
+          return;
+        }
+
+        // Check if user has any permissions at all
+        if (!permissions || permissions.length === 0) {
+          console.error('⚠️ User has no permissions assigned. Please contact administrator.');
+          setError('Kullanıcınızın yetkileri atanmamış. Lütfen yönetici ile iletişime geçin.');
+          // Still allow login but redirect to dashboard (admin can fix permissions)
+          navigate('/dashboard', { replace: true });
+          return;
+        }
+
+        // Cashier with POS permission goes to POS
         if (userData.role === 'CASHIER' && permissions.includes('pos.use')) {
           navigate('/pos', { replace: true });
-        } else if (permissions.includes('dashboard.view')) {
+        } 
+        // Users with dashboard permission go to dashboard
+        else if (permissions.includes('dashboard.view')) {
           navigate('/dashboard', { replace: true });
-        } else if (permissions.includes('pos.use')) {
+        } 
+        // Users with POS permission go to POS
+        else if (permissions.includes('pos.use')) {
           navigate('/pos', { replace: true });
-        } else {
-          // Fallback: try to find first available page
-          console.warn('No suitable page found, redirecting to POS');
-          navigate('/pos', { replace: true });
+        } 
+        // Fallback: go to dashboard (admin can assign proper permissions)
+        else {
+          console.warn('⚠️ No suitable page found for user permissions. Redirecting to dashboard.');
+          navigate('/dashboard', { replace: true });
         }
       }, 100);
     } else {

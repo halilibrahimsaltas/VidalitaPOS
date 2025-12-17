@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProducts, useDeleteProduct } from '../../hooks/useProducts';
 import { useRootCategories } from '../../hooks/useCategories';
 import { productService } from '../../services/product.service';
@@ -8,6 +9,7 @@ import Select from '../common/Select';
 import Modal from '../common/Modal';
 
 const ProductList = ({ onEdit }) => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -31,19 +33,19 @@ const ProductList = ({ onEdit }) => {
   const deleteProduct = useDeleteProduct();
 
   const handleDelete = async (id, name) => {
-    if (window.confirm(`"${name}" ürününü silmek istediğinize emin misiniz?`)) {
+    if (window.confirm(`"${name}" ${t('products.deleteConfirm')}`)) {
       try {
         await deleteProduct.mutateAsync(id);
-        alert('Ürün başarıyla silindi');
+        alert(t('common.success'));
       } catch (error) {
-        alert(error.response?.data?.message || 'Ürün silinirken bir hata oluştu');
+        alert(error.response?.data?.message || t('errors.deleteProduct'));
       }
     }
   };
 
   // Flatten categories for select
   const flattenCategories = (cats) => {
-    let result = [{ value: '', label: 'Tüm Kategoriler' }];
+    let result = [{ value: '', label: t('products.allCategories') }];
     cats.forEach((cat) => {
       result.push({
         value: cat.id,

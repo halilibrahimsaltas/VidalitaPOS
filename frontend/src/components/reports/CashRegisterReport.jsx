@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
 import { useCashRegisterReport } from '../../hooks/useReports';
 import { useBranches } from '../../hooks/useBranches';
 import Select from '../common/Select';
 import Button from '../common/Button';
 
 const CashRegisterReport = () => {
+  const { t } = useTranslation();
+  const { user } = useAuth();
   const { data: branchesData } = useBranches({ limit: 100, isActive: true });
   const branches = branchesData?.data?.branches || [];
 
@@ -44,7 +48,7 @@ const CashRegisterReport = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Rapor yükleniyor...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -52,7 +56,7 @@ const CashRegisterReport = () => {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-        Rapor yüklenirken bir hata oluştu
+        {t('reports.loadError')}
       </div>
     );
   }
@@ -131,12 +135,19 @@ const CashRegisterReport = () => {
 
         {/* Report Header */}
         <div className="border-b border-gray-200 pb-4 mb-6">
+          <div className="text-center mb-4">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Vidalita</h1>
+            <h2 className="text-lg font-semibold text-gray-700">Gün Sonu Kasa Raporu</h2>
+          </div>
           <div className="text-sm text-gray-600 space-y-1">
             <p><strong>Tarih:</strong> {formatDate(filters.startDate)} - {formatDate(filters.endDate)}</p>
             {report.period?.branch && (
               <p><strong>Şube:</strong> {report.period.branch.name}</p>
             )}
             <p><strong>Rapor Tarihi:</strong> {new Date().toLocaleString('tr-TR')}</p>
+            {user && (
+              <p><strong>Alıcı Personel:</strong> {user.fullName || user.username}</p>
+            )}
           </div>
         </div>
 

@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCustomers, useDeleteCustomer } from '../../hooks/useCustomers';
 import Button from '../common/Button';
 import Input from '../common/Input';
 
 const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, onViewStatistics, onViewPurchaseHistory }) => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [isActiveFilter, setIsActiveFilter] = useState('');
@@ -18,12 +20,12 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
   const deleteCustomer = useDeleteCustomer();
 
   const handleDelete = async (id, name) => {
-    if (window.confirm(`"${name}" müşterisini silmek istediğinize emin misiniz?`)) {
+    if (window.confirm(`"${name}" ${t('customers.deleteConfirm')}`)) {
       try {
         await deleteCustomer.mutateAsync(id);
-        alert('Müşteri başarıyla silindi');
+        alert(t('common.success'));
       } catch (error) {
-        alert(error.response?.data?.message || 'Müşteri silinirken bir hata oluştu');
+        alert(error.response?.data?.message || t('errors.deleteCustomer'));
       }
     }
   };
@@ -31,7 +33,7 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Yükleniyor...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -39,7 +41,7 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-        Müşteriler yüklenirken bir hata oluştu
+        {t('errors.loadCustomers')}
       </div>
     );
   }

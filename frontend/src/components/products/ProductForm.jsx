@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Input from '../common/Input';
 import Select from '../common/Select';
 import Button from '../common/Button';
@@ -18,6 +19,7 @@ const getImageUrl = (url) => {
 };
 
 const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
+  const { t } = useTranslation();
   const { data: categoriesData, refetch: refetchCategories } = useRootCategories();
   const categories = categoriesData?.data || [];
   const createCategory = useCreateCategory();
@@ -67,7 +69,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
       if (!product || existingBarcodeProduct.data.id !== product.id) {
         setErrors((prev) => ({
           ...prev,
-          barcode: `Bu barkod numarası zaten kullanılıyor. Ürün: ${existingBarcodeProduct.data.name}`,
+          barcode: `${t('products.form.barcodeDuplicate')}. ${t('products.name')}: ${existingBarcodeProduct.data.name}`,
         }));
       }
     } else if (shouldCheckBarcode && !existingBarcodeProduct) {
@@ -128,12 +130,12 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
           if (result.data?.data) {
             setErrors((prev) => ({
               ...prev,
-              barcode: `Bu barkod numarası zaten kullanılıyor. Ürün: ${result.data.data.name}`,
+              barcode: `${t('products.form.barcodeDuplicate')}. Ürün: ${result.data.data.name}`,
             }));
           } else {
             setErrors((prev) => {
               const newErrors = { ...prev };
-              if (newErrors.barcode?.includes('kullanılıyor')) {
+              if (newErrors.barcode?.includes(t('products.form.barcodeDuplicate'))) {
                 delete newErrors.barcode;
               }
               return newErrors;
@@ -143,7 +145,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
           // Barcode doesn't exist (404), which is good
           setErrors((prev) => {
             const newErrors = { ...prev };
-            if (newErrors.barcode?.includes('kullanılıyor')) {
+            if (newErrors.barcode?.includes(t('products.form.barcodeDuplicate'))) {
               delete newErrors.barcode;
             }
             return newErrors;
@@ -181,7 +183,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        image: error.response?.data?.message || 'Resim yüklenirken bir hata oluştu',
+        image: error.response?.data?.message || t('products.form.imageUploadError'),
       }));
     } finally {
       setIsUploading(false);
@@ -269,40 +271,40 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
-          label="Ürün Adı"
+          label={t('products.name')}
           name="name"
           value={formData.name}
           onChange={handleChange}
           error={errors.name}
           required
-          placeholder="Örn: Coca Cola 330ml"
+          placeholder={t('products.form.namePlaceholder')}
         />
 
         <Input
-          label="Barkod"
+          label={t('products.barcode')}
           name="barcode"
           value={formData.barcode}
           onChange={handleChange}
           error={errors.barcode}
-          placeholder="Otomatik oluşturulacak"
+          placeholder={t('products.form.barcodePlaceholder')}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
-          label="SKU"
+          label={t('products.sku')}
           name="sku"
           value={formData.sku}
           onChange={handleChange}
           error={errors.sku}
-          placeholder="Stok kodu"
+          placeholder={t('products.form.skuPlaceholder')}
         />
 
         <div className="flex-1">
           <div className="flex items-end gap-2">
             <div className="flex-1">
               <Select
-                label="Kategori"
+                label={t('products.category')}
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleChange}
@@ -316,7 +318,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
               onClick={() => setIsCategoryModalOpen(true)}
               className="mb-0"
             >
-              + Yeni
+              {t('products.form.newCategory')}
             </Button>
           </div>
         </div>
@@ -325,7 +327,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Input
-            label="Satış Fiyatı"
+            label={t('products.price')}
             name="price"
             type="number"
             step="0.01"
@@ -334,13 +336,13 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
             onChange={handleChange}
             error={errors.price}
             required
-            placeholder="0.00"
+            placeholder={t('products.form.pricePlaceholder')}
           />
         </div>
 
         <div>
           <Input
-            label="Maliyet Fiyatı"
+            label={t('products.costPrice')}
             name="costPrice"
             type="number"
             step="0.01"
@@ -348,40 +350,40 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
             value={formData.costPrice}
             onChange={handleChange}
             error={errors.costPrice}
-            placeholder="0.00"
+            placeholder={t('products.form.costPricePlaceholder')}
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Select
-          label="Para Birimi"
+          label={t('products.currency')}
           name="currency"
           value={formData.currency}
           onChange={handleChange}
           error={errors.currency}
           options={[
-            { value: 'UZS', label: 'UZS - O\'zbek so\'mi' },
-            { value: 'USD', label: 'USD - US Dollar' },
-            { value: 'TRY', label: 'TRY - Türk Lirası' },
-            { value: 'EUR', label: 'EUR - Euro' },
+            { value: 'UZS', label: t('products.currencyOptions.UZS') },
+            { value: 'USD', label: t('products.currencyOptions.USD') },
+            { value: 'TRY', label: t('products.currencyOptions.TRY') },
+            { value: 'EUR', label: t('products.currencyOptions.EUR') },
           ]}
         />
       </div>
 
       <Input
-        label="Açıklama"
+        label={t('products.description')}
         name="description"
         value={formData.description}
         onChange={handleChange}
         error={errors.description}
-        placeholder="Ürün açıklaması"
+        placeholder={t('products.form.descriptionPlaceholder')}
       />
 
       {/* Image Upload */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
-          Ürün Görseli
+          {t('products.imageUrl')}
         </label>
         
         {/* Image Preview */}
@@ -407,7 +409,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 disabled:opacity-50"
             />
             {isUploading && (
-              <p className="mt-1 text-sm text-gray-500">Yükleniyor...</p>
+              <p className="mt-1 text-sm text-gray-500">{t('common.uploading')}</p>
             )}
             {errors.image && (
               <p className="mt-1 text-sm text-red-600">{errors.image}</p>
@@ -416,57 +418,57 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
         </div>
 
         {/* Or URL Input */}
-        <div className="text-sm text-gray-500 mb-2">veya</div>
+        <div className="text-sm text-gray-500 mb-2">{t('common.or')}</div>
         <Input
-          label="Görsel URL"
+          label={t('products.imageUrl')}
           name="imageUrl"
           type="url"
           value={formData.imageUrl}
           onChange={handleImageUrlChange}
           error={errors.imageUrl}
-          placeholder="https://example.com/image.jpg"
+          placeholder={t('products.form.imageUrlPlaceholder')}
         />
       </div>
 
       {/* Stock Information */}
       <div className="border-t pt-4 mt-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Stok Bilgisi</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">{t('products.form.stockInfo')}</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Select
-            label="Şube"
+            label={t('inventory.branch')}
             name="branchId"
             value={formData.branchId}
             onChange={handleChange}
             error={errors.branchId}
             options={[
-              { value: '', label: 'Şube Seçiniz (Opsiyonel)' },
+              { value: '', label: t('products.form.branchSelect') },
               ...branches.map((b) => ({ value: b.id, label: b.name })),
             ]}
           />
 
           <Input
-            label="Stok Miktarı"
+            label={t('inventory.quantity')}
             name="quantity"
             type="number"
             min="0"
             value={formData.quantity}
             onChange={handleChange}
             error={errors.quantity}
-            placeholder="0"
+            placeholder={t('products.form.quantityPlaceholder')}
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <Input
-            label="Minimum Stok Seviyesi"
+            label={t('inventory.minStock')}
             name="minStockLevel"
             type="number"
             min="0"
             value={formData.minStockLevel}
             onChange={handleChange}
             error={errors.minStockLevel}
-            placeholder="0"
+            placeholder={t('products.form.minStockPlaceholder')}
           />
 
           <Input
@@ -477,7 +479,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
             value={formData.maxStockLevel}
             onChange={handleChange}
             error={errors.maxStockLevel}
-            placeholder="Sınırsız"
+            placeholder={t('products.form.maxStockPlaceholder')}
           />
         </div>
       </div>
@@ -492,16 +494,16 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
           className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
         />
         <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
-          Aktif
+          {t('common.active')}
         </label>
       </div>
 
       <div className="flex justify-end space-x-3 pt-4">
         <Button type="button" variant="secondary" onClick={onCancel} disabled={isLoading}>
-          İptal
+          {t('common.cancel')}
         </Button>
         <Button type="submit" variant="primary" disabled={isLoading}>
-          {isLoading ? 'Kaydediliyor...' : product ? 'Güncelle' : 'Oluştur'}
+          {isLoading ? t('common.saving') : product ? t('common.update') : t('common.create')}
         </Button>
       </div>
     </form>
@@ -514,14 +516,14 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
         setNewCategoryName('');
         setNewCategoryParentId('');
       }}
-      title="Yeni Kategori Ekle"
+      title={t('products.form.newCategoryTitle')}
       size="md"
     >
       <form
         onSubmit={async (e) => {
           e.preventDefault();
           if (!newCategoryName.trim()) {
-            alert('Kategori adı gereklidir');
+            alert(t('products.form.categoryNameRequired'));
             return;
           }
 
@@ -540,7 +542,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
             setNewCategoryName('');
             setNewCategoryParentId('');
           } catch (error) {
-            alert(error.response?.data?.message || 'Kategori oluşturulurken bir hata oluştu');
+            alert(error.response?.data?.message || t('products.form.categoryCreateError'));
           } finally {
             setIsCreatingCategory(false);
           }
@@ -548,18 +550,18 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
         className="space-y-4"
       >
         <Input
-          label="Kategori Adı"
+          label={t('products.category')}
           value={newCategoryName}
           onChange={(e) => setNewCategoryName(e.target.value)}
-          placeholder="Örn: İçecekler"
+          placeholder={t('products.form.categoryNamePlaceholder')}
           required
         />
         <Select
-          label="Üst Kategori (Opsiyonel)"
+          label={t('products.form.parentCategory')}
           value={newCategoryParentId}
           onChange={(e) => setNewCategoryParentId(e.target.value)}
           options={[
-            { value: '', label: 'Kök kategori (üst kategori yok)' },
+            { value: '', label: t('products.form.rootCategory') },
             ...categoryOptions,
           ]}
         />
@@ -574,10 +576,10 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
             }}
             disabled={isCreatingCategory}
           >
-            İptal
+            {t('common.cancel')}
           </Button>
           <Button type="submit" variant="primary" disabled={isCreatingCategory}>
-            {isCreatingCategory ? 'Oluşturuluyor...' : 'Oluştur'}
+            {isCreatingCategory ? t('products.form.creating') : t('common.create')}
           </Button>
         </div>
       </form>

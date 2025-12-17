@@ -86,7 +86,7 @@ const Customers = () => {
       }
       handleClose();
     } catch (error) {
-      alert(error.response?.data?.message || 'Bir hata oluştu');
+      alert(error.response?.data?.message || t('common.errorOccurred'));
     }
   };
 
@@ -99,7 +99,7 @@ const Customers = () => {
       handleClose();
       alert('Ödeme başarıyla kaydedildi');
     } catch (error) {
-      alert(error.response?.data?.message || 'Ödeme kaydedilirken bir hata oluştu');
+      alert(error.response?.data?.message || t('errors.savePayment'));
     }
   };
 
