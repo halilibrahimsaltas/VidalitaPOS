@@ -625,16 +625,9 @@ npm run dev
    - [ ] Email report delivery
    - [ ] Advanced analytics
 
-6. **Mobile App (Future)**
-   - [ ] React Native app
-   - [ ] Mobile POS
-   - [ ] Inventory management on mobile
 
 ### Uzun Vadeli
-7. **Backend Localization**
-   - [ ] Backend error messages i18n
-   - [ ] Database content localization
-   - [ ] API response localization
+
 
 8. **Advanced Features**
    - [ ] Multi-warehouse support

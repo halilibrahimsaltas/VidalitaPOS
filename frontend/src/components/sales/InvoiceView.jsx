@@ -58,13 +58,6 @@ const InvoiceView = ({ saleId, onClose }) => {
   // Invoice Content Component
   const InvoiceContent = ({ copyType = 'customer' }) => (
     <div className={`invoice-copy invoice-${copyType} bg-white border-2 border-gray-300 rounded-lg p-4 print:p-3`}>
-      {/* Copy Type Label */}
-      <div className="text-center mb-2 print:mb-1">
-        <span className="inline-block px-3 py-1 bg-gray-800 text-white text-xs font-bold rounded print:text-[10px] print:px-2 print:py-0.5">
-          {copyType === 'customer' ? 'MÜŞTERİ' : 'KASA'}
-        </span>
-      </div>
-
       {/* Header */}
       <div className="text-center border-b-2 border-gray-300 pb-3 mb-3 print:pb-2 print:mb-2">
         <h1 className="text-xl font-bold text-gray-900 mb-1 print:text-base">Vidalita</h1>
@@ -223,9 +216,9 @@ const InvoiceView = ({ saleId, onClose }) => {
       </div>
 
       {/* Invoice Content - Two Copies */}
-      <div id="invoice-content" className="invoice-container max-w-4xl mx-auto print:max-w-full">
+      <div id="invoice-content" className="invoice-container max-w-4xl mx-auto print:max-w-full print:mx-0">
         {/* Screen View - Show both copies stacked */}
-        <div className="space-y-4 print:space-y-2">
+        <div className="space-y-4 print:space-y-0 print:m-0 print:p-0">
           <InvoiceContent copyType="customer" />
           <InvoiceContent copyType="cashier" />
         </div>
@@ -235,7 +228,29 @@ const InvoiceView = ({ saleId, onClose }) => {
         @media print {
           @page {
             size: A4;
-            margin: 0.5cm;
+            margin: 0.2cm;
+          }
+          
+          html {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100% !important;
+          }
+          
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100% !important;
+            overflow: visible !important;
+            position: relative !important;
+          }
+          
+          * {
+            box-sizing: border-box;
+          }
+          
+          body > *:not(.invoice-container) {
+            display: none !important;
           }
           
           body * {
@@ -244,35 +259,66 @@ const InvoiceView = ({ saleId, onClose }) => {
           
           .invoice-container,
           .invoice-container * {
-            visibility: visible;
+            visibility: visible !important;
           }
           
           .invoice-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 0;
-            margin: 0;
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            transform: none !important;
           }
           
           .invoice-container > div {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5cm;
-            width: 100%;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.2cm !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
           }
           
           .invoice-copy {
-            page-break-inside: avoid;
-            break-inside: avoid;
-            width: 100%;
-            margin: 0;
-            padding: 0.4cm !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            width: 100% !important;
+            margin: 0 !important;
+            margin-top: 0 !important;
+            padding: 0.3cm !important;
+            border: 1px solid #ccc !important;
+          }
+          
+          .invoice-copy:first-child {
+            margin-top: 0 !important;
+            padding-top: 0.3cm !important;
           }
           
           .print\\:hidden {
             display: none !important;
+          }
+          
+          .print\\:max-w-full {
+            max-width: 100% !important;
+          }
+          
+          .print\\:mx-0 {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+          }
+          
+          .print\\:m-0 {
+            margin: 0 !important;
+          }
+          
+          .print\\:p-0 {
+            padding: 0 !important;
+          }
+          
+          .print\\:space-y-0 > * + * {
+            margin-top: 0.2cm !important;
           }
         }
         
