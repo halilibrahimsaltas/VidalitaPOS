@@ -12,6 +12,7 @@ import Customers from './pages/Customers';
 import Reports from './pages/Reports';
 import Users from './pages/Users';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import PermissionRoute from './components/common/PermissionRoute';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,79 +27,84 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router>
+        <Router
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                <PermissionRoute permission="dashboard.view">
                   <Dashboard />
-                </ProtectedRoute>
+                </PermissionRoute>
               }
             />
             <Route
               path="/branches"
               element={
-                <ProtectedRoute>
+                <PermissionRoute permission="branches.view" requireAdmin={true}>
                   <Branches />
-                </ProtectedRoute>
+                </PermissionRoute>
               }
             />
             <Route
               path="/products"
               element={
-                <ProtectedRoute>
+                <PermissionRoute permission="products.view">
                   <Products />
-                </ProtectedRoute>
+                </PermissionRoute>
               }
             />
             <Route
               path="/inventory"
               element={
-                <ProtectedRoute>
+                <PermissionRoute permission="inventory.view">
                   <Inventory />
-                </ProtectedRoute>
+                </PermissionRoute>
               }
             />
             <Route
               path="/pos"
               element={
-                <ProtectedRoute>
+                <PermissionRoute permission="pos.use">
                   <POS />
-                </ProtectedRoute>
+                </PermissionRoute>
               }
             />
             <Route
               path="/sales"
               element={
-                <ProtectedRoute>
+                <PermissionRoute permission="sales.view">
                   <Sales />
-                </ProtectedRoute>
+                </PermissionRoute>
               }
             />
             <Route
               path="/customers"
               element={
-                <ProtectedRoute>
+                <PermissionRoute permission="customers.view">
                   <Customers />
-                </ProtectedRoute>
+                </PermissionRoute>
               }
             />
             <Route
               path="/reports"
               element={
-                <ProtectedRoute>
+                <PermissionRoute permission="reports.view">
                   <Reports />
-                </ProtectedRoute>
+                </PermissionRoute>
               }
             />
             <Route
               path="/users"
               element={
-                <ProtectedRoute>
+                <PermissionRoute permission="users.view" requireAdmin={true}>
                   <Users />
-                </ProtectedRoute>
+                </PermissionRoute>
               }
             />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

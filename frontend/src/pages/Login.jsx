@@ -27,7 +27,32 @@ const Login = () => {
     const result = await login(username, password);
 
     if (result.success) {
-      navigate('/dashboard', { replace: true });
+      // Small delay to ensure state is updated
+      setTimeout(() => {
+        // Determine redirect path based on user role and permissions
+        // Cashier should go to POS, others to dashboard
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        const permissions = userData.permissions || [];
+        
+        console.log('Redirecting user:', {
+          role: userData.role,
+          permissions: permissions,
+          hasPosUse: permissions.includes('pos.use'),
+          hasDashboardView: permissions.includes('dashboard.view'),
+        });
+
+        if (userData.role === 'CASHIER' && permissions.includes('pos.use')) {
+          navigate('/pos', { replace: true });
+        } else if (permissions.includes('dashboard.view')) {
+          navigate('/dashboard', { replace: true });
+        } else if (permissions.includes('pos.use')) {
+          navigate('/pos', { replace: true });
+        } else {
+          // Fallback: try to find first available page
+          console.warn('No suitable page found, redirecting to POS');
+          navigate('/pos', { replace: true });
+        }
+      }, 100);
     } else {
       setError(result.message || t('auth.loginFailed'));
     }

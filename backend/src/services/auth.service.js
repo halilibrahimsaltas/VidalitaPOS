@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../config/database.js';
 import { config } from '../config/database.js';
 import { ApiError } from '../utils/ApiError.js';
+import { permissionRepository } from '../repositories/permission.repository.js';
 
 const generateTokens = (user) => {
   const payload = {
@@ -107,8 +108,23 @@ export const login = async (username, password) => {
     },
   });
 
+  // Get user permissions (for non-admin users)
+  let permissions = [];
+  if (user.role !== 'ADMIN') {
+    permissions = await permissionRepository.getUserPermissionCodes(user.id);
+  } else {
+    // Admin has all permissions - get all permission codes
+    const allPerms = await prisma.permission.findMany({
+      select: { code: true },
+    });
+    permissions = allPerms.map(p => p.code);
+  }
+
   return {
-    user: userWithBranch,
+    user: {
+      ...userWithBranch,
+      permissions,
+    },
     accessToken,
     refreshToken,
   };

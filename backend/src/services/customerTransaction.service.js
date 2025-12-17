@@ -5,23 +5,41 @@ import { prisma } from '../config/database.js';
 
 export const customerTransactionService = {
   getCustomerTransactions: async (customerId, filters) => {
-    // Verify customer exists
-    const customer = await customerRepository.findById(customerId);
-    if (!customer) {
-      throw new ApiError(404, 'Customer not found');
-    }
+    try {
+      // Verify customer exists
+      const customer = await customerRepository.findById(customerId);
+      if (!customer) {
+        throw new ApiError(404, 'Customer not found');
+      }
 
-    return customerTransactionRepository.findByCustomer(customerId, filters);
+      return customerTransactionRepository.findByCustomer(customerId, filters);
+    } catch (error) {
+      console.error('Error in getCustomerTransactions:', error);
+      throw error;
+    }
   },
 
   getCustomerDebt: async (customerId) => {
-    const customer = await customerRepository.findById(customerId);
-    if (!customer) {
-      throw new ApiError(404, 'Customer not found');
-    }
+    try {
+      const customer = await customerRepository.findById(customerId);
+      if (!customer) {
+        throw new ApiError(404, 'Customer not found');
+      }
 
-    const debt = await customerTransactionRepository.getCustomerDebt(customerId);
-    return { customer, debt };
+      const debt = await customerTransactionRepository.getCustomerDebt(customerId);
+      return { 
+        customer: {
+          id: customer.id,
+          name: customer.name,
+          phone: customer.phone,
+          email: customer.email,
+        }, 
+        debt: parseFloat(debt) || 0 
+      };
+    } catch (error) {
+      console.error('Error in getCustomerDebt:', error);
+      throw error;
+    }
   },
 
   recordPayment: async (paymentData, userId) => {

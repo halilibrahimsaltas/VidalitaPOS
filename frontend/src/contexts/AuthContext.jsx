@@ -22,12 +22,19 @@ export const AuthProvider = ({ children }) => {
 
     if (accessToken && userData) {
       try {
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        // Ensure permissions are loaded from localStorage
+        const storedPermissions = localStorage.getItem('permissions');
+        if (storedPermissions) {
+          parsedUser.permissions = JSON.parse(storedPermissions);
+        }
+        setUser(parsedUser);
       } catch (error) {
         console.error('Error parsing user data:', error);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
+        localStorage.removeItem('permissions');
       }
     }
     setLoading(false);
@@ -38,16 +45,57 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.login(username, password);
       const { user: userData, accessToken, refreshToken } = response.data;
 
+      // Validate that we received tokens
+      if (!accessToken) {
+        console.error('No access token received from server');
+        return {
+          success: false,
+          message: 'Login failed: No access token received',
+        };
+      }
+
+      // Store tokens and user data
       localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
       localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Store permissions separately for quick access
+      if (userData.permissions) {
+        localStorage.setItem('permissions', JSON.stringify(userData.permissions));
+      } else {
+        // If no permissions in response, try to get them from user object
+        const permissions = userData.permissions || [];
+        localStorage.setItem('permissions', JSON.stringify(permissions));
+      }
 
       setUser(userData);
+      
+      // Verify token is stored
+      const storedToken = localStorage.getItem('accessToken');
+      if (!storedToken) {
+        console.error('Failed to store access token');
+        return {
+          success: false,
+          message: 'Login failed: Could not store token',
+        };
+      }
+
+      // Debug: Log user permissions
+      console.log('Login successful:', {
+        username: userData.username,
+        role: userData.role,
+        permissions: userData.permissions,
+        permissionsCount: userData.permissions?.length || 0,
+      });
+
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error);
       return {
         success: false,
-        message: error.response?.data?.message || 'Login failed',
+        message: error.response?.data?.message || error.message || 'Login failed',
       };
     }
   };
@@ -61,8 +109,23 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('permissions');
       setUser(null);
     }
+  };
+
+  // Helper function to check if user has permission
+  const hasPermission = (permissionCode) => {
+    if (!user) return false;
+    // Admin has all permissions
+    if (user.role === 'ADMIN') return true;
+    // Check if user has the specific permission
+    const permissions = user.permissions || [];
+    if (!Array.isArray(permissions)) {
+      console.warn('User permissions is not an array:', permissions);
+      return false;
+    }
+    return permissions.includes(permissionCode);
   };
 
   const value = {
@@ -71,6 +134,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     login,
     logout,
+    hasPermission,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

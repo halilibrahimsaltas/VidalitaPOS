@@ -56,6 +56,48 @@ const userService = {
       branchId: branchId || null,
     });
 
+    // Assign default permissions based on role (except ADMIN)
+    const userRole = role || 'USER';
+    if (userRole !== 'ADMIN') {
+      try {
+        // Get all permissions
+        const allPermissions = await prisma.permission.findMany();
+        const permissionsByCode = {};
+        allPermissions.forEach(perm => {
+          permissionsByCode[perm.code] = perm;
+        });
+
+        // Define role-based default permissions (same as seed.js)
+        const allPermissionCodes = allPermissions.map(p => p.code);
+        const userBranchPermissions = [
+          'users.view', 'users.create', 'users.update', 'users.delete', 'users.manage_permissions',
+          'branches.view', 'branches.create', 'branches.update', 'branches.delete',
+        ];
+        
+        // Permissions for all non-admin roles (everything except user/branch management)
+        const commonPermissions = allPermissionCodes.filter(code => !userBranchPermissions.includes(code));
+        
+        // Get permission IDs for the role
+        const rolePermissionIds = commonPermissions
+          .map(code => permissionsByCode[code]?.id)
+          .filter(id => id !== undefined && id !== null);
+        
+        // Assign permissions to user
+        if (rolePermissionIds.length > 0) {
+          await prisma.userPermission.createMany({
+            data: rolePermissionIds.map(permissionId => ({
+              userId: user.id,
+              permissionId,
+            })),
+            skipDuplicates: true,
+          });
+        }
+      } catch (permError) {
+        // Log error but don't fail user creation
+        console.error('Error assigning default permissions to user:', permError);
+      }
+    }
+
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
     return userWithoutPassword;

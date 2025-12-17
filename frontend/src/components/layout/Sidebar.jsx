@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../contexts/AuthContext';
 import { 
   HiHome, 
   HiShoppingCart, 
@@ -15,20 +16,34 @@ import {
 const Sidebar = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const { hasPermission } = useAuth();
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
 
-  const quickActions = [
-    { path: '/dashboard', key: 'navigation.dashboard', icon: HiHome },
-    { path: '/pos', key: 'navigation.pos', icon: HiShoppingCart },
-    { path: '/branches', key: 'navigation.branches', icon: HiBuildingStorefront },
-    { path: '/products', key: 'navigation.products', icon: HiCube },
-    { path: '/inventory', key: 'navigation.inventory', icon: HiArchiveBox },
-    { path: '/sales', key: 'navigation.sales', icon: HiReceiptPercent },
-    { path: '/customers', key: 'navigation.customers', icon: HiUserGroup },
-    { path: '/reports', key: 'navigation.reports', icon: HiChartBar },
-    { path: '/users', key: 'navigation.users', icon: HiUsers },
+  const { user } = useAuth();
+
+  // Define menu items with required permissions
+  const allMenuItems = [
+    { path: '/dashboard', key: 'navigation.dashboard', icon: HiHome, permission: 'dashboard.view' },
+    { path: '/pos', key: 'navigation.pos', icon: HiShoppingCart, permission: 'pos.use' },
+    { path: '/branches', key: 'navigation.branches', icon: HiBuildingStorefront, permission: 'branches.view', requireAdmin: true },
+    { path: '/products', key: 'navigation.products', icon: HiCube, permission: 'products.view' },
+    { path: '/inventory', key: 'navigation.inventory', icon: HiArchiveBox, permission: 'inventory.view' },
+    { path: '/sales', key: 'navigation.sales', icon: HiReceiptPercent, permission: 'sales.view' },
+    { path: '/customers', key: 'navigation.customers', icon: HiUserGroup, permission: 'customers.view' },
+    { path: '/reports', key: 'navigation.reports', icon: HiChartBar, permission: 'reports.view' },
+    { path: '/users', key: 'navigation.users', icon: HiUsers, permission: 'users.view', requireAdmin: true },
   ];
+
+  // Filter menu items based on permissions and admin requirement
+  const quickActions = allMenuItems.filter(item => {
+    // If requireAdmin is true, only show for ADMIN
+    if (item.requireAdmin && user?.role !== 'ADMIN') {
+      return false;
+    }
+    // Check permission
+    return hasPermission(item.permission);
+  });
 
   return (
     <aside className="h-full bg-white border-r border-gray-200 flex flex-col">

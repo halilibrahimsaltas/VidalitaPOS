@@ -17,6 +17,13 @@ enum UserRole {
   CASHIER
 }
 
+enum Currency {
+  UZS
+  USD
+  TRY
+  EUR
+}
+
 model User {
   id                  String                @id @default(uuid())
   username            String                @unique
@@ -89,6 +96,7 @@ model Product {
   category          Category?         @relation(fields: [categoryId], references: [id])
   price             Decimal           @db.Decimal(10, 2)
   costPrice         Decimal?          @db.Decimal(10, 2)
+  currency          Currency          @default(UZS)
   imageUrl          String?
   isActive          Boolean           @default(true)
   inventory         Inventory[]

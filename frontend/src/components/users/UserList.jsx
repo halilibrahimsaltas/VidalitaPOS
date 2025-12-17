@@ -199,9 +199,11 @@ const UserList = ({ onEdit }) => {
                             setSelectedUserId(user.id);
                             setPermissionModalOpen(true);
                           }}
-                          className="text-sm text-gray-600 hover:text-gray-700 font-medium whitespace-nowrap"
+                          className="text-sm text-purple-600 hover:text-purple-700 font-medium whitespace-nowrap flex items-center gap-1"
+                          title="Yetki Yönetimi"
                         >
-                          Yetkiler
+                          <span>🔐</span>
+                          <span>Yetkiler</span>
                         </button>
                         <button
                           onClick={() => handleDelete(user.id)}
