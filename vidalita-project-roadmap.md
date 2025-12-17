@@ -356,9 +356,14 @@ npm run dev
 - [x] Refresh token mekanizması
 - [x] Password hashing (bcrypt)
 - [x] Role-based access control (RBAC)
+- [x] Permission-based access control (PBAC)
+- [x] Permission management system
+- [x] User permission assignment UI
 - [x] Login page UI
 - [x] Protected route yapısı
 - [x] Auth context & hooks
+- [x] User management UI (CRUD)
+- [x] Permission manager component
 
 ### ✅ FAZ 3: Branch Management (Tamamlandı)
 **Tahmini Süre**: 1 hafta
@@ -388,6 +393,9 @@ npm run dev
 - [x] Bulk product import (CSV)
 - [x] Product stock management (ürün oluşturma/güncelleme sırasında stok ekleme)
 - [x] Barcode duplicate validation (aynı barkod ile ürün oluşturma engellendi)
+- [x] Multi-currency support (UZS, USD, TRY, EUR)
+- [x] Currency field in product model
+- [x] Permission-based product management (CASHIER can create/update/delete)
 
 ### 🔄 FAZ 5: Inventory Management (Devam Ediyor)
 **Tahmini Süre**: 2 hafta
@@ -406,41 +414,53 @@ npm run dev
 - [ ] Stock transfer history list UI
 - [ ] Stock adjustment history list UI
 
-### 🔄 FAZ 6: POS & Sales (Devam Ediyor)
+### ✅ FAZ 6: POS & Sales (Tamamlandı)
 **Tahmini Süre**: 3 hafta
-**Durum**: 🔄 %85 Tamamlandı (Backend %100, Frontend %70)
+**Durum**: ✅ %95 Tamamlandı (Backend %100, Frontend %95)
 
 - [x] Sales model ve migration
 - [x] Sale items model
 - [x] Create sale API
 - [x] Sale details API
-- [x] Refund API
+- [x] Refund API (full & partial refund)
+- [x] Cancel sale API
 - [x] Receipt generation API
-- [x] POS screen UI (barcode input, cart)
-- [x] Payment modal (cash, card, credit)
+- [x] Invoice generation API
+- [x] POS screen UI (redesigned, modern layout)
+- [x] Payment modal (cash, card, credit, mixed)
 - [x] Split payment (parçalı ödeme - multiple payment methods)
 - [x] Manual product selection modal
+- [x] Customer selection in POS (anonymous or registered)
+- [x] Manual discount (amount or percentage)
 - [x] Sale history list UI (filters, pagination, detail modal)
-- [ ] ESC/POS printer integration
+- [x] Refund modal UI
+- [x] Invoice view component (2 copies, print-ready)
+- [x] Cart persistence (localStorage)
+- [x] Branch auto-selection in POS
+- [ ] ESC/POS printer integration (future enhancement)
 
-### ⏳ FAZ 7: Customer & Cari Management (Başlanacak)
+### ✅ FAZ 7: Customer & Cari Management (Tamamlandı)
 **Tahmini Süre**: 2 hafta
-**Durum**: ⏳ Bekliyor
+**Durum**: ✅ %100 Tamamlandı
 
-- [ ] Customer model ve migration
-- [ ] Customer transactions model
-- [ ] Customer CRUD API
-- [ ] Payment recording API
-- [ ] Debt tracking
-- [ ] Customer list UI
-- [ ] Customer form
-- [ ] Transaction history
-- [ ] Payment recording form
-- [ ] Debt reports
+- [x] Customer model ve migration
+- [x] Customer transactions model
+- [x] Customer CRUD API
+- [x] Payment recording API
+- [x] Debt tracking API
+- [x] Customer statistics API
+- [x] Customer purchase history API
+- [x] Customer list UI (search, filter, pagination)
+- [x] Customer form (create/edit)
+- [x] Transaction history UI
+- [x] Payment recording form
+- [x] Customer statistics UI
+- [x] Customer purchase history UI
+- [x] Debt display and tracking
 
-### 🔄 FAZ 8: Reporting & Analytics (Devam Ediyor)
+### ✅ FAZ 8: Reporting & Analytics (Tamamlandı)
 **Tahmini Süre**: 2 hafta
-**Durum**: 🔄 %75 Tamamlandı
+**Durum**: ✅ %90 Tamamlandı
 
 - [x] Report API endpoints
 - [x] Sales summary report
@@ -449,24 +469,34 @@ npm run dev
 - [x] Debt summary report
 - [x] Dashboard overview API
 - [x] Cash register report (gün sonu kasa raporu)
+- [x] Monthly report (ay sonu raporu)
 - [x] Report viewer (filters, preview)
 - [x] Print functionality
 - [x] Dashboard UI (cards, charts, statistics)
-- [ ] Excel export
-- [ ] PDF export
+- [x] Cash register report UI (simplified design)
+- [x] Monthly report UI
+- [x] Staff name display in reports
+- [x] Company name (Vidalita) in reports
+- [ ] Excel export (future enhancement)
+- [ ] PDF export (future enhancement)
 
-### ⏳ FAZ 9: Localization (Başlanacak)
+### ✅ FAZ 9: Localization (Tamamlandı)
 **Tahmini Süre**: 1 hafta
-**Durum**: ⏳ Bekliyor
+**Durum**: ✅ %100 Tamamlandı
 
-- [ ] i18next kurulumu
-- [ ] TR lokalizasyon dosyası
-- [ ] EN lokalizasyon dosyası
-- [ ] RU lokalizasyon dosyası
-- [ ] UZ lokalizasyon dosyası
-- [ ] Language switcher component
-- [ ] Backend error messages i18n
-- [ ] Database content localization (categories)
+- [x] i18next kurulumu
+- [x] TR lokalizasyon dosyası (comprehensive)
+- [x] EN lokalizasyon dosyası (comprehensive)
+- [x] RU lokalizasyon dosyası (comprehensive)
+- [x] UZ lokalizasyon dosyası (comprehensive)
+- [x] Language switcher component
+- [x] All UI components localized
+- [x] Forms and validation messages localized
+- [x] Error messages localized
+- [x] No UI shifts during language changes
+- [x] Text length control for translations
+- [ ] Backend error messages i18n (future enhancement)
+- [ ] Database content localization (categories) (future enhancement)
 
 ### ⏳ FAZ 10: Testing (Başlanacak)
 **Tahmini Süre**: 2 hafta
@@ -534,52 +564,92 @@ npm run dev
 - ✅ Product form (create/edit)
 - ✅ Category hiyerarşik yapı
 
+### Sprint 5 (Hafta 6-7) ✅
+- ✅ Inventory management UI tamamlandı
+- ✅ Stock transfer ve adjustment UI
+- ✅ POS screen redesign
+- ✅ Payment modals (single & split)
+- ✅ Manual discount functionality
+- ✅ Customer selection in POS
+
+### Sprint 6 (Hafta 8-9) ✅
+- ✅ Sales refund & cancel functionality
+- ✅ Invoice generation and printing
+- ✅ Customer management (CRUD)
+- ✅ Customer transactions & payments
+- ✅ Customer statistics & purchase history
+- ✅ Cash register report (daily & monthly)
+- ✅ Permission-based access control system
+- ✅ User permission management UI
+
+### Sprint 7 (Hafta 10) ✅
+- ✅ Complete localization (TR, EN, RU, UZ)
+- ✅ All UI components localized
+- ✅ Language switcher
+- ✅ Multi-currency support (UZS, USD, TRY, EUR)
+- ✅ Product currency field
+- ✅ CASHIER product management permissions
+- ✅ UI/UX improvements and simplifications
+
 ---
 
 ## 🎯 Gelecek Adımlar (Priority Order)
 
-### Bu Hafta (Hafta 5-6)
-1. **Product Management Tamamlama**
-   -
+### Öncelikli (Kısa Vadeli)
+1. **Testing & QA**
+   - [ ] Jest kurulumu ve unit test yazımı
+   - [ ] Integration testler
+   - [ ] E2E testler (Playwright)
+   - [ ] Test coverage %80+ hedefi
 
-2. **Inventory Management Başlangıç**
-   - [x] Inventory model (Prisma schema'da var)
-   - [ ] Stock tracking API
-   - [ ] Stock transfer API
-   - [ ] Stock adjustment API
-   - [ ] Basic inventory UI
+2. **ESC/POS Printer Integration**
+   - [ ] ESC/POS protokol desteği
+   - [ ] Fiş yazdırma entegrasyonu
+   - [ ] Farklı yazıcı modelleri desteği
 
-### Önümüzdeki 2 Hafta (Hafta 7-8)
-3. **Inventory Management Tam Implementasyon**
-   - [ ] Inventory dashboard UI
-   - [ ] Stock transfer form
-   - [ ] Stock adjustment form
-   - [ ] Low stock alerts
+3. **Export Functionality**
+   - [ ] Excel export (reports, sales, inventory)
+   - [ ] PDF export (invoices, reports)
+   - [ ] CSV export (data backup)
 
-4. **POS & Sales Başlangıç**
-   - [x] Sales model (Prisma schema'da var)
-   - [ ] Create sale API
-   - [ ] Sale details API
-   - [ ] POS screen UI improvements
+### Orta Vadeli
+4. **Real-time Features**
+   - [ ] WebSocket entegrasyonu
+   - [ ] Real-time stock updates
+   - [ ] Real-time sales notifications
+   - [ ] Live dashboard updates
 
-### Gelecek Ay (Hafta 8-11)
-5. **POS System (En Kritik)**
-   - [ ] Sales flow implementasyonu
-   - [ ] POS ekranı UI
-   - [ ] Barcode scanner entegrasyonu
-   - [ ] Payment processing
-   - [ ] Receipt printing
+5. **Advanced Reporting**
+   - [ ] Custom report builder
+   - [ ] Scheduled reports
+   - [ ] Email report delivery
+   - [ ] Advanced analytics
 
-6. **Customer Management**
-   - [ ] Customer CRUD
-   - [ ] Cari hesap tracking
-   - [ ] Payment recording
+6. **Mobile App (Future)**
+   - [ ] React Native app
+   - [ ] Mobile POS
+   - [ ] Inventory management on mobile
 
-### 2-3 Ay İçinde
-7. **Reporting & Analytics**
-8. **Localization (4 dil)**
-9. **Testing & QA**
-10. **Production Deployment**
+### Uzun Vadeli
+7. **Backend Localization**
+   - [ ] Backend error messages i18n
+   - [ ] Database content localization
+   - [ ] API response localization
+
+8. **Advanced Features**
+   - [ ] Multi-warehouse support
+   - [ ] Advanced pricing rules
+   - [ ] Loyalty program
+   - [ ] Gift cards
+
+9. **Production Deployment**
+   - [ ] Production Dockerfile'lar
+   - [ ] Docker Compose production
+   - [ ] Nginx configuration
+   - [ ] SSL certificate setup
+   - [ ] CI/CD pipeline
+   - [ ] Monitoring setup
+   - [ ] Automated backups
 
 ---
 
@@ -643,32 +713,40 @@ npm run dev
 - [x] `GET /api/sales/:id` - Satış detayı
 - [x] `GET /api/sales/number/:saleNumber` - Satış numarası ile bul
 - [x] `GET /api/sales/:id/receipt` - Fiş oluştur
-- [x] `POST /api/sales/:id/refund` - İade işlemi
+- [x] `POST /api/sales/:id/refund` - İade işlemi (full & partial)
+- [x] `POST /api/sales/:id/cancel` - Satış iptal
 
 ### Customer Management
-- [ ] `GET /api/customers` - Müşteri listesi
-- [ ] `GET /api/customers/:id` - Müşteri detayı
-- [ ] `POST /api/customers` - Yeni müşteri
-- [ ] `PUT /api/customers/:id` - Müşteri güncelle
-- [ ] `DELETE /api/customers/:id` - Müşteri sil
-- [ ] `GET /api/customers/:id/transactions` - Cari hareketler
-- [ ] `POST /api/customers/:id/payments` - Ödeme kaydet
+- [x] `GET /api/customers` - Müşteri listesi
+- [x] `GET /api/customers/:id` - Müşteri detayı
+- [x] `POST /api/customers` - Yeni müşteri
+- [x] `PUT /api/customers/:id` - Müşteri güncelle
+- [x] `DELETE /api/customers/:id` - Müşteri sil
+- [x] `GET /api/customers/:id/transactions` - Cari hareketler
+- [x] `GET /api/customers/:id/debt` - Müşteri borcu
+- [x] `GET /api/customers/:id/statistics` - Müşteri istatistikleri
+- [x] `POST /api/customers/:id/payments` - Ödeme kaydet
 
 ### Reports
 - [x] `GET /api/reports/sales-summary` - Satış özeti
 - [x] `GET /api/reports/inventory-status` - Stok durumu
 - [x] `GET /api/reports/top-products` - En çok satanlar
 - [x] `GET /api/reports/debt-summary` - Borç özeti
-- [x] `GET /api/reports/cash-register` - Gün sonu kasa raporu
+- [x] `GET /api/reports/cash-register` - Gün sonu kasa raporu (daily, weekly, monthly)
 
 ### Dashboard
 - [x] `GET /api/dashboard/overview` - Dashboard özet
 
 ### User Management
-- [ ] `GET /api/users` - Kullanıcı listesi
-- [ ] `PUT /api/users/:id` - Kullanıcı güncelle
-- [ ] `DELETE /api/users/:id` - Kullanıcı sil
-- [ ] `PUT /api/users/:id/password` - Şifre değiştir
+- [x] `GET /api/users` - Kullanıcı listesi
+- [x] `GET /api/users/:id` - Kullanıcı detayı
+- [x] `POST /api/users` - Yeni kullanıcı
+- [x] `PUT /api/users/:id` - Kullanıcı güncelle
+- [x] `DELETE /api/users/:id` - Kullanıcı sil
+- [x] `PATCH /api/users/:id/role` - Kullanıcı rolü güncelle
+- [x] `GET /api/users/:id/permissions` - Kullanıcı yetkileri
+- [x] `PUT /api/users/:id/permissions` - Kullanıcı yetkileri güncelle
+- [ ] `PUT /api/users/:id/password` - Şifre değiştir (future enhancement)
 
 ---
 
@@ -761,10 +839,10 @@ docker-compose logs -f
 
 ### Genel İlerleme
 ```
-███████████████████████░░░░░ 58% Tamamlandı
+███████████████████████████████░░ 85% Tamamlandı
 
-Backend:  ████████████████░░░░░░ 70%
-Frontend: ███████████░░░░░░░░░░░ 55%
+Backend:  ████████████████████░░░░ 90%
+Frontend: ████████████████████░░░░ 90%
 Testing:  ░░░░░░░░░░░░░░░░░░░░░░░░  0%
 DevOps:   ██████████░░░░░░░░░░░░░░ 40%
 ```
@@ -773,15 +851,19 @@ DevOps:   ██████████░░░░░░░░░░░░░�
 | Modül | Backend | Frontend | Test | Durum |
 |-------|---------|----------|------|-------|
 | Auth | 100% | 100% | 0% | ✅ |
+| User Management | 100% | 100% | 0% | ✅ |
+| Permission System | 100% | 100% | 0% | ✅ |
 | Branch | 100% | 100% | 0% | ✅ |
 | Product | 100% | 100% | 0% | ✅ |
 | Category | 100% | 100% | 0% | ✅ |
-| Inventory | 100% | 85% | 0% | 🔄 |
-| Stock Transfer | 100% | 70% | 0% | 🔄 |
-| Stock Adjustment | 100% | 70% | 0% | 🔄 |
-| Sales | 100% | 70% | 0% | 🔄 |
-| Customer | 100% | 80% | 0% | 🔄 |
-| Reports | 100% | 75% | 0% | 🔄 |
+| Inventory | 100% | 90% | 0% | ✅ |
+| Stock Transfer | 100% | 85% | 0% | ✅ |
+| Stock Adjustment | 100% | 85% | 0% | ✅ |
+| Sales | 100% | 95% | 0% | ✅ |
+| POS | 100% | 95% | 0% | ✅ |
+| Customer | 100% | 100% | 0% | ✅ |
+| Reports | 100% | 90% | 0% | ✅ |
+| Localization | 0% | 100% | 0% | ✅ |
 
 ---
 
@@ -827,6 +909,46 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Son Güncelleme**: 25 Kasım 2025
-**Versiyon**: 0.3.5-alpha
+**Son Güncelleme**: 30 Aralık 2024
+**Versiyon**: 0.8.5-alpha
 **Durum**: Active Development 🚀
+
+## 🎉 Son Tamamlanan Özellikler
+
+### ✅ Permission-Based Access Control
+- Granular permission system
+- User-specific permission assignment
+- Permission management UI
+- Role-based default permissions
+
+### ✅ Sales Management Enhancements
+- Full & partial refund functionality
+- Sale cancellation
+- Invoice generation (2 copies, print-ready)
+- Manual discount (amount or percentage)
+- Split payment improvements
+
+### ✅ Customer Management
+- Complete CRUD operations
+- Transaction history
+- Payment recording
+- Customer statistics
+- Purchase history with invoice links
+- Debt tracking
+
+### ✅ Reporting
+- Daily cash register report
+- Monthly cash register report
+- Simplified report design
+- Staff name and company name in reports
+
+### ✅ Localization
+- Complete 4-language support (TR, EN, RU, UZ)
+- All UI components localized
+- No UI shifts during language changes
+- Text length control
+
+### ✅ Product Management
+- Multi-currency support (UZS, USD, TRY, EUR)
+- CASHIER can create/update/delete products
+- Permission-based product management
