@@ -69,6 +69,7 @@
     "category": "Категория",
     "price": "Цена продажи",
     "costPrice": "Себестоимость",
+    "currency": "Валюта",
     "description": "Описание",
     "imageUrl": "URL изображения",
     "create": "Создать новый продукт",
@@ -76,7 +77,13 @@
     "deleteConfirm": "Вы уверены, что хотите удалить продукт",
     "searchPlaceholder": "Поиск по названию, штрих-коду или SKU...",
     "noProducts": "Продукты не найдены",
-    "allCategories": "Все категории"
+    "allCategories": "Все категории",
+    "currencyOptions": {
+      "UZS": "UZS - Узбекский сум",
+      "USD": "USD - Доллар США",
+      "TRY": "TRY - Турецкая лира",
+      "EUR": "EUR - Евро"
+    }
   },
   "inventory": {
     "title": "Управление запасами",
@@ -158,7 +165,30 @@
     "date": "Дата",
     "customer": "Клиент",
     "total": "Итого",
-    "status": "Статус"
+    "status": "Статус",
+    "refund": "Возврат",
+    "cancel": "Отмена",
+    "invoice": "Счет",
+    "viewInvoice": "Просмотреть счет",
+    "refundModal": {
+      "title": "Возврат продажи",
+      "fullRefund": "Полный возврат",
+      "partialRefund": "Частичный возврат",
+      "refundAmount": "Сумма возврата",
+      "reason": "Причина возврата",
+      "confirm": "Подтвердить возврат"
+    }
+  },
+  "reports": {
+    "title": "Отчеты",
+    "endOfDay": "Отчет о кассе на конец дня",
+    "monthEnd": "Отчет на конец месяца",
+    "cashReceived": "Получено наличными",
+    "cardReceived": "Получено картой",
+    "totalRefunds": "Всего возвратов",
+    "totalCash": "Всего в кассе",
+    "selectMonth": "Выберите месяц",
+    "selectDate": "Выберите дату"
   },
   "navigation": {
     "dashboard": "Панель управления",
@@ -174,7 +204,22 @@
   "users": {
     "title": "Управление пользователями",
     "create": "Новый пользователь",
-    "edit": "Редактировать пользователя"
+    "edit": "Редактировать пользователя",
+    "username": "Имя пользователя",
+    "email": "Email",
+    "fullName": "Полное имя",
+    "role": "Роль",
+    "branch": "Филиал",
+    "isActive": "Активный",
+    "permissions": "Разрешения",
+    "managePermissions": "Управление разрешениями",
+    "noUsers": "Пользователи не найдены",
+    "searchPlaceholder": "Поиск по имени пользователя, email или полному имени...",
+    "roles": {
+      "ADMIN": "Администратор",
+      "MANAGER": "Менеджер",
+      "USER": "Пользователь",
+      "CASHIER": "Кассир"
+    }
   }
 }
-

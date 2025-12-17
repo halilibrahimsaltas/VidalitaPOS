@@ -34,6 +34,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
     categoryId: '',
     price: '',
     costPrice: '',
+    currency: 'UZS',
     imageUrl: '',
     isActive: true,
     // Stock fields
@@ -92,6 +93,7 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
         categoryId: product.categoryId || '',
         price: product.price ? parseFloat(product.price).toFixed(2) : '',
         costPrice: product.costPrice ? parseFloat(product.costPrice).toFixed(2) : '',
+        currency: product.currency || 'UZS',
         imageUrl: product.imageUrl || '',
         isActive: product.isActive !== undefined ? product.isActive : true,
         // Stock fields - will be loaded from inventory if needed (use first inventory item)
@@ -321,29 +323,49 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          label="Satış Fiyatı"
-          name="price"
-          type="number"
-          step="0.01"
-          min="0"
-          value={formData.price}
-          onChange={handleChange}
-          error={errors.price}
-          required
-          placeholder="0.00"
-        />
+        <div>
+          <Input
+            label="Satış Fiyatı"
+            name="price"
+            type="number"
+            step="0.01"
+            min="0"
+            value={formData.price}
+            onChange={handleChange}
+            error={errors.price}
+            required
+            placeholder="0.00"
+          />
+        </div>
 
-        <Input
-          label="Maliyet Fiyatı"
-          name="costPrice"
-          type="number"
-          step="0.01"
-          min="0"
-          value={formData.costPrice}
+        <div>
+          <Input
+            label="Maliyet Fiyatı"
+            name="costPrice"
+            type="number"
+            step="0.01"
+            min="0"
+            value={formData.costPrice}
+            onChange={handleChange}
+            error={errors.costPrice}
+            placeholder="0.00"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Select
+          label="Para Birimi"
+          name="currency"
+          value={formData.currency}
           onChange={handleChange}
-          error={errors.costPrice}
-          placeholder="0.00"
+          error={errors.currency}
+          options={[
+            { value: 'UZS', label: 'UZS - O\'zbek so\'mi' },
+            { value: 'USD', label: 'USD - US Dollar' },
+            { value: 'TRY', label: 'TRY - Türk Lirası' },
+            { value: 'EUR', label: 'EUR - Euro' },
+          ]}
         />
       </div>
 

@@ -69,6 +69,7 @@
     "category": "Category",
     "price": "Sale Price",
     "costPrice": "Cost Price",
+    "currency": "Currency",
     "description": "Description",
     "imageUrl": "Image URL",
     "create": "Create New Product",
@@ -76,7 +77,13 @@
     "deleteConfirm": "Are you sure you want to delete product",
     "searchPlaceholder": "Search by product name, barcode or SKU...",
     "noProducts": "No products found",
-    "allCategories": "All Categories"
+    "allCategories": "All Categories",
+    "currencyOptions": {
+      "UZS": "UZS - Uzbek Som",
+      "USD": "USD - US Dollar",
+      "TRY": "TRY - Turkish Lira",
+      "EUR": "EUR - Euro"
+    }
   },
   "inventory": {
     "title": "Inventory Management",
@@ -158,7 +165,30 @@
     "date": "Date",
     "customer": "Customer",
     "total": "Total",
-    "status": "Status"
+    "status": "Status",
+    "refund": "Refund",
+    "cancel": "Cancel",
+    "invoice": "Invoice",
+    "viewInvoice": "View Invoice",
+    "refundModal": {
+      "title": "Sale Refund",
+      "fullRefund": "Full Refund",
+      "partialRefund": "Partial Refund",
+      "refundAmount": "Refund Amount",
+      "reason": "Refund Reason",
+      "confirm": "Confirm Refund"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "endOfDay": "End of Day Cash Report",
+    "monthEnd": "Month End Report",
+    "cashReceived": "Cash Received",
+    "cardReceived": "Card Received",
+    "totalRefunds": "Total Refunds",
+    "totalCash": "Total Cash",
+    "selectMonth": "Select Month",
+    "selectDate": "Select Date"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -174,7 +204,22 @@
   "users": {
     "title": "User Management",
     "create": "New User",
-    "edit": "Edit User"
+    "edit": "Edit User",
+    "username": "Username",
+    "email": "Email",
+    "fullName": "Full Name",
+    "role": "Role",
+    "branch": "Branch",
+    "isActive": "Active",
+    "permissions": "Permissions",
+    "managePermissions": "Manage Permissions",
+    "noUsers": "No users found",
+    "searchPlaceholder": "Search by username, email or full name...",
+    "roles": {
+      "ADMIN": "Administrator",
+      "MANAGER": "Manager",
+      "USER": "User",
+      "CASHIER": "Cashier"
+    }
   }
 }
-

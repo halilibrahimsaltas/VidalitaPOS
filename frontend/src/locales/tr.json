@@ -69,6 +69,7 @@
     "category": "Kategori",
     "price": "Satış Fiyatı",
     "costPrice": "Maliyet Fiyatı",
+    "currency": "Para Birimi",
     "description": "Açıklama",
     "imageUrl": "Görsel URL",
     "create": "Yeni Ürün Oluştur",
@@ -76,7 +77,13 @@
     "deleteConfirm": "ürününü silmek istediğiniz emin misiniz?",
     "searchPlaceholder": "Ürün adı, barkod veya SKU ile ara...",
     "noProducts": "Ürün bulunamadı",
-    "allCategories": "Tüm Kategoriler"
+    "allCategories": "Tüm Kategoriler",
+    "currencyOptions": {
+      "UZS": "UZS - O'zbek so'mi",
+      "USD": "USD - US Dollar",
+      "TRY": "TRY - Türk Lirası",
+      "EUR": "EUR - Euro"
+    }
   },
   "inventory": {
     "title": "Stok Yönetimi",
@@ -158,7 +165,30 @@
     "date": "Tarih",
     "customer": "Müşteri",
     "total": "Toplam",
-    "status": "Durum"
+    "status": "Durum",
+    "refund": "İade",
+    "cancel": "İptal",
+    "invoice": "Fatura",
+    "viewInvoice": "Faturayı Görüntüle",
+    "refundModal": {
+      "title": "Satış İadesi",
+      "fullRefund": "Tam İade",
+      "partialRefund": "Kısmi İade",
+      "refundAmount": "İade Tutarı",
+      "reason": "İade Nedeni",
+      "confirm": "İadeyi Onayla"
+    }
+  },
+  "reports": {
+    "title": "Raporlar",
+    "endOfDay": "Gün Sonu Kasa Raporu",
+    "monthEnd": "Ay Sonu Raporu",
+    "cashReceived": "Alınan Nakit",
+    "cardReceived": "Alınan Kredi Kartı",
+    "totalRefunds": "Toplam İadeler",
+    "totalCash": "Toplam Kasa",
+    "selectMonth": "Ay Seçin",
+    "selectDate": "Tarih Seçin"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -174,7 +204,23 @@
   "users": {
     "title": "Kullanıcı Yönetimi",
     "create": "Yeni Kullanıcı",
-    "edit": "Kullanıcı Düzenle"
+    "edit": "Kullanıcı Düzenle",
+    "username": "Kullanıcı Adı",
+    "email": "Email",
+    "fullName": "Ad Soyad",
+    "role": "Rol",
+    "branch": "Şube",
+    "isActive": "Aktif",
+    "permissions": "Yetkiler",
+    "managePermissions": "Yetkileri Yönet",
+    "noUsers": "Kullanıcı bulunamadı",
+    "searchPlaceholder": "Kullanıcı adı, email veya ad soyad ile ara...",
+    "roles": {
+      "ADMIN": "Yönetici",
+      "MANAGER": "Müdür",
+      "USER": "Kullanıcı",
+      "CASHIER": "Kasiyer"
+    }
   }
 }
 

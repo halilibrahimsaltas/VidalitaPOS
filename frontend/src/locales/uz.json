@@ -69,6 +69,7 @@
     "category": "Kategoriya",
     "price": "Sotish narxi",
     "costPrice": "Xarajat narxi",
+    "currency": "Valyuta",
     "description": "Tavsif",
     "imageUrl": "Rasm URL",
     "create": "Yangi mahsulot yaratish",
@@ -76,7 +77,13 @@
     "deleteConfirm": "mahsulotni o'chirmoqchimisiz",
     "searchPlaceholder": "Mahsulot nomi, shtrix-kod yoki SKU bo'yicha qidiring...",
     "noProducts": "Mahsulotlar topilmadi",
-    "allCategories": "Barcha kategoriyalar"
+    "allCategories": "Barcha kategoriyalar",
+    "currencyOptions": {
+      "UZS": "UZS - O'zbek so'mi",
+      "USD": "USD - AQSH dollari",
+      "TRY": "TRY - Turk lirasi",
+      "EUR": "EUR - Yevro"
+    }
   },
   "inventory": {
     "title": "Zaxira boshqaruvi",
@@ -158,7 +165,30 @@
     "date": "Sana",
     "customer": "Mijoz",
     "total": "Jami",
-    "status": "Holat"
+    "status": "Holat",
+    "refund": "Qaytarish",
+    "cancel": "Bekor qilish",
+    "invoice": "Hisob-faktura",
+    "viewInvoice": "Hisob-fakturani ko'rish",
+    "refundModal": {
+      "title": "Sotuvni qaytarish",
+      "fullRefund": "To'liq qaytarish",
+      "partialRefund": "Qisman qaytarish",
+      "refundAmount": "Qaytarish summasi",
+      "reason": "Qaytarish sababi",
+      "confirm": "Qaytarishni tasdiqlash"
+    }
+  },
+  "reports": {
+    "title": "Hisobotlar",
+    "endOfDay": "Kun oxiridagi kassa hisoboti",
+    "monthEnd": "Oy oxiridagi hisobot",
+    "cashReceived": "Naqd pul olingan",
+    "cardReceived": "Karta orqali olingan",
+    "totalRefunds": "Jami qaytarilgan",
+    "totalCash": "Jami kassa",
+    "selectMonth": "Oyni tanlang",
+    "selectDate": "Sanani tanlang"
   },
   "navigation": {
     "dashboard": "Boshqaruv paneli",
@@ -174,7 +204,22 @@
   "users": {
     "title": "Foydalanuvchi boshqaruvi",
     "create": "Yangi foydalanuvchi",
-    "edit": "Foydalanuvchini tahrirlash"
+    "edit": "Foydalanuvchini tahrirlash",
+    "username": "Foydalanuvchi nomi",
+    "email": "Email",
+    "fullName": "To'liq ism",
+    "role": "Rol",
+    "branch": "Filial",
+    "isActive": "Faol",
+    "permissions": "Ruxsatlar",
+    "managePermissions": "Ruxsatlarni boshqarish",
+    "noUsers": "Foydalanuvchilar topilmadi",
+    "searchPlaceholder": "Foydalanuvchi nomi, email yoki to'liq ism bo'yicha qidiring...",
+    "roles": {
+      "ADMIN": "Administrator",
+      "MANAGER": "Menejer",
+      "USER": "Foydalanuvchi",
+      "CASHIER": "Kassir"
+    }
   }
 }
-

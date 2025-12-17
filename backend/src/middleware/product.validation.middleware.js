@@ -47,6 +47,10 @@ export const validateCreateProduct = [
     .optional()
     .isBoolean()
     .withMessage('isActive must be a boolean'),
+  body('currency')
+    .optional()
+    .isIn(['UZS', 'USD', 'TRY', 'EUR'])
+    .withMessage('Currency must be one of: UZS, USD, TRY, EUR'),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

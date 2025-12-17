@@ -76,6 +76,11 @@ const productService = {
       productData.costPrice = parseFloat(productData.costPrice);
     }
 
+    // Set default currency if not provided
+    if (!productData.currency) {
+      productData.currency = 'UZS';
+    }
+
     // Handle imageUrl - if it's a file upload result, use the URL
     if (productData.imageUrl && typeof productData.imageUrl === 'object') {
       productData.imageUrl = productData.imageUrl.url;
