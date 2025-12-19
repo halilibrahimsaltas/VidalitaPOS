@@ -105,3 +105,12 @@ export const getImportTemplate = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getAvailableProductImages = async (req, res, next) => {
+  try {
+    const images = await productService.getAvailableProductImages();
+    res.json(ApiResponse.success(images, 'Product images retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+};

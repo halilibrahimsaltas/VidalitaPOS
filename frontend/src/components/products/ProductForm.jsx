@@ -54,6 +54,8 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
   const [newCategoryParentId, setNewCategoryParentId] = useState('');
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [barcodeCheckTimer, setBarcodeCheckTimer] = useState(null);
+  const [availableImages, setAvailableImages] = useState([]);
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
 
   // Check barcode uniqueness (only when creating new product or when editing and barcode is provided and changed)
   const barcodeToCheck = formData.barcode?.trim();
@@ -107,6 +109,23 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
       setImagePreview(getImageUrl(product.imageUrl || ''));
     }
   }, [product, inventory]);
+
+  // Load available images on component mount
+  useEffect(() => {
+    const loadAvailableImages = async () => {
+      setIsLoadingImages(true);
+      try {
+        const response = await productService.getAvailableImages();
+        setAvailableImages(response.data || []);
+      } catch (error) {
+        console.error('Error loading available images:', error);
+        setAvailableImages([]);
+      } finally {
+        setIsLoadingImages(false);
+      }
+    };
+    loadAvailableImages();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -194,6 +213,20 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
     const url = e.target.value;
     setFormData((prev) => ({ ...prev, imageUrl: url }));
     setImagePreview(getImageUrl(url));
+  };
+
+  const handleImageSelect = (e) => {
+    const selectedImageName = e.target.value;
+    if (selectedImageName) {
+      const selectedImage = availableImages.find(img => img.name === selectedImageName);
+      if (selectedImage) {
+        setFormData((prev) => ({ ...prev, imageUrl: selectedImage.url }));
+        setImagePreview(getImageUrl(selectedImage.url));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, imageUrl: '' }));
+      setImagePreview('');
+    }
   };
 
   const validate = () => {
@@ -396,6 +429,27 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
               onError={() => setImagePreview('')}
             />
           </div>
+        )}
+
+        {/* Select from available images */}
+        {availableImages.length > 0 && (
+          <>
+            <Select
+              label={t('products.form.selectExistingImage') || 'Mevcut Resimlerden Seç'}
+              name="selectedImage"
+              value={availableImages.find(img => img.url === formData.imageUrl)?.name || ''}
+              onChange={handleImageSelect}
+              options={[
+                { value: '', label: t('products.form.selectImage') || 'Resim Seçin' },
+                ...availableImages.map(img => ({
+                  value: img.name,
+                  label: img.name,
+                })),
+              ]}
+              error={errors.selectedImage}
+            />
+            <div className="text-sm text-gray-500 mb-2">{t('common.or')}</div>
+          </>
         )}
 
         {/* File Upload */}

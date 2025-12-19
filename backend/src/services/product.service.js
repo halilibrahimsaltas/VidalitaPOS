@@ -1,7 +1,9 @@
 import { productRepository } from '../repositories/product.repository.js';
 import { generateBarcode, validateBarcode } from '../utils/barcode.js';
 import { ApiError } from '../utils/ApiError.js';
-import { uploadToLocal, deleteLocalFile } from '../config/s3.js';
+import { uploadToLocal, deleteLocalFile, UPLOAD_DIR, UPLOAD_URL } from '../config/s3.js';
+import fs from 'fs/promises';
+import path from 'path';
 
 const productService = {
   getAllProducts: async (filters) => {
@@ -234,6 +236,40 @@ const productService = {
 
   uploadProductImage: async (file) => {
     return uploadToLocal(file, 'products');
+  },
+
+  getAvailableProductImages: async () => {
+    try {
+      const productsDir = path.join(UPLOAD_DIR, 'products');
+      
+      // Check if directory exists
+      try {
+        await fs.access(productsDir);
+      } catch (error) {
+        // Directory doesn't exist, return empty array
+        return [];
+      }
+
+      // Read directory contents
+      const files = await fs.readdir(productsDir);
+      
+      // Filter only image files and return their names
+      const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'];
+      const imageFiles = files
+        .filter(file => {
+          const ext = path.extname(file).toLowerCase();
+          return imageExtensions.includes(ext);
+        })
+        .map(file => ({
+          name: file,
+          url: `${UPLOAD_URL}/products/${file}`,
+        }));
+
+      return imageFiles;
+    } catch (error) {
+      console.error('Error reading product images directory:', error);
+      throw new ApiError(500, 'Failed to read product images');
+    }
   },
 
   importProducts: async (file) => {

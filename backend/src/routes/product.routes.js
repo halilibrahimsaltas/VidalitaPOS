@@ -9,6 +9,7 @@ import {
   uploadProductImage,
   importProducts,
   getImportTemplate,
+  getAvailableProductImages,
 } from '../controllers/product.controller.js';
 import { authenticate, authorize, hasPermission } from '../middleware/auth.middleware.js';
 import { validateCreateProduct, validateUpdateProduct } from '../middleware/product.validation.middleware.js';
@@ -30,6 +31,9 @@ router.get('/barcode/:barcode', hasPermission('products.view'), getProductByBarc
 
 // Get import template (only ADMIN and MANAGER)
 router.get('/import/template', authorize('ADMIN', 'MANAGER'), getImportTemplate);
+
+// Get available product images (requires products.view permission)
+router.get('/available-images', hasPermission('products.view'), getAvailableProductImages);
 
 // Upload product image (only ADMIN and MANAGER)
 router.post('/upload-image', authorize('ADMIN', 'MANAGER'), uploadSingleImage, handleUploadError, uploadProductImage);

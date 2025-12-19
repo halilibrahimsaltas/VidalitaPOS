@@ -84,5 +84,10 @@ export const productService = {
     link.remove();
     window.URL.revokeObjectURL(url);
   },
+
+  getAvailableImages: async () => {
+    const response = await api.get('/products/available-images');
+    return response.data;
+  },
 };
 
