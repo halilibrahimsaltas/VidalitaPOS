@@ -27,14 +27,14 @@ const UserList = ({ onEdit }) => {
   const deleteUser = useDeleteUser();
 
   const handleDelete = async (userId) => {
-    if (!window.confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) {
+    if (!window.confirm(t('users.deleteConfirm'))) {
       return;
     }
 
     try {
       await deleteUser.mutateAsync(userId);
     } catch (error) {
-      alert(error.response?.data?.message || 'Kullanıcı silinirken bir hata oluştu');
+      alert(error.response?.data?.message || t('errors.deleteUser'));
     }
   };
 
@@ -51,7 +51,7 @@ const UserList = ({ onEdit }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Yükleniyor...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -59,7 +59,7 @@ const UserList = ({ onEdit }) => {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-        Kullanıcılar yüklenirken bir hata oluştu
+        {t('errors.loadUsers')}
       </div>
     );
   }
@@ -70,7 +70,7 @@ const UserList = ({ onEdit }) => {
     { value: '', label: 'Tüm Roller' },
     { value: 'ADMIN', label: 'Admin' },
     { value: 'MANAGER', label: 'Yönetici' },
-    { value: 'USER', label: 'Kullanıcı' },
+    { value: 'USER', label: t('users.roles.USER') },
     { value: 'CASHIER', label: 'Kasiyer' },
   ];
 
@@ -83,7 +83,7 @@ const UserList = ({ onEdit }) => {
   const roleLabels = {
     ADMIN: 'Admin',
     MANAGER: 'Yönetici',
-    USER: 'Kullanıcı',
+    USER: t('users.roles.USER'),
     CASHIER: 'Kasiyer',
   };
 
@@ -106,7 +106,7 @@ const UserList = ({ onEdit }) => {
               setSearch(e.target.value);
               setPage(1);
             }}
-            placeholder="Kullanıcı adı, email veya ad soyad"
+            placeholder={t('users.searchPlaceholder')}
           />
           <Select
             label="Rol"
@@ -135,7 +135,7 @@ const UserList = ({ onEdit }) => {
           <table className="table">
             <thead className="table-header">
               <tr>
-                <th className="table-header-cell min-w-[120px]">Kullanıcı Adı</th>
+                <th className="table-header-cell min-w-[120px]">{t('users.username')}</th>
                 <th className="table-header-cell min-w-[150px]">Ad Soyad</th>
                 <th className="table-header-cell min-w-[180px] hidden lg:table-cell">Email</th>
                 <th className="table-header-cell min-w-[100px]">Rol</th>
@@ -149,7 +149,7 @@ const UserList = ({ onEdit }) => {
               {users.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
-                    Kullanıcı bulunamadı
+                    {t('users.noUsers')}
                   </td>
                 </tr>
               ) : (
@@ -258,7 +258,7 @@ const UserList = ({ onEdit }) => {
           setPermissionModalOpen(false);
           setSelectedUserId(null);
         }}
-        title="Kullanıcı Yetkilerini Yönet"
+        title={t('users.permissions.title')}
         size="lg"
       >
         {selectedUserId && (

@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
+import { formatCurrency } from '../../utils/currency';
 
-const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit, selectedCustomer }) => {
+const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit, selectedCustomer, currency = 'UZS' }) => {
   const { t } = useTranslation();
   const [payments, setPayments] = useState([
     { method: 'CASH', amount: '', cardType: '' },
@@ -55,7 +56,7 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit, selectedCustomer 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!isValid) {
-      alert(`${t('pos.splitPaymentModal.totalMismatch')}. ${t('pos.splitPaymentModal.remaining')}: ${remaining.toFixed(2)} ₺`);
+      alert(`${t('pos.splitPaymentModal.totalMismatch')}. ${t('pos.splitPaymentModal.remaining')}: ${formatCurrency(remaining, currency)}`);
       return;
     }
 
@@ -118,7 +119,7 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit, selectedCustomer 
               <div className="text-xs text-blue-700 mt-1">{t('pos.splitPaymentModal.phone')}: {selectedCustomer.phone}</div>
             )}
             {selectedCustomer.debt > 0 && (
-              <div className="text-xs text-red-600 mt-1">{t('pos.splitPaymentModal.currentDebt')}: ₺{selectedCustomer.debt.toFixed(2)}</div>
+              <div className="text-xs text-red-600 mt-1">{t('pos.splitPaymentModal.currentDebt')}: {formatCurrency(selectedCustomer.debt, 'UZS')}</div>
             )}
           </div>
         )}
@@ -175,7 +176,7 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit, selectedCustomer 
                   />
                   {discountAmount > 0 && (
                     <div className="mt-2 text-sm text-green-700 font-medium">
-                      {t('pos.splitPaymentModal.discountAmount')}: -₺{discountAmount.toFixed(2)}
+                      {t('pos.splitPaymentModal.discountAmount')}: -{formatCurrency(discountAmount, currency)}
                     </div>
                   )}
                 </div>
@@ -183,29 +184,29 @@ const SplitPaymentModal = ({ isOpen, onClose, total, onSubmit, selectedCustomer 
                 <div className="bg-gray-50 p-4 rounded-lg mb-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-600 font-medium">{t('pos.subtotal')}:</span>
-                    <span className="font-semibold text-gray-900">₺{total.toFixed(2)}</span>
+                    <span className="font-semibold text-gray-900">{formatCurrency(total, currency)}</span>
                   </div>
                   {discountAmount > 0 && (
                     <div className="flex justify-between items-center mb-2 text-red-600">
                       <span className="text-gray-600">{t('pos.splitPaymentModal.discount')}:</span>
-                      <span className="font-semibold">-₺{discountAmount.toFixed(2)}</span>
+                      <span className="font-semibold">-{formatCurrency(discountAmount, currency)}</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center border-t border-gray-300 pt-2">
                     <span className="text-gray-600 font-medium">{t('pos.splitPaymentModal.totalAmount')}:</span>
-                    <span className="font-bold text-2xl text-gray-900">₺{finalTotal.toFixed(2)}</span>
+                    <span className="font-bold text-2xl text-gray-900">{formatCurrency(finalTotal, currency)}</span>
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-gray-600">{t('pos.splitPaymentModal.paid')}:</span>
                     <span className={`font-semibold text-lg ${isValid ? 'text-green-600' : 'text-red-600'}`}>
-                      ₺{calculateTotal().toFixed(2)}
+                      {formatCurrency(calculateTotal(), currency)}
                     </span>
                   </div>
                   {remaining !== 0 && (
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-gray-600">{t('pos.splitPaymentModal.remaining')}:</span>
                       <span className={`font-semibold ${remaining > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                        {remaining > 0 ? '+' : ''}₺{Math.abs(remaining).toFixed(2)}
+                        {remaining > 0 ? '+' : ''}{formatCurrency(Math.abs(remaining), currency)}
                       </span>
                     </div>
                   )}

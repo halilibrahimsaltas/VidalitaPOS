@@ -218,7 +218,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
     }
 
     if (!selectedBranch) {
-      alert('Lütfen bir şube seçin!');
+      alert(t('pos.selectBranchAlert'));
       return;
     }
 
@@ -245,7 +245,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
     }
 
     if (!selectedBranch) {
-      alert('Lütfen bir şube seçin!');
+      alert(t('pos.selectBranchAlert'));
       return;
     }
 
@@ -292,14 +292,14 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
         <div className="flex flex-col sm:flex-row gap-4 items-center">
           {/* Branch Selection */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Şube:</label>
+            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">{t('pos.branch')}</label>
             <select
               value={selectedBranch}
               onChange={(e) => setSelectedBranch(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               disabled={user?.role !== 'ADMIN' && user?.branchId}
             >
-              <option value="">Şube seçin...</option>
+              <option value="">{t('pos.selectBranch')}</option>
               {branches.map((branch) => (
                 <option key={branch.id} value={branch.id}>
                   {branch.name}
@@ -323,7 +323,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
                 type="text"
                 value={barcodeInput}
                 onChange={(e) => setBarcodeInput(e.target.value)}
-                placeholder="Barkod okuyun veya ürün adı ile arayın..."
+                placeholder={t('pos.barcodePlaceholder')}
                 className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                 autoFocus
               />
@@ -348,7 +348,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
           {/* Cart Summary */}
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <HiShoppingCart className="w-5 h-5" />
-            <span className="font-semibold">{cart.length} ürün</span>
+            <span className="font-semibold">{cart.length} {t('pos.product')}</span>
             <span className="text-gray-400">|</span>
             <span className="font-bold text-lg text-gray-900">{formatCurrency(total, cartCurrency)}</span>
           </div>
@@ -362,7 +362,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
           {productSearch && (
             <div className="mb-4">
               <p className="text-sm text-gray-600">
-                "{productSearch}" için {totalProducts} sonuç bulundu
+                {t('pos.searchResults', { search: productSearch, count: totalProducts })}
               </p>
             </div>
           )}
@@ -371,8 +371,8 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
             <div className="flex items-center justify-center h-full text-gray-500">
               <div className="text-center">
                 <HiShoppingCart className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <p className="text-lg">Ürün bulunamadı</p>
-                <p className="text-sm mt-2">Barkod okuyun veya ürün adı ile arayın</p>
+                <p className="text-lg">{t('pos.noProducts')}</p>
+                <p className="text-sm mt-2">{t('pos.searchHint')}</p>
               </div>
             </div>
           ) : (
@@ -432,17 +432,17 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
                 disabled={productPage === 1}
                 className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                Önceki
+                {t('pos.previous')}
               </button>
               <span className="px-4 py-2 text-sm text-gray-600">
-                Sayfa {productPage} / {Math.ceil(totalProducts / 20)}
+                {t('pos.page')} {productPage} / {Math.ceil(totalProducts / 20)}
               </span>
               <button
                 onClick={() => setProductPage(p => p + 1)}
                 disabled={productPage >= Math.ceil(totalProducts / 20)}
                 className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                Sonraki
+                {t('pos.next')}
               </button>
             </div>
           )}
@@ -453,28 +453,28 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
           {/* Cart Header */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-semibold text-gray-900">Sepet</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('pos.cart')}</h2>
               {cart.length > 0 && (
                 <button
                   onClick={clearCart}
                   className="text-sm text-red-600 hover:text-red-800 flex items-center gap-1"
                 >
                   <HiTrash className="w-4 h-4" />
-                  Temizle
+                  {t('pos.clear')}
                 </button>
               )}
             </div>
             {/* Customer Info in Cart */}
             {selectedCustomer ? (
               <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
-                <div className="font-medium text-blue-900">Müşteri: {selectedCustomer.name}</div>
+                <div className="font-medium text-blue-900">{t('pos.customer')} {selectedCustomer.name}</div>
                 {selectedCustomer.debt > 0 && (
-                  <div className="text-red-600 mt-0.5">Borç: {formatCurrency(selectedCustomer.debt, 'UZS')}</div>
+                  <div className="text-red-600 mt-0.5">{t('pos.debt')} {formatCurrency(selectedCustomer.debt, 'UZS')}</div>
                 )}
               </div>
             ) : (
               <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600">
-                Anonim Müşteri
+                {t('pos.customerSelector.anonymous')}
               </div>
             )}
           </div>
@@ -484,7 +484,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
             {cart.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
                 <HiShoppingCart className="w-16 h-16 mb-4" />
-                <p className="text-sm">Sepet boş</p>
+                <p className="text-sm">{t('pos.emptyCart')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -499,7 +499,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
                           {item.product.name}
                         </h3>
                         <p className="text-xs text-gray-500 mt-1">
-                          {formatCurrency(item.unitPrice, item.product?.currency || 'UZS')} / adet
+                          {formatCurrency(item.unitPrice, item.product?.currency || 'UZS')} {t('pos.perUnit')}
                         </p>
                       </div>
                       <button
@@ -546,17 +546,17 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
               {/* Totals */}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Ara Toplam:</span>
+                  <span className="text-gray-600">{t('pos.subtotal')}:</span>
                   <span className="text-gray-900 font-medium">{formatCurrency(subtotal, cartCurrency)}</span>
                 </div>
                 {totalDiscount > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">İndirim:</span>
+                    <span className="text-gray-600">{t('pos.discount')}</span>
                     <span className="text-red-600 font-medium">-{formatCurrency(totalDiscount, cartCurrency)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
-                  <span className="text-gray-900">Toplam:</span>
+                  <span className="text-gray-900">{t('pos.total')}:</span>
                   <span className="text-gray-900">{formatCurrency(total, cartCurrency)}</span>
                 </div>
               </div>
@@ -567,14 +567,14 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
                   onClick={handleCheckout}
                   className="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors"
                 >
-                  Ödemeye Geç
+                  {t('pos.checkout')}
                 </button>
                 {onSplitPayment && (
                   <button
                     onClick={handleSplitPayment}
                     className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
                   >
-                    Parçalı Ödeme
+                    {t('pos.splitPayment')}
                   </button>
                 )}
               </div>

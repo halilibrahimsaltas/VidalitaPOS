@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Input from '../common/Input';
 import Button from '../common/Button';
+import { formatCurrency } from '../../utils/currency';
 
 const PaymentForm = ({ customer, onSubmit, onCancel, isLoading }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     amount: '',
     description: '',
@@ -49,7 +52,7 @@ const PaymentForm = ({ customer, onSubmit, onCancel, isLoading }) => {
         <p className="font-semibold">{customer.name}</p>
         {customer.debt > 0 && (
           <p className="text-sm text-red-600 mt-1">
-            {t('customers.paymentForm.currentDebt')}: ₺{customer.debt.toFixed(2)}
+            {t('customers.paymentForm.currentDebt')}: {formatCurrency(customer.debt, 'UZS')}
           </p>
         )}
       </div>

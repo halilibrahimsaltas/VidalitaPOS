@@ -8,6 +8,7 @@ import SplitPaymentModal from '../components/pos/SplitPaymentModal';
 import InvoiceView from '../components/sales/InvoiceView';
 import Modal from '../components/common/Modal';
 import Button from '../components/common/Button';
+import { formatCurrency, getCurrencySymbol } from '../utils/currency';
 
 const POS = () => {
   const { t } = useTranslation();
@@ -52,7 +53,7 @@ const POS = () => {
         discount: paymentData.discount || 0,
         customerId: paymentData.customerId || null,
         notes: paymentData.splitPayments 
-          ? `Parçalı ödeme: ${paymentData.splitPayments.map(p => `${p.method} ${p.amount.toFixed(2)}₺`).join(', ')}`
+          ? `Parçalı ödeme: ${paymentData.splitPayments.map(p => `${p.method} ${formatCurrency(p.amount, checkoutData?.currency || 'UZS')}`).join(', ')}`
           : null,
       };
 
@@ -129,6 +130,7 @@ const POS = () => {
           }, 0) - (checkoutData?.discount || 0) || 0}
           onSubmit={handleSplitPaymentSubmit}
           selectedCustomer={checkoutData?.customer || null}
+          currency={checkoutData?.currency || 'UZS'}
         />
 
         {completedSale && (
@@ -147,7 +149,7 @@ const POS = () => {
                   Fiş No: {completedSale.saleNumber}
                 </p>
                 <p className="text-sm text-green-700">
-                  Toplam: ₺{parseFloat(completedSale.total).toFixed(2)}
+                  Toplam: {formatCurrency(parseFloat(completedSale.total), completedSale.currency || 'UZS')}
                 </p>
               </div>
               <div className="flex justify-end gap-2">
