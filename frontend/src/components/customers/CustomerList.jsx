@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useCustomers, useDeleteCustomer } from '../../hooks/useCustomers';
 import Button from '../common/Button';
 import Input from '../common/Input';
+import { formatCurrency } from '../../utils/currency';
 
 const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, onViewStatistics, onViewPurchaseHistory }) => {
   const { t } = useTranslation();
@@ -54,7 +55,7 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <Input
-            placeholder="Müşteri adı, telefon veya email ile ara..."
+            placeholder={t('customers.searchPlaceholder')}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -70,12 +71,12 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
           }}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
-          <option value="">Tümü</option>
-          <option value="true">Aktif</option>
-          <option value="false">Pasif</option>
+          <option value="">{t('common.all')}</option>
+          <option value="true">{t('common.active')}</option>
+          <option value="false">{t('common.inactive')}</option>
         </select>
         <Button onClick={onCreate} variant="primary">
-          + Yeni Müşteri
+          {t('customers.createNew')}
         </Button>
       </div>
 
@@ -86,19 +87,19 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Müşteri
+                  {t('customers.customer')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  İletişim
+                  {t('customers.contact')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Borç
+                  {t('customers.debt')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Durum
+                  {t('customers.status')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  İşlemler
+                  {t('customers.actions')}
                 </th>
               </tr>
             </thead>
@@ -106,7 +107,7 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
               {customers.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                    Müşteri bulunamadı
+                    {t('customers.noCustomers')}
                   </td>
                 </tr>
               ) : (
@@ -115,7 +116,7 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">{customer.name}</div>
                       {customer.taxNumber && (
-                        <div className="text-sm text-gray-500">VKN: {customer.taxNumber}</div>
+                        <div className="text-sm text-gray-500">{t('customers.taxNumber')}: {customer.taxNumber}</div>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -128,7 +129,7 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
                           customer.debt > 0 ? 'text-red-600' : 'text-green-600'
                         }`}
                       >
-                        ₺{customer.debt?.toFixed(2) || '0.00'}
+                        {formatCurrency(customer.debt || 0, 'UZS')}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -139,7 +140,7 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
                             : 'bg-red-100 text-red-800'
                         }`}
                       >
-                        {customer.isActive ? 'Aktif' : 'Pasif'}
+                        {customer.isActive ? t('common.active') : t('common.inactive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -147,14 +148,14 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
                         <button
                           onClick={() => onViewStatistics(customer)}
                           className="text-purple-600 hover:text-purple-900"
-                          title="İstatistikler"
+                          title={t('customers.statistics')}
                         >
                           📊
                         </button>
                         <button
                           onClick={() => onViewPurchaseHistory(customer)}
                           className="text-indigo-600 hover:text-indigo-900"
-                          title="Satın Alma Geçmişi"
+                          title={t('customers.purchaseHistory')}
                         >
                           📋
                         </button>
@@ -162,28 +163,28 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
                           onClick={() => onViewTransactions(customer)}
                           className="text-blue-600 hover:text-blue-900"
                         >
-                          Hareketler
+                          {t('customers.transactions')}
                         </button>
                         {customer.debt > 0 && (
                           <button
                             onClick={() => onRecordPayment(customer)}
                             className="text-green-600 hover:text-green-900"
                           >
-                            Ödeme
+                            {t('customers.payment')}
                           </button>
                         )}
                         <button
                           onClick={() => onEdit(customer)}
                           className="text-gray-600 hover:text-gray-900"
                         >
-                          Düzenle
+                          {t('common.edit')}
                         </button>
                         <button
                           onClick={() => handleDelete(customer.id, customer.name)}
                           className="text-red-600 hover:text-red-900"
                           disabled={deleteCustomer.isLoading}
                         >
-                          Sil
+                          {t('common.delete')}
                         </button>
                       </div>
                     </td>
@@ -199,7 +200,7 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Toplam {pagination.total} müşteri, Sayfa {pagination.page} / {pagination.totalPages}
+            {t('customers.paginationTotal', { total: pagination.total, page: pagination.page, totalPages: pagination.totalPages })}
           </div>
           <div className="flex space-x-2">
             <Button
@@ -208,7 +209,7 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
             >
-              Önceki
+              {t('common.previous')}
             </Button>
             <Button
               variant="outline"
@@ -216,7 +217,7 @@ const CustomerList = ({ onEdit, onCreate, onViewTransactions, onRecordPayment, o
               onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
               disabled={page === pagination.totalPages}
             >
-              Sonraki
+              {t('common.next')}
             </Button>
           </div>
         </div>

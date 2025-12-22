@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useInventory } from '../../hooks/useInventory';
 import { useBranches } from '../../hooks/useBranches';
 import Select from '../common/Select';
 import Button from '../common/Button';
 
 const InventoryList = ({ onEdit, onTransfer, onAdjust }) => {
+  const { t } = useTranslation();
   const [branchFilter, setBranchFilter] = useState('');
   const [lowStockFilter, setLowStockFilter] = useState('');
 
@@ -20,7 +22,7 @@ const InventoryList = ({ onEdit, onTransfer, onAdjust }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Yükleniyor...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -36,7 +38,7 @@ const InventoryList = ({ onEdit, onTransfer, onAdjust }) => {
   const { inventory } = data?.data || { inventory: [] };
 
   const branchOptions = [
-    { value: '', label: 'Tüm Şubeler' },
+    { value: '', label: t('inventory.allBranches') },
     ...branches.map((b) => ({ value: b.id, label: b.name })),
   ];
 
@@ -56,11 +58,11 @@ const InventoryList = ({ onEdit, onTransfer, onAdjust }) => {
           onChange={(e) => setLowStockFilter(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
-          <option value="">Tümü</option>
-          <option value="true">Düşük Stok</option>
+          <option value="">{t('inventory.all')}</option>
+          <option value="true">{t('inventory.lowStock')}</option>
         </select>
         <Button onClick={onTransfer} variant="primary">
-          Stok Transferi
+          {t('inventory.transfer')}
         </Button>
       </div>
 
@@ -71,22 +73,22 @@ const InventoryList = ({ onEdit, onTransfer, onAdjust }) => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Şube
+                  {t('inventory.branch')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ürün
+                  {t('inventory.product')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Mevcut Stok
+                  {t('inventory.quantity')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Min. Stok
+                  {t('inventory.minStock')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Durum
+                  {t('inventory.status')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  İşlemler
+                  {t('inventory.actions')}
                 </th>
               </tr>
             </thead>
@@ -94,7 +96,7 @@ const InventoryList = ({ onEdit, onTransfer, onAdjust }) => {
               {inventory.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                    Stok kaydı bulunamadı
+                    {t('inventory.noInventory')}
                   </td>
                 </tr>
               ) : (
@@ -126,7 +128,7 @@ const InventoryList = ({ onEdit, onTransfer, onAdjust }) => {
                               : 'bg-green-100 text-green-800'
                           }`}
                         >
-                          {isLowStock ? 'Düşük Stok' : 'Normal'}
+                          {isLowStock ? t('inventory.lowStock') : t('inventory.normal')}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -135,14 +137,14 @@ const InventoryList = ({ onEdit, onTransfer, onAdjust }) => {
                             onClick={() => onEdit(item)}
                             className="text-primary-600 hover:text-primary-900"
                           >
-                            Düzenle
+                            {t('common.edit')}
                           </button>
                           {onAdjust && (
                             <button
                               onClick={() => onAdjust(item)}
                               className="text-orange-600 hover:text-orange-900"
                             >
-                              Düzelt
+                              {t('inventory.adjust')}
                             </button>
                           )}
                         </div>

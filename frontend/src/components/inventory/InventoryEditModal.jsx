@@ -51,23 +51,23 @@ const InventoryEditModal = ({ isOpen, onClose, inventoryItem, onSuccess }) => {
     const newErrors = {};
 
     if (!formData.branchId) {
-      newErrors.branchId = 'Şube seçimi gereklidir';
+      newErrors.branchId = t('inventory.form.branchRequired');
     }
 
     if (!formData.productId) {
-      newErrors.productId = 'Ürün seçimi gereklidir';
+      newErrors.productId = t('inventory.form.productRequired');
     }
 
     if (formData.quantity === '' || parseInt(formData.quantity) < 0) {
-      newErrors.quantity = 'Geçerli bir stok miktarı girin';
+      newErrors.quantity = t('inventory.form.quantityRequired');
     }
 
     if (formData.minStockLevel === '' || parseInt(formData.minStockLevel) < 0) {
-      newErrors.minStockLevel = 'Geçerli bir minimum stok seviyesi girin';
+      newErrors.minStockLevel = t('inventory.form.minStockRequired');
     }
 
     if (formData.maxStockLevel && parseInt(formData.maxStockLevel) < 0) {
-      newErrors.maxStockLevel = 'Maksimum stok seviyesi negatif olamaz';
+      newErrors.maxStockLevel = t('inventory.form.maxStockInvalid');
     }
 
     if (
@@ -75,7 +75,7 @@ const InventoryEditModal = ({ isOpen, onClose, inventoryItem, onSuccess }) => {
       formData.minStockLevel &&
       parseInt(formData.maxStockLevel) < parseInt(formData.minStockLevel)
     ) {
-      newErrors.maxStockLevel = 'Maksimum stok seviyesi minimum stok seviyesinden küçük olamaz';
+      newErrors.maxStockLevel = t('inventory.form.maxStockLessThanMin');
     }
 
     setErrors(newErrors);
@@ -96,7 +96,7 @@ const InventoryEditModal = ({ isOpen, onClose, inventoryItem, onSuccess }) => {
         if (onSuccess) onSuccess();
         onClose();
       } catch (error) {
-        alert(error.response?.data?.message || 'Stok güncellenirken bir hata oluştu');
+        alert(error.response?.data?.message || t('inventory.form.updateError'));
       }
     }
   };
@@ -107,19 +107,19 @@ const InventoryEditModal = ({ isOpen, onClose, inventoryItem, onSuccess }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={inventoryItem ? 'Stok Düzenle' : 'Yeni Stok Ekle'}
+      title={inventoryItem ? t('inventory.form.editTitle') : t('inventory.form.createTitle')}
       size="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Select
-          label="Şube"
+          label={t('inventory.branch')}
           name="branchId"
           value={formData.branchId}
           onChange={handleChange}
           error={errors.branchId}
           required
           options={[
-            { value: '', label: 'Şube Seçiniz' },
+            { value: '', label: t('inventory.branchSelect') },
             ...branchOptions,
           ]}
           disabled={!!inventoryItem} // Disable if editing existing inventory
@@ -127,15 +127,15 @@ const InventoryEditModal = ({ isOpen, onClose, inventoryItem, onSuccess }) => {
 
         {inventoryItem && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Ürün</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('inventory.product')}</label>
             <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700">
-              {inventoryItem.product?.name || 'Bilinmeyen Ürün'}
+              {inventoryItem.product?.name || t('inventory.form.unknownProduct')}
             </div>
           </div>
         )}
 
         <Input
-          label="Stok Miktarı"
+          label={t('inventory.quantityLabel')}
           name="quantity"
           type="number"
           min="0"
@@ -147,7 +147,7 @@ const InventoryEditModal = ({ isOpen, onClose, inventoryItem, onSuccess }) => {
         />
 
         <Input
-          label="Minimum Stok Seviyesi"
+          label={t('inventory.minStockLabel')}
           name="minStockLevel"
           type="number"
           min="0"
@@ -159,22 +159,22 @@ const InventoryEditModal = ({ isOpen, onClose, inventoryItem, onSuccess }) => {
         />
 
         <Input
-          label="Maksimum Stok Seviyesi"
+          label={t('inventory.maxStockLabel')}
           name="maxStockLevel"
           type="number"
           min="0"
           value={formData.maxStockLevel}
           onChange={handleChange}
           error={errors.maxStockLevel}
-          placeholder="Sınırsız"
+          placeholder={t('inventory.form.maxStockPlaceholder')}
         />
 
         <div className="flex justify-end space-x-3 pt-4">
           <Button type="button" variant="secondary" onClick={onClose} disabled={createOrUpdateInventory.isLoading}>
-            İptal
+            {t('common.cancel')}
           </Button>
           <Button type="submit" variant="primary" disabled={createOrUpdateInventory.isLoading}>
-            {createOrUpdateInventory.isLoading ? 'Kaydediliyor...' : 'Kaydet'}
+            {createOrUpdateInventory.isLoading ? t('common.saving') : t('common.save')}
           </Button>
         </div>
       </form>

@@ -1,6 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { useCustomerTransactions, useCustomerDebt } from '../../hooks/useCustomers';
+import { formatCurrency } from '../../utils/currency';
 
 const TransactionHistory = ({ customerId, onClose }) => {
+  const { t } = useTranslation();
   const { data: transactionsData, isLoading } = useCustomerTransactions(customerId);
   const { data: debtData } = useCustomerDebt(customerId);
 
@@ -10,7 +13,7 @@ const TransactionHistory = ({ customerId, onClose }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Yükleniyor...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -22,9 +25,9 @@ const TransactionHistory = ({ customerId, onClose }) => {
         debt > 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'
       }`}>
         <div className="flex justify-between items-center">
-          <span className="font-semibold">Toplam Borç:</span>
+          <span className="font-semibold">{t('customers.totalDebt')}:</span>
           <span className={`text-lg font-bold ${debt > 0 ? 'text-red-600' : 'text-green-600'}`}>
-            ₺{debt.toFixed(2)}
+            {formatCurrency(debt, 'UZS')}
           </span>
         </div>
       </div>
@@ -36,16 +39,16 @@ const TransactionHistory = ({ customerId, onClose }) => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tarih
+                  {t('customers.date')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tip
+                  {t('customers.transactionType')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Açıklama
+                  {t('customers.description')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tutar
+                  {t('customers.amount')}
                 </th>
               </tr>
             </thead>
@@ -53,7 +56,7 @@ const TransactionHistory = ({ customerId, onClose }) => {
               {transactions.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
-                    İşlem kaydı bulunamadı
+                    {t('customers.noTransactions')}
                   </td>
                 </tr>
               ) : (
@@ -77,7 +80,9 @@ const TransactionHistory = ({ customerId, onClose }) => {
                             : 'bg-gray-100 text-gray-800'
                         }`}
                       >
-                        {transaction.type === 'SALE' ? 'Satış' : transaction.type === 'PAYMENT' ? 'Ödeme' : 'Düzeltme'}
+                        {transaction.type === 'SALE' ? t('customers.transactionTypeLabels.SALE') : 
+                         transaction.type === 'PAYMENT' ? t('customers.transactionTypeLabels.PAYMENT') : 
+                         t('customers.transactionTypeLabels.ADJUSTMENT')}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -86,7 +91,7 @@ const TransactionHistory = ({ customerId, onClose }) => {
                       </div>
                       {transaction.sale && (
                         <div className="text-sm text-gray-500">
-                          Fiş: {transaction.sale.saleNumber}
+                          {t('customers.receipt')} {transaction.sale.saleNumber}
                         </div>
                       )}
                     </td>
@@ -100,7 +105,7 @@ const TransactionHistory = ({ customerId, onClose }) => {
                             : 'text-gray-600'
                         }`}
                       >
-                        {transaction.type === 'SALE' ? '+' : '-'}₺{parseFloat(transaction.amount).toFixed(2)}
+                        {transaction.type === 'SALE' ? '+' : '-'}{formatCurrency(parseFloat(transaction.amount), 'UZS')}
                       </div>
                     </td>
                   </tr>

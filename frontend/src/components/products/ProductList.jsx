@@ -67,7 +67,7 @@ const ProductList = ({ onEdit }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Yükleniyor...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -75,7 +75,7 @@ const ProductList = ({ onEdit }) => {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-        Ürünler yüklenirken bir hata oluştu
+        {t('errors.loadProducts')}
       </div>
     );
   }
@@ -89,7 +89,7 @@ const ProductList = ({ onEdit }) => {
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <Input
-              placeholder="Ürün adı, barkod veya SKU ile ara..."
+              placeholder={t('products.searchPlaceholder')}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -115,13 +115,13 @@ const ProductList = ({ onEdit }) => {
             }}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="">Tümü</option>
-            <option value="true">Aktif</option>
-            <option value="false">Pasif</option>
+            <option value="">{t('common.all')}</option>
+            <option value="true">{t('common.active')}</option>
+            <option value="false">{t('common.inactive')}</option>
           </select>
           <div>
             <Button onClick={() => setIsImportModalOpen(true)} variant="outline">
-              📥 İçe Aktar
+              📥 {t('products.import')}
             </Button>
           </div>
         </div>
@@ -134,22 +134,22 @@ const ProductList = ({ onEdit }) => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ürün
+                  {t('products.name')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Barkod
+                  {t('products.barcode')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Kategori
+                  {t('products.category')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Fiyat
+                  {t('products.price')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Durum
+                  {t('products.status')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  İşlemler
+                  {t('products.actions')}
                 </th>
               </tr>
             </thead>
@@ -157,7 +157,7 @@ const ProductList = ({ onEdit }) => {
               {products.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                    Ürün bulunamadı
+                    {t('products.noProducts')}
                   </td>
                 </tr>
               ) : (
@@ -166,7 +166,7 @@ const ProductList = ({ onEdit }) => {
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">{product.name}</div>
                       {product.sku && (
-                        <div className="text-sm text-gray-500">SKU: {product.sku}</div>
+                        <div className="text-sm text-gray-500">{t('products.sku')}: {product.sku}</div>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -190,7 +190,7 @@ const ProductList = ({ onEdit }) => {
                             : 'bg-red-100 text-red-800'
                         }`}
                       >
-                        {product.isActive ? 'Aktif' : 'Pasif'}
+                        {product.isActive ? t('common.active') : t('common.inactive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -198,14 +198,14 @@ const ProductList = ({ onEdit }) => {
                         onClick={() => onEdit(product)}
                         className="text-primary-600 hover:text-primary-900 mr-4"
                       >
-                        Düzenle
+                        {t('common.edit')}
                       </button>
                       <button
                         onClick={() => handleDelete(product.id, product.name)}
                         className="text-red-600 hover:text-red-900"
                         disabled={deleteProduct.isLoading}
                       >
-                        Sil
+                        {t('common.delete')}
                       </button>
                     </td>
                   </tr>
@@ -220,7 +220,7 @@ const ProductList = ({ onEdit }) => {
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Toplam {pagination.total} ürün, Sayfa {pagination.page} / {pagination.totalPages}
+            {t('products.paginationTotal', { total: pagination.total, page: pagination.page, totalPages: pagination.totalPages })}
           </div>
           <div className="flex space-x-2">
             <Button
@@ -229,7 +229,7 @@ const ProductList = ({ onEdit }) => {
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
             >
-              Önceki
+              {t('common.previous')}
             </Button>
             <Button
               variant="outline"
@@ -237,7 +237,7 @@ const ProductList = ({ onEdit }) => {
               onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
               disabled={page === pagination.totalPages}
             >
-              Sonraki
+              {t('common.next')}
             </Button>
           </div>
         </div>
@@ -251,46 +251,46 @@ const ProductList = ({ onEdit }) => {
           setImportFile(null);
           setImportResult(null);
         }}
-        title="Ürün İçe Aktarma"
+        title={t('products.importTitle')}
         size="lg"
       >
         <div className="space-y-4">
           {!importResult ? (
             <>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h3 className="font-semibold text-blue-800 mb-2">CSV Formatı</h3>
+                <h3 className="font-semibold text-blue-800 mb-2">{t('products.importCSVFormat')}</h3>
                 <p className="text-sm text-blue-700 mb-2">
-                  CSV dosyanız şu sütunları içermelidir:
+                  {t('products.importCSVColumns')}
                 </p>
                 <ul className="text-sm text-blue-700 list-disc list-inside">
-                  <li><strong>name</strong> (zorunlu) - Ürün adı</li>
-                  <li><strong>price</strong> (zorunlu) - Satış fiyatı</li>
-                  <li><strong>description</strong> - Açıklama</li>
-                  <li><strong>barcode</strong> - Barkod</li>
-                  <li><strong>sku</strong> - Stok kodu</li>
-                  <li><strong>categoryId</strong> - Kategori ID</li>
-                  <li><strong>costPrice</strong> - Maliyet fiyatı</li>
-                  <li><strong>isActive</strong> - Aktif (true/false)</li>
+                  <li><strong>{t('products.importColumnName')}</strong></li>
+                  <li><strong>{t('products.importColumnPrice')}</strong></li>
+                  <li><strong>{t('products.importColumnDescription')}</strong></li>
+                  <li><strong>{t('products.importColumnBarcode')}</strong></li>
+                  <li><strong>{t('products.importColumnSku')}</strong></li>
+                  <li><strong>{t('products.importColumnCategoryId')}</strong></li>
+                  <li><strong>{t('products.importColumnCostPrice')}</strong></li>
+                  <li><strong>{t('products.importColumnIsActive')}</strong></li>
                 </ul>
                 <Button
                   onClick={async () => {
                     try {
                       await productService.downloadTemplate();
                     } catch (error) {
-                      alert('Şablon indirilemedi: ' + (error.response?.data?.message || error.message));
+                      alert(t('products.importTemplateError') + ': ' + (error.response?.data?.message || error.message));
                     }
                   }}
                   variant="outline"
                   size="sm"
                   className="mt-2"
                 >
-                  📥 Şablon İndir
+                  {t('products.importTemplateDownload')}
                 </Button>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  CSV Dosyası Seçin
+                  {t('products.importFileSelect')}
                 </label>
                 <input
                   type="file"
@@ -309,13 +309,13 @@ const ProductList = ({ onEdit }) => {
                   }}
                   disabled={isImporting}
                 >
-                  İptal
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   variant="primary"
                   onClick={async () => {
                     if (!importFile) {
-                      alert('Lütfen bir dosya seçin');
+                      alert(t('products.importFileRequired'));
                       return;
                     }
 
@@ -325,33 +325,33 @@ const ProductList = ({ onEdit }) => {
                       setImportResult(result.data);
                       refetch(); // Refresh product list
                     } catch (error) {
-                      alert('İçe aktarma başarısız: ' + (error.response?.data?.message || error.message));
+                      alert(t('products.importFailed') + ': ' + (error.response?.data?.message || error.message));
                     } finally {
                       setIsImporting(false);
                     }
                   }}
                   disabled={!importFile || isImporting}
                 >
-                  {isImporting ? 'İçe Aktarılıyor...' : 'İçe Aktar'}
+                  {isImporting ? t('products.importing') : t('products.import')}
                 </Button>
               </div>
             </>
           ) : (
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h3 className="font-semibold text-green-800 mb-2">✅ İçe Aktarma Tamamlandı</h3>
+                <h3 className="font-semibold text-green-800 mb-2">{t('products.importCompleted')}</h3>
                 <div className="text-sm text-green-700 space-y-1">
-                  <p>Toplam: {importResult.total} ürün</p>
-                  <p>Başarılı: {importResult.success} ürün</p>
+                  <p>{t('products.importTotal')}: {importResult.total} {t('products.name')}</p>
+                  <p>{t('products.importSuccess')}: {importResult.success} {t('products.name')}</p>
                   {importResult.failed > 0 && (
-                    <p className="text-red-700">Başarısız: {importResult.failed} ürün</p>
+                    <p className="text-red-700">{t('products.importFailedCount')}: {importResult.failed} {t('products.name')}</p>
                   )}
                 </div>
               </div>
 
               {importResult.errors && importResult.errors.length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-h-60 overflow-y-auto">
-                  <h4 className="font-semibold text-red-800 mb-2">Hatalar:</h4>
+                  <h4 className="font-semibold text-red-800 mb-2">{t('products.importErrors')}</h4>
                   <ul className="text-sm text-red-700 space-y-1">
                     {importResult.errors.slice(0, 10).map((error, index) => (
                       <li key={index}>
@@ -360,7 +360,7 @@ const ProductList = ({ onEdit }) => {
                     ))}
                     {importResult.errors.length > 10 && (
                       <li className="text-gray-600">
-                        ... ve {importResult.errors.length - 10} hata daha
+                        {t('products.importMoreErrors', { count: importResult.errors.length - 10 })}
                       </li>
                     )}
                   </ul>
@@ -376,7 +376,7 @@ const ProductList = ({ onEdit }) => {
                     setImportResult(null);
                   }}
                 >
-                  Kapat
+                  {t('common.close')}
                 </Button>
               </div>
             </div>

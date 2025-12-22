@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSales } from '../../hooks/useSales';
 import { HiDocumentText, HiPrinter } from 'react-icons/hi2';
 import Button from '../common/Button';
 import { formatCurrency } from '../../utils/currency';
 
 const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -49,9 +51,9 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
 
   const getStatusLabel = (status) => {
     const labels = {
-      COMPLETED: 'Tamamlandı',
-      REFUNDED: 'İade Edildi',
-      PARTIALLY_REFUNDED: 'Kısmen İade',
+      COMPLETED: t('sales.statusLabels.COMPLETED'),
+      REFUNDED: t('sales.statusLabels.REFUNDED'),
+      PARTIALLY_REFUNDED: t('sales.statusLabels.PARTIALLY_REFUNDED'),
       CANCELLED: t('sales.statusLabels.CANCELLED'),
     };
     return labels[status] || status;
@@ -70,7 +72,7 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">Yükleniyor...</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -78,7 +80,7 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-        Satış geçmişi yüklenirken bir hata oluştu
+        {t('errors.loadSales')}
       </div>
     );
   }
@@ -89,7 +91,7 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
       <div className="bg-gray-50 p-4 rounded-lg">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Başlangıç Tarihi</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('customers.startDate')}</label>
             <input
               type="date"
               value={startDate}
@@ -101,7 +103,7 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bitiş Tarihi</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('customers.endDate')}</label>
             <input
               type="date"
               value={endDate}
@@ -123,7 +125,7 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
               }}
               className="text-sm text-blue-600 hover:text-blue-800"
             >
-              Filtreleri Temizle
+              {t('customers.clearFilters')}
             </button>
           </div>
         )}
@@ -135,20 +137,20 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fiş No</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tarih</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Şube</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ödeme</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Durum</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tutar</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">İşlemler</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('customers.receiptNumber')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('customers.date')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('sales.branch')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('customers.payment')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('customers.status')}</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('customers.amount')}</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{t('customers.actions')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {sales.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
-                    Satış kaydı bulunamadı
+                    {t('customers.noSales')}
                   </td>
                 </tr>
               ) : (
@@ -157,7 +159,7 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="text-sm font-mono text-gray-900">{sale.saleNumber}</div>
                       {sale.invoiceNumber && (
-                        <div className="text-xs text-gray-500">Fatura: {sale.invoiceNumber}</div>
+                        <div className="text-xs text-gray-500">{t('customers.invoiceNumber')} {sale.invoiceNumber}</div>
                       )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -168,10 +170,10 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="text-sm text-gray-600">
-                        {sale.paymentMethod === 'CASH' ? 'Nakit' :
-                         sale.paymentMethod === 'CARD' ? 'Kart' :
-                         sale.paymentMethod === 'CREDIT' ? 'Veresiye' :
-                         sale.paymentMethod === 'MIXED' ? 'Karma' : sale.paymentMethod}
+                        {sale.paymentMethod === 'CASH' ? t('sales.paymentMethodLabels.CASH') :
+                         sale.paymentMethod === 'CARD' ? t('sales.paymentMethodLabels.CARD') :
+                         sale.paymentMethod === 'CREDIT' ? t('sales.paymentMethodLabels.CREDIT') :
+                         sale.paymentMethod === 'MIXED' ? t('sales.paymentMethodLabels.MIXED') : sale.paymentMethod}
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -188,10 +190,10 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
                       <button
                         onClick={() => onViewInvoice(sale.id)}
                         className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm"
-                        title="Faturayı Görüntüle"
+                        title={t('customers.viewInvoice')}
                       >
                         <HiDocumentText className="w-4 h-4" />
-                        <span>Fatura</span>
+                        <span>{t('customers.invoice')}</span>
                       </button>
                     </td>
                   </tr>
@@ -205,7 +207,7 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
         {pagination.totalPages > 1 && (
           <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200">
             <div className="text-sm text-gray-700">
-              Toplam {pagination.total} satış, Sayfa {pagination.page} / {pagination.totalPages}
+              {t('customers.purchaseHistoryPagination', { total: pagination.total, page: pagination.page, totalPages: pagination.totalPages })}
             </div>
             <div className="flex gap-2">
               <Button
@@ -214,7 +216,7 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
-                Önceki
+                {t('common.previous')}
               </Button>
               <Button
                 variant="outline"
@@ -222,7 +224,7 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
                 onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
                 disabled={page >= pagination.totalPages}
               >
-                Sonraki
+                {t('common.next')}
               </Button>
             </div>
           </div>
