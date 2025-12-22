@@ -435,12 +435,12 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
         {availableImages.length > 0 && (
           <>
             <Select
-              label={t('products.form.selectExistingImage') || 'Mevcut Resimlerden Seç'}
+              label={t('products.form.selectExistingImage')}
               name="selectedImage"
               value={availableImages.find(img => img.url === formData.imageUrl)?.name || ''}
               onChange={handleImageSelect}
               options={[
-                { value: '', label: t('products.form.selectImage') || 'Resim Seçin' },
+                { value: '', label: t('products.form.selectImage') },
                 ...availableImages.map(img => ({
                   value: img.name,
                   label: img.name,

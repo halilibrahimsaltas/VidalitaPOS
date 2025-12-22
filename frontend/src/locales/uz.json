@@ -133,7 +133,9 @@
       "rootCategory": "Asosiy kategoriya (ota kategoriya yo'q)",
       "categoryCreateError": "Kategoriya yaratishda xato yuz berdi",
       "creating": "Yaratilmoqda...",
-      "branchSelect": "Filialni tanlang (Ixtiyoriy)"
+      "branchSelect": "Filialni tanlang (Ixtiyoriy)",
+      "selectExistingImage": "Mavjud rasmlardan tanlang",
+      "selectImage": "Rasmni tanlang"
     }
   },
   "inventory": {

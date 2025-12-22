@@ -7,6 +7,7 @@ import Button from '../common/Button';
 import Input from '../common/Input';
 import Select from '../common/Select';
 import Modal from '../common/Modal';
+import { formatCurrency } from '../../utils/currency';
 
 const ProductList = ({ onEdit }) => {
   const { t } = useTranslation();
@@ -178,7 +179,7 @@ const ProductList = ({ onEdit }) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        ₺{parseFloat(product.price).toFixed(2)}
+                        {formatCurrency(parseFloat(product.price), product.currency || 'UZS')}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

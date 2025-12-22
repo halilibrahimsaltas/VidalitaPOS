@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSales, useSale, useRefundSale, useCancelSale } from '../../hooks/useSales';
 import { HiDocumentText } from 'react-icons/hi2';
@@ -9,14 +9,25 @@ import Modal from '../common/Modal';
 import BranchSelect from '../common/BranchSelect';
 import RefundModal from './RefundModal';
 import InvoiceView from './InvoiceView';
+import { formatCurrency } from '../../utils/currency';
 
 const SalesList = () => {
   const { t } = useTranslation();
+  
+  // Get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const [page, setPage] = useState(1);
   const [branchFilter, setBranchFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(getTodayDate());
+  const [endDate, setEndDate] = useState(getTodayDate());
   const [selectedSaleId, setSelectedSaleId] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
@@ -94,11 +105,20 @@ const SalesList = () => {
     });
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY',
-    }).format(amount);
+  // Get the most common currency from sale items, or default to UZS
+  const getSaleCurrency = (sale) => {
+    if (!sale?.items || sale.items.length === 0) return 'UZS';
+    const currencies = sale.items
+      .map(item => item.product?.currency || 'UZS')
+      .filter(Boolean);
+    if (currencies.length === 0) return 'UZS';
+    const currencyCounts = {};
+    currencies.forEach(curr => {
+      currencyCounts[curr] = (currencyCounts[curr] || 0) + 1;
+    });
+    return Object.keys(currencyCounts).reduce((a, b) => 
+      currencyCounts[a] > currencyCounts[b] ? a : b
+    );
   };
 
   if (isLoading) {
@@ -152,29 +172,34 @@ const SalesList = () => {
     <div className="space-y-4">
       {/* Filters */}
       <div className="card p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <BranchSelect
-              value={branchFilter}
-              onChange={(e) => {
-                setBranchFilter(e.target.value);
-                setPage(1);
-              }}
-              placeholder={t('sales.allBranches')}
-            />
+        <div className="space-y-4">
+          {/* First row: Branch and Status - Symmetric */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="pt-6">
+              <BranchSelect
+                value={branchFilter}
+                onChange={(e) => {
+                  setBranchFilter(e.target.value);
+                  setPage(1);
+                }}
+                placeholder={t('sales.allBranches')}
+                label=""
+              />
+            </div>
+            <div className="pt-6">
+              <Select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+                options={statusOptions}
+                placeholder={t('sales.allStatuses')}
+              />
+            </div>
           </div>
-          <div>
-            <Select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-              }}
-              options={statusOptions}
-              placeholder={t('sales.allStatuses')}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
+          {/* Second row: Date inputs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               type="date"
               value={startDate}
@@ -250,7 +275,7 @@ const SalesList = () => {
                     </td>
                     <td className="table-cell text-right">
                       <div className="text-sm font-semibold text-gray-900">
-                        {formatCurrency(parseFloat(sale.total))}
+                        {formatCurrency(parseFloat(sale.total), getSaleCurrency(sale))}
                       </div>
                     </td>
                     <td className="table-cell">
@@ -472,15 +497,16 @@ const SalesList = () => {
                           <div className="text-sm text-gray-600">{item.quantity}</div>
                         </td>
                         <td className="table-cell text-right hidden sm:table-cell">
-                          <div className="text-sm text-gray-600">{formatCurrency(parseFloat(item.unitPrice))}</div>
+                          <div className="text-sm text-gray-600">{formatCurrency(parseFloat(item.unitPrice), item.product?.currency || 'UZS')}</div>
                         </td>
                         <td className="table-cell text-right hidden md:table-cell">
-                          <div className="text-sm text-gray-600">{formatCurrency(parseFloat(item.discount || 0))}</div>
+                          <div className="text-sm text-gray-600">{formatCurrency(parseFloat(item.discount || 0), item.product?.currency || 'UZS')}</div>
                         </td>
                         <td className="table-cell text-right">
                           <div className="text-sm font-semibold text-gray-900">
                             {formatCurrency(
-                              parseFloat(item.unitPrice) * item.quantity - parseFloat(item.discount || 0)
+                              parseFloat(item.unitPrice) * item.quantity - parseFloat(item.discount || 0),
+                              item.product?.currency || 'UZS'
                             )}
                           </div>
                         </td>

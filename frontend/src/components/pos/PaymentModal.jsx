@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
+import { formatCurrency } from '../../utils/currency';
 
-const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, selectedCustomer }) => {
+const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, selectedCustomer, currency = 'UZS' }) => {
   const { t } = useTranslation();
   const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [paidAmount, setPaidAmount] = useState('');
@@ -135,7 +136,7 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, select
                   <div className="text-xs text-blue-700 mt-1">{t('pos.paymentModal.phone')}: {selectedCustomer.phone}</div>
                 )}
                 {selectedCustomer.debt > 0 && (
-                  <div className="text-xs text-red-600 mt-1">{t('pos.paymentModal.currentDebt')}: ₺{selectedCustomer.debt.toFixed(2)}</div>
+                  <div className="text-xs text-red-600 mt-1">{t('pos.paymentModal.currentDebt')}: {formatCurrency(selectedCustomer.debt, 'UZS')}</div>
                 )}
               </div>
             </div>
@@ -194,7 +195,7 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, select
           />
           {discountAmount > 0 && (
             <div className="mt-2 text-sm text-green-700 font-medium">
-              {t('pos.paymentModal.discountAmount')}: -₺{discountAmount.toFixed(2)}
+              {t('pos.paymentModal.discountAmount')}: -{formatCurrency(discountAmount, currency)}
             </div>
           )}
         </div>
@@ -202,17 +203,17 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, select
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="flex justify-between mb-2">
             <span className="text-gray-600">{t('pos.subtotal')}:</span>
-            <span className="font-semibold">₺{total.toFixed(2)}</span>
+            <span className="font-semibold">{formatCurrency(total, currency)}</span>
           </div>
           {discountAmount > 0 && (
             <div className="flex justify-between mb-2 text-red-600">
               <span className="text-gray-600">{t('pos.paymentModal.discount')}:</span>
-              <span className="font-semibold">-₺{discountAmount.toFixed(2)}</span>
+              <span className="font-semibold">-{formatCurrency(discountAmount, currency)}</span>
             </div>
           )}
           <div className="flex justify-between border-t border-gray-300 pt-2">
             <span className="text-gray-600 font-semibold">{t('pos.total')}:</span>
-            <span className="font-bold text-lg">₺{finalTotal.toFixed(2)}</span>
+            <span className="font-bold text-lg">{formatCurrency(finalTotal, currency)}</span>
           </div>
         </div>
 
@@ -220,7 +221,7 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, select
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-blue-900">{t('pos.paymentModal.paidAmountLabel')}:</span>
-              <span className="text-lg font-bold text-blue-900">₺{finalTotal.toFixed(2)}</span>
+              <span className="text-lg font-bold text-blue-900">{formatCurrency(finalTotal, currency)}</span>
             </div>
             <p className="mt-1 text-xs text-blue-700">{t('pos.paymentModal.paidAmountNote')}</p>
           </div>
@@ -238,7 +239,7 @@ const PaymentModal = ({ isOpen, onClose, total, onSubmit, onSplitPayment, select
           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
             <div className="flex justify-between">
               <span className="text-green-800 font-medium">{t('pos.change')}:</span>
-              <span className="text-green-800 font-bold">₺{changeAmount.toFixed(2)}</span>
+              <span className="text-green-800 font-bold">{formatCurrency(changeAmount, currency)}</span>
             </div>
           </div>
         )}

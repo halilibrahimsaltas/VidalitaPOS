@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProductByBarcode, useProducts } from '../../hooks/useProducts';
 import { useBranches } from '../../hooks/useBranches';
 import { useAuth } from '../../contexts/AuthContext';
 import CustomerSelector from './CustomerSelector';
 import { HiShoppingCart, HiPlus, HiMinus, HiTrash } from 'react-icons/hi2';
 import { HiX } from 'react-icons/hi';
+import { formatCurrency, getCurrencySymbol } from '../../utils/currency';
 
 const POSScreen = ({ onCheckout, onSplitPayment }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [barcodeInput, setBarcodeInput] = useState('');
   const [cart, setCart] = useState(() => {
@@ -231,6 +234,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
       items,
       customerId: selectedCustomer?.id || null,
       customer: selectedCustomer || null,
+      currency: cartCurrency,
     });
   };
 
@@ -257,12 +261,27 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
       items,
       customerId: selectedCustomer?.id || null,
       customer: selectedCustomer || null,
+      currency: cartCurrency,
     });
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
   const totalDiscount = cart.reduce((sum, item) => sum + (item.discount || 0), 0);
   const total = subtotal;
+
+  // Get the most common currency from cart items, or default to UZS
+  const getCartCurrency = () => {
+    if (cart.length === 0) return 'UZS';
+    const currencies = cart.map(item => item.product?.currency || 'UZS');
+    const currencyCounts = {};
+    currencies.forEach(curr => {
+      currencyCounts[curr] = (currencyCounts[curr] || 0) + 1;
+    });
+    return Object.keys(currencyCounts).reduce((a, b) => 
+      currencyCounts[a] > currencyCounts[b] ? a : b
+    );
+  };
+  const cartCurrency = getCartCurrency();
 
   const selectedBranchName = branches.find(b => b.id === selectedBranch)?.name || '';
 
@@ -331,7 +350,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
             <HiShoppingCart className="w-5 h-5" />
             <span className="font-semibold">{cart.length} ürün</span>
             <span className="text-gray-400">|</span>
-            <span className="font-bold text-lg text-gray-900">{total.toFixed(2)} ₺</span>
+            <span className="font-bold text-lg text-gray-900">{formatCurrency(total, cartCurrency)}</span>
           </div>
         </div>
       </div>
@@ -397,7 +416,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
                       <p className="text-xs text-gray-500 font-mono">{product.barcode}</p>
                     )}
                     <p className="text-lg font-bold text-gray-900">
-                      ₺{parseFloat(product.price).toFixed(2)}
+                      {formatCurrency(parseFloat(product.price), product.currency || 'UZS')}
                     </p>
                   </div>
                 </button>
@@ -450,7 +469,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
               <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
                 <div className="font-medium text-blue-900">Müşteri: {selectedCustomer.name}</div>
                 {selectedCustomer.debt > 0 && (
-                  <div className="text-red-600 mt-0.5">Borç: ₺{selectedCustomer.debt.toFixed(2)}</div>
+                  <div className="text-red-600 mt-0.5">Borç: {formatCurrency(selectedCustomer.debt, 'UZS')}</div>
                 )}
               </div>
             ) : (
@@ -480,7 +499,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
                           {item.product.name}
                         </h3>
                         <p className="text-xs text-gray-500 mt-1">
-                          ₺{item.unitPrice.toFixed(2)} / adet
+                          {formatCurrency(item.unitPrice, item.product?.currency || 'UZS')} / adet
                         </p>
                       </div>
                       <button
@@ -511,7 +530,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-gray-900">
-                          ₺{item.total.toFixed(2)}
+                          {formatCurrency(item.total, item.product?.currency || 'UZS')}
                         </p>
                       </div>
                     </div>
@@ -528,17 +547,17 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Ara Toplam:</span>
-                  <span className="text-gray-900 font-medium">₺{subtotal.toFixed(2)}</span>
+                  <span className="text-gray-900 font-medium">{formatCurrency(subtotal, cartCurrency)}</span>
                 </div>
                 {totalDiscount > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">İndirim:</span>
-                    <span className="text-red-600 font-medium">-₺{totalDiscount.toFixed(2)}</span>
+                    <span className="text-red-600 font-medium">-{formatCurrency(totalDiscount, cartCurrency)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2">
                   <span className="text-gray-900">Toplam:</span>
-                  <span className="text-gray-900">₺{total.toFixed(2)}</span>
+                  <span className="text-gray-900">{formatCurrency(total, cartCurrency)}</span>
                 </div>
               </div>
 

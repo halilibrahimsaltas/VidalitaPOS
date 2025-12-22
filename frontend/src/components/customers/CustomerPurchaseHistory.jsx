@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSales } from '../../hooks/useSales';
 import { HiDocumentText, HiPrinter } from 'react-icons/hi2';
 import Button from '../common/Button';
+import { formatCurrency } from '../../utils/currency';
 
 const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
   const [page, setPage] = useState(1);
@@ -20,11 +21,20 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
   const sales = data?.data?.sales || [];
   const pagination = data?.data?.pagination || {};
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY',
-    }).format(amount || 0);
+  // Get the most common currency from sale items, or default to UZS
+  const getSaleCurrency = (sale) => {
+    if (!sale?.items || sale.items.length === 0) return 'UZS';
+    const currencies = sale.items
+      .map(item => item.product?.currency || 'UZS')
+      .filter(Boolean);
+    if (currencies.length === 0) return 'UZS';
+    const currencyCounts = {};
+    currencies.forEach(curr => {
+      currencyCounts[curr] = (currencyCounts[curr] || 0) + 1;
+    });
+    return Object.keys(currencyCounts).reduce((a, b) => 
+      currencyCounts[a] > currencyCounts[b] ? a : b
+    );
   };
 
   const formatDate = (dateString) => {
@@ -171,7 +181,7 @@ const CustomerPurchaseHistory = ({ customerId, onViewInvoice }) => {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right">
                       <div className="text-sm font-semibold text-gray-900">
-                        {formatCurrency(parseFloat(sale.total))}
+                        {formatCurrency(parseFloat(sale.total), getSaleCurrency(sale))}
                       </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-center">

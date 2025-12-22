@@ -132,7 +132,9 @@
       "rootCategory": "Root category (no parent)",
       "categoryCreateError": "An error occurred while creating category",
       "creating": "Creating...",
-      "branchSelect": "Select Branch (Optional)"
+      "branchSelect": "Select Branch (Optional)",
+      "selectExistingImage": "Select from Existing Images",
+      "selectImage": "Select Image"
     }
   },
   "inventory": {

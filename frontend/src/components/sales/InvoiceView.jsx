@@ -3,17 +3,27 @@ import { useTranslation } from 'react-i18next';
 import { HiPrinter } from 'react-icons/hi2';
 import { HiDownload } from 'react-icons/hi';
 import Button from '../common/Button';
+import { formatCurrency } from '../../utils/currency';
 
 const InvoiceView = ({ saleId, onClose }) => {
   const { t } = useTranslation();
   const { data, isLoading, error } = useSale(saleId);
   const sale = data?.data;
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY',
-    }).format(amount || 0);
+  // Get the most common currency from sale items, or default to UZS
+  const getSaleCurrency = (sale) => {
+    if (!sale?.items || sale.items.length === 0) return 'UZS';
+    const currencies = sale.items
+      .map(item => item.product?.currency || 'UZS')
+      .filter(Boolean);
+    if (currencies.length === 0) return 'UZS';
+    const currencyCounts = {};
+    currencies.forEach(curr => {
+      currencyCounts[curr] = (currencyCounts[curr] || 0) + 1;
+    });
+    return Object.keys(currencyCounts).reduce((a, b) => 
+      currencyCounts[a] > currencyCounts[b] ? a : b
+    );
   };
 
   const formatDate = (dateString) => {
@@ -54,6 +64,7 @@ const InvoiceView = ({ saleId, onClose }) => {
   const subtotal = sale.items?.reduce((sum, item) => sum + parseFloat(item.total), 0) || 0;
   const totalDiscount = parseFloat(sale.discount || 0);
   const total = parseFloat(sale.total);
+  const saleCurrency = sale ? getSaleCurrency(sale) : 'UZS';
 
   // Invoice Content Component
   const InvoiceContent = ({ copyType = 'customer' }) => (
@@ -121,10 +132,10 @@ const InvoiceView = ({ saleId, onClose }) => {
                   {item.quantity}
                 </td>
                 <td className="border border-gray-300 px-2 py-1 text-right text-gray-900 print:px-1 print:py-0.5">
-                  {formatCurrency(parseFloat(item.unitPrice))}
+                  {formatCurrency(parseFloat(item.unitPrice), item.product?.currency || saleCurrency)}
                 </td>
                 <td className="border border-gray-300 px-2 py-1 text-right font-semibold text-gray-900 print:px-1 print:py-0.5">
-                  {formatCurrency(parseFloat(item.total))}
+                  {formatCurrency(parseFloat(item.total), item.product?.currency || saleCurrency)}
                 </td>
               </tr>
             ))}
@@ -137,23 +148,23 @@ const InvoiceView = ({ saleId, onClose }) => {
         <div className="w-64 space-y-1 print:w-48 print:space-y-0.5">
           <div className="flex justify-between text-xs print:text-[10px]">
             <span className="text-gray-600">{t('invoice.subtotal')}:</span>
-            <span className="font-medium text-gray-900">{formatCurrency(subtotal)}</span>
+            <span className="font-medium text-gray-900">{formatCurrency(subtotal, saleCurrency)}</span>
           </div>
           {totalDiscount > 0 && (
             <div className="flex justify-between text-xs print:text-[10px]">
               <span className="text-gray-600">{t('invoice.discount')}:</span>
-              <span className="font-medium text-red-600">-{formatCurrency(totalDiscount)}</span>
+              <span className="font-medium text-red-600">-{formatCurrency(totalDiscount, saleCurrency)}</span>
             </div>
           )}
           {parseFloat(sale.tax || 0) > 0 && (
             <div className="flex justify-between text-xs print:text-[10px]">
               <span className="text-gray-600">{t('invoice.tax')}:</span>
-              <span className="font-medium text-gray-900">{formatCurrency(parseFloat(sale.tax))}</span>
+              <span className="font-medium text-gray-900">{formatCurrency(parseFloat(sale.tax), saleCurrency)}</span>
             </div>
           )}
           <div className="flex justify-between text-sm font-bold border-t-2 border-gray-300 pt-1 print:text-xs print:pt-0.5">
             <span className="text-gray-900">{t('invoice.total')}:</span>
-            <span className="text-gray-900">{formatCurrency(total)}</span>
+            <span className="text-gray-900">{formatCurrency(total, saleCurrency)}</span>
           </div>
         </div>
       </div>
@@ -173,14 +184,14 @@ const InvoiceView = ({ saleId, onClose }) => {
           <div>
             <span className="text-gray-600">{t('invoice.paid')}:</span>
             <span className="ml-1 font-medium text-gray-900">
-              {formatCurrency(parseFloat(sale.paidAmount || sale.total))}
+              {formatCurrency(parseFloat(sale.paidAmount || sale.total), saleCurrency)}
             </span>
           </div>
           {parseFloat(sale.changeAmount || 0) > 0 && (
             <div>
               <span className="text-gray-600">{t('invoice.change')}:</span>
               <span className="ml-1 font-medium text-green-600">
-                {formatCurrency(parseFloat(sale.changeAmount))}
+                {formatCurrency(parseFloat(sale.changeAmount), saleCurrency)}
               </span>
             </div>
           )}

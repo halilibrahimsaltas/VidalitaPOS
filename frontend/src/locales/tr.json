@@ -133,7 +133,9 @@
       "rootCategory": "Kök kategori (üst kategori yok)",
       "categoryCreateError": "Kategori oluşturulurken bir hata oluştu",
       "creating": "Oluşturuluyor...",
-      "branchSelect": "Şube Seçiniz (Opsiyonel)"
+      "branchSelect": "Şube Seçiniz (Opsiyonel)",
+      "selectExistingImage": "Mevcut Resimlerden Seç",
+      "selectImage": "Resim Seçin"
     }
   },
   "inventory": {

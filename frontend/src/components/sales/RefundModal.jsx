@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../common/Button';
+import { formatCurrency } from '../../utils/currency';
 
 const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
   const { t } = useTranslation();
@@ -36,12 +37,23 @@ const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
     );
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY',
-    }).format(amount);
+  // Get the most common currency from sale items, or default to UZS
+  const getSaleCurrency = (sale) => {
+    if (!sale?.items || sale.items.length === 0) return 'UZS';
+    const currencies = sale.items
+      .map(item => item.product?.currency || 'UZS')
+      .filter(Boolean);
+    if (currencies.length === 0) return 'UZS';
+    const currencyCounts = {};
+    currencies.forEach(curr => {
+      currencyCounts[curr] = (currencyCounts[curr] || 0) + 1;
+    });
+    return Object.keys(currencyCounts).reduce((a, b) => 
+      currencyCounts[a] > currencyCounts[b] ? a : b
+    );
   };
+  
+  const saleCurrency = sale ? getSaleCurrency(sale) : 'UZS';
 
   const calculateRefundTotal = () => {
     return refundItems.reduce((total, refundItem) => {
@@ -167,10 +179,10 @@ const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500 text-right">
-                    {formatCurrency(parseFloat(item.unitPrice))}
+                    {formatCurrency(parseFloat(item.unitPrice), item.product?.currency || saleCurrency)}
                   </td>
                   <td className="px-4 py-3 text-sm font-semibold text-gray-900 text-right">
-                    {formatCurrency(itemRefundTotal)}
+                    {formatCurrency(itemRefundTotal, item.product?.currency || saleCurrency)}
                   </td>
                 </tr>
               );
@@ -189,7 +201,7 @@ const RefundModal = ({ sale, onConfirm, onCancel, isLoading }) => {
           <div className="text-right">
             <p className="text-sm text-gray-600">{t('sales.refundModal.totalRefundAmount')}:</p>
             <p className="text-2xl font-bold text-primary-600">
-              {formatCurrency(calculateRefundTotal())}
+              {formatCurrency(calculateRefundTotal(), saleCurrency)}
             </p>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { useCashRegisterReport } from '../../hooks/useReports';
 import { useBranches } from '../../hooks/useBranches';
 import Select from '../common/Select';
 import Button from '../common/Button';
+import { formatCurrency } from '../../utils/currency';
 
 const MonthlyReport = () => {
   const { t } = useTranslation();
@@ -35,13 +36,9 @@ const MonthlyReport = () => {
 
   const { data, isLoading, error, refetch } = useCashRegisterReport(filters);
   const report = data?.data;
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY',
-    }).format(amount || 0);
-  };
+  
+  // Default to UZS for reports (reports aggregate multiple currencies)
+  const reportCurrency = 'UZS';
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('tr-TR', {
@@ -181,22 +178,22 @@ const MonthlyReport = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white border border-gray-300 rounded-lg p-4">
             <div className="text-sm font-medium text-gray-600 mb-1">Alınan Nakit</div>
-            <div className="text-2xl font-bold text-gray-900">{formatCurrency(totalCash)}</div>
+            <div className="text-2xl font-bold text-gray-900">{formatCurrency(totalCash, reportCurrency)}</div>
           </div>
 
           <div className="bg-white border border-gray-300 rounded-lg p-4">
             <div className="text-sm font-medium text-gray-600 mb-1">Alınan Kredi Kartı</div>
-            <div className="text-2xl font-bold text-gray-900">{formatCurrency(totalCard)}</div>
+            <div className="text-2xl font-bold text-gray-900">{formatCurrency(totalCard, reportCurrency)}</div>
           </div>
 
           <div className="bg-white border border-gray-300 rounded-lg p-4">
             <div className="text-sm font-medium text-gray-600 mb-1">Toplam İade</div>
-            <div className="text-2xl font-bold text-gray-900">{formatCurrency(refundTotal)}</div>
+            <div className="text-2xl font-bold text-gray-900">{formatCurrency(refundTotal, reportCurrency)}</div>
           </div>
 
           <div className="bg-white border border-gray-300 rounded-lg p-4">
             <div className="text-sm font-medium text-gray-600 mb-1">Toplam Kasa</div>
-            <div className="text-2xl font-bold text-gray-900">{formatCurrency(netTotal)}</div>
+            <div className="text-2xl font-bold text-gray-900">{formatCurrency(netTotal, reportCurrency)}</div>
           </div>
         </div>
 
@@ -206,33 +203,33 @@ const MonthlyReport = () => {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between py-2 border-b border-gray-100">
               <span className="text-gray-600">Toplam Satış:</span>
-              <span className="font-semibold text-gray-900">{formatCurrency(report.summary?.totalSalesAmount || 0)}</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(report.summary?.totalSalesAmount || 0, reportCurrency)}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-100">
               <span className="text-gray-600">Nakit Satış:</span>
-              <span className="font-semibold text-gray-900">{formatCurrency(cashTotal)}</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(cashTotal, reportCurrency)}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-100">
               <span className="text-gray-600">Kart Satış:</span>
-              <span className="font-semibold text-gray-900">{formatCurrency(cardTotal)}</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(cardTotal, reportCurrency)}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-100">
               <span className="text-gray-600">Veresiye Satış:</span>
-              <span className="font-semibold text-gray-900">{formatCurrency(creditTotal)}</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(creditTotal, reportCurrency)}</span>
             </div>
             {mixedTotal > 0 && (
               <div className="flex justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-600">Karma Ödeme:</span>
-                <span className="font-semibold text-gray-900">{formatCurrency(mixedTotal)}</span>
+                <span className="font-semibold text-gray-900">{formatCurrency(mixedTotal, reportCurrency)}</span>
               </div>
             )}
             <div className="flex justify-between py-2 border-b border-gray-100">
               <span className="text-gray-600">Toplam İndirim:</span>
-              <span className="font-semibold text-gray-900">{formatCurrency(report.summary?.totalDiscount || 0)}</span>
+              <span className="font-semibold text-gray-900">{formatCurrency(report.summary?.totalDiscount || 0, reportCurrency)}</span>
             </div>
             <div className="flex justify-between py-2 border-b-2 border-gray-300">
               <span className="text-gray-900 font-semibold">Net Kasa:</span>
-              <span className="font-bold text-lg text-gray-900">{formatCurrency(netTotal)}</span>
+              <span className="font-bold text-lg text-gray-900">{formatCurrency(netTotal, reportCurrency)}</span>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCustomerStatistics } from '../../hooks/useCustomers';
 import StatCard from '../dashboard/StatCard';
+import { formatCurrency } from '../../utils/currency';
 
 const CustomerStatistics = ({ customerId }) => {
   const [dateRange, setDateRange] = useState({
@@ -10,13 +11,9 @@ const CustomerStatistics = ({ customerId }) => {
 
   const { data, isLoading, error, refetch } = useCustomerStatistics(customerId, dateRange);
   const statistics = data?.data;
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY',
-    }).format(amount || 0);
-  };
+  
+  // Default to UZS for customer statistics (aggregates multiple currencies)
+  const statsCurrency = 'UZS';
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('tr-TR', {
@@ -102,24 +99,24 @@ const CustomerStatistics = ({ customerId }) => {
         <StatCard
           title="Toplam Satış"
           value={statistics.summary.totalSales}
-          subtitle={formatCurrency(statistics.summary.totalRevenue)}
+          subtitle={formatCurrency(statistics.summary.totalRevenue, statsCurrency)}
           color="primary"
         />
         <StatCard
           title="Toplam Ciro"
-          value={formatCurrency(statistics.summary.totalRevenue)}
-          subtitle={`Ortalama: ${formatCurrency(statistics.summary.averageSale)}`}
+          value={formatCurrency(statistics.summary.totalRevenue, statsCurrency)}
+          subtitle={`Ortalama: ${formatCurrency(statistics.summary.averageSale, statsCurrency)}`}
           color="green"
         />
         <StatCard
           title="Toplam Ürün"
           value={statistics.summary.totalItems}
-          subtitle={`İndirim: ${formatCurrency(statistics.summary.totalDiscount)}`}
+          subtitle={`İndirim: ${formatCurrency(statistics.summary.totalDiscount, statsCurrency)}`}
           color="gray"
         />
         <StatCard
           title="Mevcut Borç"
-          value={formatCurrency(statistics.summary.currentDebt)}
+          value={formatCurrency(statistics.summary.currentDebt, statsCurrency)}
           color={statistics.summary.currentDebt > 0 ? 'red' : 'green'}
         />
       </div>
@@ -148,7 +145,7 @@ const CustomerStatistics = ({ customerId }) => {
                       {month.sales}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold text-gray-900">
-                      {formatCurrency(month.revenue)}
+                      {formatCurrency(month.revenue, statsCurrency)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600">
                       {month.items}
@@ -183,7 +180,7 @@ const CustomerStatistics = ({ customerId }) => {
                       {product.quantity}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold text-gray-900">
-                      {formatCurrency(product.revenue)}
+                      {formatCurrency(product.revenue, statsCurrency)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600">
                       {product.sales}
@@ -211,7 +208,7 @@ const CustomerStatistics = ({ customerId }) => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Ciro:</span>
-                    <span className="font-semibold text-gray-900">{formatCurrency(branch.revenue)}</span>
+                    <span className="font-semibold text-gray-900">{formatCurrency(branch.revenue, statsCurrency)}</span>
                   </div>
                 </div>
               </div>
@@ -246,7 +243,7 @@ const CustomerStatistics = ({ customerId }) => {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{sale.branch}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-semibold text-gray-900">
-                      {formatCurrency(sale.total)}
+                      {formatCurrency(sale.total, statsCurrency)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600">
                       {sale.items}

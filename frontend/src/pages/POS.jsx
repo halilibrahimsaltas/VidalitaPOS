@@ -114,6 +114,7 @@ const POS = () => {
             setIsSplitPaymentModalOpen(true);
           }}
           selectedCustomer={checkoutData?.customer || null}
+          currency={checkoutData?.currency || 'UZS'}
         />
 
         <SplitPaymentModal

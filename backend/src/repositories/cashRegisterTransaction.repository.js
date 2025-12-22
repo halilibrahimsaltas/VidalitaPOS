@@ -16,8 +16,18 @@ export const cashRegisterTransactionRepository = {
     if (type) where.type = type;
     if (startDate || endDate) {
       where.createdAt = {};
-      if (startDate) where.createdAt.gte = new Date(startDate);
-      if (endDate) where.createdAt.lte = new Date(endDate);
+      if (startDate) {
+        // Set to start of day (00:00:00.000)
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        where.createdAt.gte = start;
+      }
+      if (endDate) {
+        // Set to end of day (23:59:59.999) to include the entire day
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        where.createdAt.lte = end;
+      }
     }
 
     const skip = (page - 1) * limit;

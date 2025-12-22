@@ -23,17 +23,18 @@ router.use(authenticate);
 // Get all products (with pagination and filters) - requires products.view permission
 router.get('/', hasPermission('products.view'), getAllProducts);
 
-// Get product by ID - requires products.view permission
-router.get('/:id', hasPermission('products.view'), getProductById);
-
-// Get product by barcode - requires products.view permission
-router.get('/barcode/:barcode', hasPermission('products.view'), getProductByBarcode);
+// IMPORTANT: Specific routes must come before parameterized routes (/:id)
+// Get available product images (requires products.view permission)
+router.get('/available-images', hasPermission('products.view'), getAvailableProductImages);
 
 // Get import template (only ADMIN and MANAGER)
 router.get('/import/template', authorize('ADMIN', 'MANAGER'), getImportTemplate);
 
-// Get available product images (requires products.view permission)
-router.get('/available-images', hasPermission('products.view'), getAvailableProductImages);
+// Get product by barcode - requires products.view permission
+router.get('/barcode/:barcode', hasPermission('products.view'), getProductByBarcode);
+
+// Get product by ID - requires products.view permission (must be last GET route)
+router.get('/:id', hasPermission('products.view'), getProductById);
 
 // Upload product image (only ADMIN and MANAGER)
 router.post('/upload-image', authorize('ADMIN', 'MANAGER'), uploadSingleImage, handleUploadError, uploadProductImage);
