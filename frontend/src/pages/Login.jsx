@@ -51,7 +51,7 @@ const Login = () => {
         // Check if user has any permissions at all
         if (!permissions || permissions.length === 0) {
           console.error('⚠️ User has no permissions assigned. Please contact administrator.');
-          setError('Kullanıcınızın yetkileri atanmamış. Lütfen yönetici ile iletişime geçin.');
+          setError(t('auth.noPermissions'));
           // Still allow login but redirect to dashboard (admin can fix permissions)
           navigate('/dashboard', { replace: true });
           return;
@@ -118,7 +118,7 @@ const Login = () => {
               {t('auth.login')}
             </h2>
             <p className="text-sm text-gray-500">
-              Retail Management System
+              {t('auth.subtitle')}
             </p>
           </div>
 

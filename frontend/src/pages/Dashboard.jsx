@@ -6,6 +6,7 @@ import StatCard from '../components/dashboard/StatCard';
 import SalesChart from '../components/dashboard/SalesChart';
 import TopProductsChart from '../components/dashboard/TopProductsChart';
 import PageLayout from '../components/layout/PageLayout';
+import { formatCurrency } from '../utils/currency';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -49,7 +50,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <StatCard
                 title={t('dashboard.todayRevenue')}
-                value={`₺${(sales.today?.revenue || 0).toFixed(2)}`}
+                value={formatCurrency(sales.today?.revenue || 0, 'UZS')}
                 subtitle={`${sales.today?.count || 0} ${t('dashboard.sales')}`}
                 color="green"
                 trend={revenueTrend && parseFloat(revenueTrend) > 0 ? 'up' : revenueTrend && parseFloat(revenueTrend) < 0 ? 'down' : null}
@@ -57,7 +58,7 @@ const Dashboard = () => {
               />
               <StatCard
                 title={t('dashboard.last7Days')}
-                value={`₺${(sales.last7Days?.revenue || 0).toFixed(2)}`}
+                value={formatCurrency(sales.last7Days?.revenue || 0, 'UZS')}
                 subtitle={`${sales.last7Days?.count || 0} ${t('dashboard.sales')}`}
                 color="blue"
               />
@@ -69,7 +70,7 @@ const Dashboard = () => {
               />
               <StatCard
                 title={t('dashboard.totalDebt')}
-                value={`₺${(customers.totalDebt || 0).toFixed(2)}`}
+                value={formatCurrency(customers.totalDebt || 0, 'UZS')}
                 subtitle={`${customers.debtorsCount || 0} ${t('dashboard.customers')}`}
                 color="gray"
               />

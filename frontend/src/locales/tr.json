@@ -40,7 +40,9 @@
     "password": "Şifre",
     "welcome": "Hoş geldiniz",
     "loginFailed": "Giriş başarısız",
-    "defaultAdmin": "Varsayılan admin hesabı"
+    "defaultAdmin": "Varsayılan admin hesabı",
+    "noPermissions": "Kullanıcınızın yetkileri atanmamış. Lütfen yönetici ile iletişime geçin.",
+    "subtitle": "Perakende Yönetim Sistemi"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -54,7 +56,11 @@
     "customers": "müşteri",
     "quickActions": "Hızlı İşlemler",
     "salesTrend": "Son 7 Gün Satış Trendi",
-    "topProducts": "En Çok Satan Ürünler"
+    "topProducts": "En Çok Satan Ürünler",
+    "noData": "Veri bulunamadı",
+    "revenue": "Gelir",
+    "salesCount": "Satış Sayısı",
+    "quantitySold": "Satılan Miktar"
   },
   "branches": {
     "title": "Şube Yönetimi",

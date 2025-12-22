@@ -1,10 +1,13 @@
+import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const TopProductsChart = ({ data }) => {
+  const { t } = useTranslation();
+  
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500">
-        Veri bulunamadı
+        {t('dashboard.noData')}
       </div>
     );
   }
@@ -23,8 +26,8 @@ const TopProductsChart = ({ data }) => {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Bar dataKey="quantity" fill="#0ea5e9" name="Satılan Miktar" />
-        <Bar dataKey="revenue" fill="#10b981" name="Gelir (₺)" />
+        <Bar dataKey="quantity" fill="#0ea5e9" name={t('dashboard.quantitySold')} />
+        <Bar dataKey="revenue" fill="#10b981" name={t('dashboard.revenue')} />
       </BarChart>
     </ResponsiveContainer>
   );

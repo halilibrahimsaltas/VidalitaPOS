@@ -1,10 +1,13 @@
+import { useTranslation } from 'react-i18next';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const SalesChart = ({ data }) => {
+  const { t } = useTranslation();
+  
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500">
-        Veri bulunamadı
+        {t('dashboard.noData')}
       </div>
     );
   }
@@ -17,8 +20,8 @@ const SalesChart = ({ data }) => {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Line type="monotone" dataKey="revenue" stroke="#0ea5e9" strokeWidth={2} name="Gelir (₺)" />
-        <Line type="monotone" dataKey="sales" stroke="#10b981" strokeWidth={2} name="Satış Sayısı" />
+        <Line type="monotone" dataKey="revenue" stroke="#0ea5e9" strokeWidth={2} name={t('dashboard.revenue')} />
+        <Line type="monotone" dataKey="sales" stroke="#10b981" strokeWidth={2} name={t('dashboard.salesCount')} />
       </LineChart>
     </ResponsiveContainer>
   );

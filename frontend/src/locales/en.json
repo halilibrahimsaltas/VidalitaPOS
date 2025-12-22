@@ -39,7 +39,9 @@
     "password": "Password",
     "welcome": "Welcome",
     "loginFailed": "Login failed",
-    "defaultAdmin": "Default admin account"
+    "defaultAdmin": "Default admin account",
+    "noPermissions": "Your user permissions have not been assigned. Please contact the administrator.",
+    "subtitle": "Retail Management System"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -53,7 +55,11 @@
     "customers": "customers",
     "quickActions": "Quick Actions",
     "salesTrend": "Last 7 Days Sales Trend",
-    "topProducts": "Top Selling Products"
+    "topProducts": "Top Selling Products",
+    "noData": "No data found",
+    "revenue": "Revenue",
+    "salesCount": "Sales Count",
+    "quantitySold": "Quantity Sold"
   },
   "branches": {
     "title": "Branch Management",

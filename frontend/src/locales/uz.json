@@ -40,7 +40,9 @@
     "password": "Parol",
     "welcome": "Xush kelibsiz",
     "loginFailed": "Kirish muvaffaqiyatsiz",
-    "defaultAdmin": "Standart admin hisobi"
+    "defaultAdmin": "Standart admin hisobi",
+    "noPermissions": "Foydalanuvchi huquqlari tayinlanmagan. Iltimos, administrator bilan bog'laning.",
+    "subtitle": "Chakana savdo boshqaruv tizimi"
   },
   "dashboard": {
     "title": "Boshqaruv paneli",
@@ -54,7 +56,11 @@
     "customers": "mijozlar",
     "quickActions": "Tezkor amallar",
     "salesTrend": "Oxirgi 7 kunlik sotuv tendentsiyasi",
-    "topProducts": "Eng ko'p sotilgan mahsulotlar"
+    "topProducts": "Eng ko'p sotilgan mahsulotlar",
+    "noData": "Ma'lumot topilmadi",
+    "revenue": "Daromad",
+    "salesCount": "Sotuvlar soni",
+    "quantitySold": "Sotilgan miqdor"
   },
   "branches": {
     "title": "Filial boshqaruvi",
