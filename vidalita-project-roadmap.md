@@ -807,6 +807,10 @@ npm run dev
 
 ## 🚢 Deployment Guide
 
+**Platform:** Vercel (Frontend) + Render (Backend + Database)
+
+Detaylı deployment rehberi için [DEPLOYMENT.md](./DEPLOYMENT.md) dosyasına bakın.
+
 ### Development
 ```bash
 # Clone repository
