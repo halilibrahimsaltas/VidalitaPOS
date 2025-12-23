@@ -6,16 +6,24 @@ const RETRY_DELAY = 5000; // 5 seconds
 
 async function waitForDatabase() {
   console.log('⏳ Waiting for database to be ready...');
+  console.log(`📊 DATABASE_URL: ${process.env.DATABASE_URL ? 'Set' : 'Not set'}`);
   
   for (let i = 0; i < MAX_RETRIES; i++) {
     try {
-      // Try to connect to database using Prisma
+      // Try to connect to database using Prisma (singleton pattern - connection is reused)
       await prisma.$connect();
       console.log('✅ Database connection successful!');
-      await prisma.$disconnect();
+      
+      // Test query to verify connection works
+      await prisma.$queryRaw`SELECT 1`;
+      console.log('✅ Database query test successful!');
+      
+      // Don't disconnect - singleton pattern keeps connection alive for reuse
+      // Connection will be reused by the server when it starts
       return true;
     } catch (error) {
       console.log(`⏳ Attempt ${i + 1}/${MAX_RETRIES}: Database not ready yet...`);
+      console.log(`   Error: ${error.message}`);
       if (i < MAX_RETRIES - 1) {
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
       }

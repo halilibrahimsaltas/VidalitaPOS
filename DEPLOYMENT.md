@@ -93,7 +93,8 @@ Bu script şunları yapar:
 - Migration'lar idempotent'tir (zaten uygulanmışsa tekrar uygulanmaz), bu yüzden her deploy'da güvenle çalıştırılabilir
 - Database retry mekanizması sayesinde database hazır olana kadar bekler
 - Render dashboard'da "Events" sekmesinden logları kontrol ederek migration'ın başarıyla çalıştığını doğrulayın
-- `DATABASE_URL` için `internalDatabaseUrl` property'si kullanılır (aynı region'daki servisler için)
+- `DATABASE_URL` için `connectionString` property'si kullanılır (Render otomatik olarak SSL parametrelerini ekler)
+- **Connection Pooling**: Prisma Client singleton pattern ile kullanılır (connection flooding'i önlemek için)
 
 ### 1.7 Backend URL'ini Not Edin
 

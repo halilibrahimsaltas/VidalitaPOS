@@ -53,7 +53,7 @@
 
 ### 6. Prisma Migration
 - [ ] Start command'da migration script eklendi: `node scripts/migrate-and-start.js`
-- [ ] DATABASE_URL property: `internalDatabaseUrl` (aynı region için)
+- [ ] DATABASE_URL property: `connectionString` (Render otomatik SSL ekler)
 - [ ] Deploy loglarında migration'ın başarıyla çalıştığı görüldü (Events sekmesi)
 - [ ] Migration başarılı - Server başlamadan önce migration çalıştı
 
