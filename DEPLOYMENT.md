@@ -28,8 +28,8 @@ Bu dokümanda, VidalitaPOS uygulamasını canlıya almak için gerekli adımlar 
 4. **Name**: `vidalita-backend` (veya istediğiniz isim)
 5. **Root Directory**: `backend` olarak ayarlayın
 6. **Environment**: `Node` seçin
-7. **Build Command**: `npm install && npx prisma generate && npx prisma migrate deploy`
-8. **Start Command**: `npm start`
+7. **Build Command**: `npm install && npx prisma generate`
+8. **Start Command**: `npm run start:prod` (migration'ı içerir)
 
 ### 1.3 PostgreSQL Database Ekleme
 
@@ -77,18 +77,21 @@ Proje root'unda `backend/render.yaml` dosyası mevcut. Bu dosya ile Render otoma
 
 ### 1.6 Prisma Migration
 
-**✅ Otomatik Migration:** `render.yaml` dosyasında build command'a migration eklendi. Her deploy'da otomatik olarak çalışacak.
+**✅ Otomatik Migration:** `render.yaml` dosyasında start command'a migration eklendi. Her deploy'da server başlamadan önce otomatik olarak çalışacak.
 
-Build command:
+Start command:
 ```bash
-npm install && npx prisma generate && npx prisma migrate deploy
+npm run start:prod
 ```
 
-**Not:** Migration'lar idempotent'tir (zaten uygulanmışsa tekrar uygulanmaz), bu yüzden her deploy'da güvenle çalıştırılabilir.
+Bu command şunları yapar:
+1. `npx prisma migrate deploy` - Migration'ları uygular
+2. `node src/server.js` - Server'ı başlatır
 
-Eğer manuel olarak çalıştırmak isterseniz (Shell ücretli olduğu için önerilmez):
-- Render dashboard'da "Events" sekmesinden logları kontrol edin
-- Migration'ın başarıyla çalıştığını doğrulayın
+**Not:** 
+- Migration'lar idempotent'tir (zaten uygulanmışsa tekrar uygulanmaz), bu yüzden her deploy'da güvenle çalıştırılabilir
+- Build sırasında database'e erişim olmayabilir, bu yüzden migration start command'da çalışır
+- Render dashboard'da "Events" sekmesinden logları kontrol ederek migration'ın başarıyla çalıştığını doğrulayın
 
 ### 1.7 Backend URL'ini Not Edin
 

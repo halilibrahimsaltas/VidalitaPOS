@@ -41,8 +41,8 @@
 - [ ] `FRONTEND_URL` eklendi (Vercel URL - deploy sonrası güncellenecek)
 
 ### 4. Build & Deploy Settings
-- [ ] Build Command: `npm install && npx prisma generate && npx prisma migrate deploy`
-- [ ] Start Command: `npm start`
+- [ ] Build Command: `npm install && npx prisma generate`
+- [ ] Start Command: `npm run start:prod` (migration'ı içerir)
 - [ ] Root Directory: `backend`
 - [ ] Environment: `Node`
 
@@ -52,9 +52,9 @@
 - [ ] Hata yok
 
 ### 6. Prisma Migration
-- [ ] Build command'da migration eklendi: `npm install && npx prisma generate && npx prisma migrate deploy`
-- [ ] Deploy loglarında migration'ın başarıyla çalıştığı görüldü
-- [ ] Migration başarılı (Events sekmesinden kontrol edildi)
+- [ ] Start command'da migration eklendi: `npm run start:prod`
+- [ ] Deploy loglarında migration'ın başarıyla çalıştığı görüldü (Events sekmesi)
+- [ ] Migration başarılı - Server başlamadan önce migration çalıştı
 
 ### 7. Backend URL
 - [ ] Render otomatik domain oluşturuldu
