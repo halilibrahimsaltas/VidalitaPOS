@@ -42,7 +42,7 @@
 
 ### 4. Build & Deploy Settings
 - [ ] Build Command: `npm install && npx prisma generate`
-- [ ] Start Command: `npm run start:prod` (migration'ı içerir)
+- [ ] Start Command: `node scripts/migrate-and-start.js` (database retry + migration + server)
 - [ ] Root Directory: `backend`
 - [ ] Environment: `Node`
 
@@ -52,7 +52,8 @@
 - [ ] Hata yok
 
 ### 6. Prisma Migration
-- [ ] Start command'da migration eklendi: `npm run start:prod`
+- [ ] Start command'da migration script eklendi: `node scripts/migrate-and-start.js`
+- [ ] DATABASE_URL property: `internalDatabaseUrl` (aynı region için)
 - [ ] Deploy loglarında migration'ın başarıyla çalıştığı görüldü (Events sekmesi)
 - [ ] Migration başarılı - Server başlamadan önce migration çalıştı
 

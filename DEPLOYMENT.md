@@ -29,7 +29,7 @@ Bu dokümanda, VidalitaPOS uygulamasını canlıya almak için gerekli adımlar 
 5. **Root Directory**: `backend` olarak ayarlayın
 6. **Environment**: `Node` seçin
 7. **Build Command**: `npm install && npx prisma generate`
-8. **Start Command**: `npm run start:prod` (migration'ı içerir)
+8. **Start Command**: `node scripts/migrate-and-start.js` (database retry + migration + server)
 
 ### 1.3 PostgreSQL Database Ekleme
 
@@ -81,17 +81,19 @@ Proje root'unda `backend/render.yaml` dosyası mevcut. Bu dosya ile Render otoma
 
 Start command:
 ```bash
-npm run start:prod
+node scripts/migrate-and-start.js
 ```
 
-Bu command şunları yapar:
-1. `npx prisma migrate deploy` - Migration'ları uygular
-2. `node src/server.js` - Server'ı başlatır
+Bu script şunları yapar:
+1. **Database Retry**: Database'in hazır olmasını bekler (10 deneme, 5 saniye aralıklarla)
+2. **Migration**: `npx prisma migrate deploy` - Migration'ları uygular
+3. **Server Start**: `node src/server.js` - Server'ı başlatır
 
 **Not:** 
 - Migration'lar idempotent'tir (zaten uygulanmışsa tekrar uygulanmaz), bu yüzden her deploy'da güvenle çalıştırılabilir
-- Build sırasında database'e erişim olmayabilir, bu yüzden migration start command'da çalışır
+- Database retry mekanizması sayesinde database hazır olana kadar bekler
 - Render dashboard'da "Events" sekmesinden logları kontrol ederek migration'ın başarıyla çalıştığını doğrulayın
+- `DATABASE_URL` için `internalDatabaseUrl` property'si kullanılır (aynı region'daki servisler için)
 
 ### 1.7 Backend URL'ini Not Edin
 
@@ -177,7 +179,7 @@ Render otomatik olarak yeniden deploy edecek.
 Render dashboard'da backend service'inizde "Shell" sekmesine gidin veya "Events" → "Run Command":
 
 ```bash
-npx prisma migrate deploy
+node scripts/migrate-and-start.js
 ```
 
 ### 4.2 Seed Data (Opsiyonel)
