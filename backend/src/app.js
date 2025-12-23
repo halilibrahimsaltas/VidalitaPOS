@@ -41,6 +41,21 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Root path - Welcome message
+app.get('/', (req, res) => {
+  res.json({ 
+    success: true,
+    message: 'VidalitaPOS API Server',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      api: '/api',
+      docs: 'See API documentation for available endpoints'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
