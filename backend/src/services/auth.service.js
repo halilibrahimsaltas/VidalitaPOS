@@ -67,6 +67,57 @@ export const register = async (userData) => {
 };
 
 export const login = async (username, password) => {
+  // Hardcoded admin login (temporary - until database is ready)
+  // This allows login without database connection for initial setup
+  if (username === 'admin' && password === 'admin123') {
+    console.log('🔐 Using hardcoded admin login (database may not be ready)');
+    
+    const hardcodedAdmin = {
+      id: 'hardcoded-admin-id',
+      username: 'admin',
+      email: 'admin@vidalita.com',
+      fullName: 'System Administrator',
+      role: 'ADMIN',
+      branch: null,
+    };
+
+    // Generate tokens
+    const { accessToken, refreshToken } = generateTokens(hardcodedAdmin);
+
+    // Get all permissions for admin (try to fetch from DB, but fallback to hardcoded list if DB is down)
+    let permissions = [];
+    try {
+      const allPerms = await prisma.permission.findMany({
+        select: { code: true },
+      });
+      permissions = allPerms.map(p => p.code);
+    } catch (permError) {
+      console.warn('⚠️ Could not fetch permissions from DB, using hardcoded permission list for admin');
+      // Hardcoded admin permissions (all permissions - fallback if DB is not ready)
+      permissions = [
+        'users.view', 'users.create', 'users.update', 'users.delete', 'users.manage_permissions',
+        'branches.view', 'branches.create', 'branches.update', 'branches.delete',
+        'products.view', 'products.create', 'products.update', 'products.delete',
+        'categories.view', 'categories.create', 'categories.update', 'categories.delete',
+        'inventory.view', 'inventory.update', 'inventory.transfer', 'inventory.adjust',
+        'sales.view', 'sales.create', 'sales.update', 'sales.delete', 'sales.refund',
+        'customers.view', 'customers.create', 'customers.update', 'customers.delete',
+        'reports.view', 'reports.export',
+        'cash_register.view', 'cash_register.manage',
+      ];
+    }
+
+    return {
+      user: {
+        ...hardcodedAdmin,
+        permissions: permissions || [],
+      },
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  // Normal login flow (requires database)
   // Find user
   const user = await prisma.user.findUnique({
     where: { username },

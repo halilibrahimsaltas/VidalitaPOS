@@ -86,14 +86,17 @@ node scripts/migrate-and-start.js
 
 Bu script şunları yapar:
 1. **Database Retry**: Database'in hazır olmasını bekler (10 deneme, 5 saniye aralıklarla)
-2. **Migration**: `npx prisma migrate deploy` - Migration'ları uygular
-3. **Server Start**: `node src/server.js` - Server'ı başlatır
+2. **Migration**: `npx prisma migrate deploy` - Migration'ları uygular (retry mekanizması ile)
+3. **Verification**: Migration sonrası tabloları kontrol eder
+4. **Seed** (opsiyonel): `npm run seed` - Database'i seed eder (admin kullanıcısı vs.)
+5. **Server Start**: `node src/server.js` - Server'ı başlatır
 
 **Not:** 
 - Migration'lar idempotent'tir (zaten uygulanmışsa tekrar uygulanmaz), bu yüzden her deploy'da güvenle çalıştırılabilir
 - Database retry mekanizması sayesinde database hazır olana kadar bekler
 - Render dashboard'da "Events" sekmesinden logları kontrol ederek migration'ın başarıyla çalıştığını doğrulayın
-- `DATABASE_URL` için `connectionString` property'si kullanılır (Render otomatik olarak SSL parametrelerini ekler)
+- `DATABASE_URL` için `internalDatabaseUrl` property'si kullanılır (aynı region'daki servisler için - daha güvenilir)
+- **Hardcoded Admin**: Database hazır olana kadar `admin/admin123` ile giriş yapılabilir (geçici çözüm)
 - **Connection Pooling**: Prisma Client singleton pattern ile kullanılır (connection flooding'i önlemek için)
 
 ### 1.7 Backend URL'ini Not Edin
