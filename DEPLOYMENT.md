@@ -28,7 +28,7 @@ Bu dokümanda, VidalitaPOS uygulamasını canlıya almak için gerekli adımlar 
 4. **Name**: `vidalita-backend` (veya istediğiniz isim)
 5. **Root Directory**: `backend` olarak ayarlayın
 6. **Environment**: `Node` seçin
-7. **Build Command**: `npm install && npx prisma generate`
+7. **Build Command**: `npm install && npx prisma generate && npx prisma migrate deploy`
 8. **Start Command**: `npm start`
 
 ### 1.3 PostgreSQL Database Ekleme
@@ -77,16 +77,18 @@ Proje root'unda `backend/render.yaml` dosyası mevcut. Bu dosya ile Render otoma
 
 ### 1.6 Prisma Migration
 
-Render deploy olduktan sonra, Render dashboard'da "Events" sekmesinden logları kontrol edin.
+**✅ Otomatik Migration:** `render.yaml` dosyasında build command'a migration eklendi. Her deploy'da otomatik olarak çalışacak.
 
-Migration'ı çalıştırmak için:
-
-1. Render dashboard'da backend service'inizde "Shell" sekmesine gidin
-2. Veya "Events" → "Run Command" ile:
-
+Build command:
 ```bash
-npx prisma migrate deploy
+npm install && npx prisma generate && npx prisma migrate deploy
 ```
+
+**Not:** Migration'lar idempotent'tir (zaten uygulanmışsa tekrar uygulanmaz), bu yüzden her deploy'da güvenle çalıştırılabilir.
+
+Eğer manuel olarak çalıştırmak isterseniz (Shell ücretli olduğu için önerilmez):
+- Render dashboard'da "Events" sekmesinden logları kontrol edin
+- Migration'ın başarıyla çalıştığını doğrulayın
 
 ### 1.7 Backend URL'ini Not Edin
 
@@ -122,7 +124,11 @@ VITE_API_URL=https://your-backend.onrender.com/api
 VITE_APP_NAME=Vidalita Retail Manager
 ```
 
-**ÖNEMLİ:** Backend URL'ini Render'dan aldığınız URL ile değiştirin!
+**⚠️ ÇOK ÖNEMLİ:** 
+- Backend URL'ini Render'dan aldığınız URL ile değiştirin
+- **MUTLAKA sonunda `/api` olmalı!** 
+- Örnek: `https://vidalitapos.onrender.com/api` ✅
+- Yanlış: `https://vidalitapos.onrender.com` ❌
 
 ### 2.4 Deploy
 

@@ -41,7 +41,7 @@
 - [ ] `FRONTEND_URL` eklendi (Vercel URL - deploy sonrası güncellenecek)
 
 ### 4. Build & Deploy Settings
-- [ ] Build Command: `npm install && npx prisma generate`
+- [ ] Build Command: `npm install && npx prisma generate && npx prisma migrate deploy`
 - [ ] Start Command: `npm start`
 - [ ] Root Directory: `backend`
 - [ ] Environment: `Node`
@@ -52,8 +52,9 @@
 - [ ] Hata yok
 
 ### 6. Prisma Migration
-- [ ] Render Shell veya Run Command ile `npx prisma migrate deploy` çalıştırıldı
-- [ ] Migration başarılı
+- [ ] Build command'da migration eklendi: `npm install && npx prisma generate && npx prisma migrate deploy`
+- [ ] Deploy loglarında migration'ın başarıyla çalıştığı görüldü
+- [ ] Migration başarılı (Events sekmesinden kontrol edildi)
 
 ### 7. Backend URL
 - [ ] Render otomatik domain oluşturuldu
@@ -76,8 +77,9 @@
 - [ ] Output Directory: `dist` (otomatik)
 
 ### 3. Environment Variables
-- [ ] `VITE_API_URL` eklendi (Render backend URL)
+- [ ] `VITE_API_URL` eklendi (Render backend URL - **sonunda /api olmalı!**)
 - [ ] `VITE_APP_NAME=Vidalita Retail Manager` eklendi
+- [ ] `VITE_API_URL` formatı kontrol edildi: `https://your-backend.onrender.com/api`
 
 ### 4. Deploy
 - [ ] Deploy başlatıldı
