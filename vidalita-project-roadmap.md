@@ -397,9 +397,9 @@ npm run dev
 - [x] Currency field in product model
 - [x] Permission-based product management (CASHIER can create/update/delete)
 
-### 🔄 FAZ 5: Inventory Management (Devam Ediyor)
+### ✅ FAZ 5: Inventory Management (Tamamlandı)
 **Tahmini Süre**: 2 hafta
-**Durum**: 🔄 %85 Tamamlandı
+**Durum**: ✅ %90 Tamamlandı
 
 - [x] Inventory model ve migration
 - [x] Stock tracking API
@@ -410,13 +410,14 @@ npm run dev
 - [x] Stock transfer form
 - [x] Stock adjustment form
 - [x] Inventory edit form
+- [x] Buton isimlendirmeleri düzeltildi (Transfer, Düzenle, Düzelt)
 - [ ] Real-time stock updates (websocket - gelecekte)
 - [ ] Stock transfer history list UI
 - [ ] Stock adjustment history list UI
 
 ### ✅ FAZ 6: POS & Sales (Tamamlandı)
 **Tahmini Süre**: 3 hafta
-**Durum**: ✅ %95 Tamamlandı (Backend %100, Frontend %95)
+**Durum**: ✅ %100 Tamamlandı (Backend %100, Frontend %100)
 
 - [x] Sales model ve migration
 - [x] Sale items model
@@ -435,6 +436,8 @@ npm run dev
 - [x] Sale history list UI (filters, pagination, detail modal)
 - [x] Refund modal UI
 - [x] Invoice view component (2 copies, print-ready)
+- [x] Invoice print sistemi (react-to-print ile profesyonel çözüm)
+- [x] Logo entegrasyonu (fatura başlığında)
 - [x] Cart persistence (localStorage)
 - [x] Branch auto-selection in POS
 - [ ] ESC/POS printer integration (future enhancement)
@@ -460,7 +463,7 @@ npm run dev
 
 ### ✅ FAZ 8: Reporting & Analytics (Tamamlandı)
 **Tahmini Süre**: 2 hafta
-**Durum**: ✅ %90 Tamamlandı
+**Durum**: ✅ %95 Tamamlandı
 
 - [x] Report API endpoints
 - [x] Sales summary report
@@ -477,6 +480,8 @@ npm run dev
 - [x] Monthly report UI
 - [x] Staff name display in reports
 - [x] Company name (Vidalita) in reports
+- [x] Logo entegrasyonu (raporlarda)
+- [x] Gereksiz kutucuklar kaldırıldı (detay özet üstü)
 - [ ] Excel export (future enhancement)
 - [ ] PDF export (future enhancement)
 
@@ -590,6 +595,16 @@ npm run dev
 - ✅ Product currency field
 - ✅ CASHIER product management permissions
 - ✅ UI/UX improvements and simplifications
+
+### Sprint 8 (Hafta 11) ✅
+- ✅ Logo entegrasyonu (Login, Navbar, Sidebar, Invoice, Reports)
+- ✅ Dashboard optimizasyonu (yüzdesel analiz kaldırıldı)
+- ✅ Son satışlar widget'ı eklendi (dashboard)
+- ✅ SalesChart sadece gelir trendi gösteriyor (dengeli görünüm)
+- ✅ Inventory buton isimlendirmeleri düzeltildi
+- ✅ Fatura print sistemi react-to-print ile yeniden yapılandırıldı
+- ✅ Raporlarda gereksiz kutucuklar kaldırıldı
+- ✅ Admin yetkileri dokümantasyonu eklendi (ADMIN_PERMISSIONS.md)
 
 ---
 
@@ -832,10 +847,10 @@ docker-compose logs -f
 
 ### Genel İlerleme
 ```
-███████████████████████████████░░ 85% Tamamlandı
+████████████████████████████████░░ 88% Tamamlandı
 
 Backend:  ████████████████████░░░░ 90%
-Frontend: ████████████████████░░░░ 90%
+Frontend: █████████████████████░░░ 92%
 Testing:  ░░░░░░░░░░░░░░░░░░░░░░░░  0%
 DevOps:   ██████████░░░░░░░░░░░░░░ 40%
 ```
@@ -852,11 +867,15 @@ DevOps:   ██████████░░░░░░░░░░░░░�
 | Inventory | 100% | 90% | 0% | ✅ |
 | Stock Transfer | 100% | 85% | 0% | ✅ |
 | Stock Adjustment | 100% | 85% | 0% | ✅ |
-| Sales | 100% | 95% | 0% | ✅ |
-| POS | 100% | 95% | 0% | ✅ |
+| Sales | 100% | 100% | 0% | ✅ |
+| POS | 100% | 100% | 0% | ✅ |
 | Customer | 100% | 100% | 0% | ✅ |
-| Reports | 100% | 90% | 0% | ✅ |
+| Reports | 100% | 95% | 0% | ✅ |
 | Localization | 0% | 100% | 0% | ✅ |
+| Invoice/Print | 100% | 100% | 0% | ✅ |
+| Dashboard | 100% | 100% | 0% | ✅ |
+| Invoice/Print | 100% | 100% | 0% | ✅ |
+| Dashboard | 100% | 100% | 0% | ✅ |
 
 ---
 
@@ -902,8 +921,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Son Güncelleme**: 30 Aralık 2024
-**Versiyon**: 0.8.5-alpha
+**Son Güncelleme**: 31 Aralık 2024
+**Versiyon**: 0.9.0-alpha
 **Durum**: Active Development 🚀
 
 ## 🎉 Son Tamamlanan Özellikler
@@ -945,3 +964,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Multi-currency support (UZS, USD, TRY, EUR)
 - CASHIER can create/update/delete products
 - Permission-based product management
+
+### ✅ UI/UX Improvements (Son Güncellemeler)
+- Logo entegrasyonu (Login, Navbar, Sidebar, Invoice, Reports)
+- Dashboard optimizasyonu (yüzdesel analiz kaldırıldı, son satışlar eklendi)
+- Inventory buton isimlendirmeleri düzeltildi
+- Fatura print sistemi react-to-print ile yeniden yapılandırıldı
+- Raporlarda gereksiz kutucuklar kaldırıldı
+- Admin yetkileri dokümantasyonu eklendi

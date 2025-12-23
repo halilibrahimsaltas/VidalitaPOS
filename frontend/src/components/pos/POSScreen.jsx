@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useProductByBarcode, useProducts } from '../../hooks/useProducts';
 import { useBranches } from '../../hooks/useBranches';
 import { useAuth } from '../../contexts/AuthContext';
+import { productService } from '../../services/product.service';
 import CustomerSelector from './CustomerSelector';
 import { HiShoppingCart, HiPlus, HiMinus, HiTrash } from 'react-icons/hi2';
 import { HiX } from 'react-icons/hi';
@@ -393,7 +394,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
                   <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center overflow-hidden">
                     {product.imageUrl ? (
                       <img
-                        src={product.imageUrl}
+                        src={productService.getImageUrl(product.imageUrl)}
                         alt={product.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {

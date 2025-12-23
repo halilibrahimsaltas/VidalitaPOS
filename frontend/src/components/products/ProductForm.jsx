@@ -14,6 +14,13 @@ import { productService } from '../../services/product.service';
 const getImageUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http')) return url; // Already a full URL
+  
+  // If URL starts with /uploads, serve from frontend (Vite dev server)
+  if (url.startsWith('/uploads')) {
+    return url; // Vite will serve this from uploads folder
+  }
+  
+  // Otherwise, serve from backend (for backward compatibility)
   const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   return url.startsWith('/') ? `${apiBaseUrl}${url}` : `${apiBaseUrl}/${url}`;
 };
