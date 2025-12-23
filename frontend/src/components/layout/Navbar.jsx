@@ -13,8 +13,17 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-full">
           <div className="flex items-center space-x-3 flex-shrink-0 min-w-0">
             <Link to="/dashboard" className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg flex-shrink-0">
-                <span className="text-white font-bold text-lg">V</span>
+              <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg flex-shrink-0 border border-gray-200">
+                <img 
+                  src="/uploads/logo/logo_v.png" 
+                  alt="V" 
+                  className="w-8 h-8 object-contain"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                />
+                <span className="text-blue-600 font-bold text-lg hidden">V</span>
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-base font-semibold text-gray-900 truncate">

@@ -98,9 +98,9 @@ const Login = () => {
             <div className="mb-6">
               {!logoError ? (
                 <img 
-                  src="/vidalita.jpg" 
+                  src="/uploads/logo/vidalita_logo.webp" 
                   alt="Vidalita" 
-                  className="h-20 mx-auto object-contain"
+                  className="h-24 mx-auto object-contain"
                   onError={() => setLogoError(true)}
                 />
               ) : (

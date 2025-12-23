@@ -37,7 +37,29 @@ const InvoiceView = ({ saleId, onClose }) => {
   };
 
   const handlePrint = () => {
-    window.print();
+    // Print öncesi scroll'u en üste al ve tüm içeriği görünür yap
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    
+    // Modal içindeki scroll'u da sıfırla
+    const invoiceContent = document.getElementById('invoice-content');
+    if (invoiceContent) {
+      invoiceContent.scrollTop = 0;
+      // Tüm parent container'ların scroll'unu sıfırla
+      let parent = invoiceContent.parentElement;
+      while (parent) {
+        if (parent.scrollTop !== undefined) {
+          parent.scrollTop = 0;
+        }
+        parent = parent.parentElement;
+      }
+    }
+    
+    // Kısa bir gecikme sonrası print (DOM güncellemesi için)
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   const handleDownload = () => {
@@ -71,7 +93,20 @@ const InvoiceView = ({ saleId, onClose }) => {
     <div className={`invoice-copy invoice-${copyType} bg-white border-2 border-gray-300 rounded-lg p-4 print:p-3`}>
       {/* Header */}
       <div className="text-center border-b-2 border-gray-300 pb-3 mb-3 print:pb-2 print:mb-2">
-        <h1 className="text-xl font-bold text-gray-900 mb-1 print:text-base">Vidalita</h1>
+        <div className="mb-2 print:mb-1">
+          <img 
+            src="/uploads/logo/vidalita_logo.webp" 
+            alt="Vidalita" 
+            className="h-12 mx-auto object-contain print:h-10"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              if (e.target.nextSibling) {
+                e.target.nextSibling.style.display = 'block';
+              }
+            }}
+          />
+          <h1 className="text-xl font-bold text-gray-900 mb-1 print:text-base hidden">Vidalita</h1>
+        </div>
         <p className="text-sm text-gray-600 print:text-xs">{t('invoice.title')}</p>
       </div>
 
@@ -229,7 +264,7 @@ const InvoiceView = ({ saleId, onClose }) => {
       {/* Invoice Content - Two Copies */}
       <div id="invoice-content" className="invoice-container max-w-4xl mx-auto print:max-w-full print:mx-0">
         {/* Screen View - Show both copies stacked */}
-        <div className="space-y-4 print:space-y-0 print:m-0 print:p-0">
+        <div className="space-y-4 print:space-y-2">
           <InvoiceContent copyType="customer" />
           <InvoiceContent copyType="cashier" />
         </div>
@@ -237,100 +272,128 @@ const InvoiceView = ({ saleId, onClose }) => {
       {/* Print Styles */}
       <style>{`
         @media print {
+          /* Sayfa ayarı */
           @page {
             size: A4;
-            margin: 0.2cm;
+            margin: 10mm;
           }
-          
-          html, body {
+
+          /* TÜM UYGULAMAYI GİZLE */
+          body > * {
+            display: none !important;
+          }
+
+          /* Root'u göster */
+          body > #root {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
-            width: 100% !important;
             height: auto !important;
             overflow: visible !important;
-            background: white !important;
           }
-          
-          * {
-            box-sizing: border-box;
-          }
-          
-          /* Hide all body children except root */
-          body > *:not(#root) {
+
+          /* Root içindeki her şeyi gizle */
+          #root > * {
             display: none !important;
           }
-          
-          /* Hide root children except invoice content */
-          #root > *:not(#invoice-content) {
-            display: none !important;
-          }
-          
-          /* Hide modal elements */
+
+          /* Modal container'larını gizle ve overflow'ları kaldır */
           .fixed,
-          .fixed.inset-0,
-          div[class*="z-50"],
-          div[class*="overflow-y-auto"],
-          div[class*="bg-black"][class*="bg-opacity"],
-          div[class*="flex"][class*="min-h-full"],
-          div[class*="rounded-lg"][class*="shadow-xl"]:not(.invoice-copy),
-          div[class*="px-4"][class*="sm:px-6"],
-          div[class*="max-h-"] {
+          [class*="fixed"],
+          [class*="overflow-y-auto"],
+          [class*="overflow-y"],
+          [class*="max-h"] {
+            position: static !important;
+            overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
+          }
+
+          /* Modal backdrop ve overlay'leri gizle */
+          [class*="bg-black"],
+          [class*="bg-opacity"],
+          [class*="backdrop"] {
             display: none !important;
           }
-          
-          /* Show root */
-          #root {
-            display: block !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            position: relative !important;
+
+          /* Scroll pozisyonunu sıfırla */
+          html,
+          body {
+            overflow: visible !important;
+            height: auto !important;
+            position: static !important;
           }
-          
-          /* Show invoice content */
+
+          /* SADECE FATURAYI GÖSTER - en yüksek öncelik */
           #invoice-content {
             display: block !important;
-            position: relative !important;
-            left: 0 !important;
-            top: 0 !important;
+            position: static !important;
             width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
             background: white !important;
-            page-break-after: auto;
+            height: auto !important;
+            overflow: visible !important;
+            max-height: none !important;
           }
-          
-          #invoice-content > div {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 0.2cm !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
+
+          /* Fatura içindeki tüm elementleri göster */
+          #invoice-content * {
+            display: revert !important;
+            overflow: visible !important;
+            max-height: none !important;
+            height: auto !important;
           }
-          
-          .invoice-copy {
+
+          /* Tablo ve inline elementler için düzeltme */
+          #invoice-content table {
+            display: table !important;
+          }
+
+          #invoice-content tr {
+            display: table-row !important;
+          }
+
+          #invoice-content td,
+          #invoice-content th {
+            display: table-cell !important;
+          }
+
+          #invoice-content img {
             display: block !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            width: 100% !important;
-            margin: 0 !important;
-            margin-bottom: 0.2cm !important;
-            padding: 0.3cm !important;
-            border: 1px solid #ccc !important;
-            background: white !important;
-            color: black !important;
           }
-          
-          .invoice-copy:first-child {
-            margin-top: 0 !important;
+
+          body {
+            margin: 0;
+            padding: 0;
+            background: white;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
           }
-          
-          .invoice-copy:last-child {
-            margin-bottom: 0 !important;
-          }
-          
+
           .print\\:hidden {
             display: none !important;
+          }
+
+          .invoice-container {
+            max-width: 100% !important;
+            margin: 0 !important;
+          }
+
+          .invoice-copy {
+            page-break-inside: avoid;
+            height: auto !important;
+            min-height: calc(50% - 5mm);
+            display: block !important;
+            overflow: visible !important;
+          }
+
+          .invoice-copy:first-child {
+            border-bottom: 2px dashed #999;
+            margin-bottom: 5mm;
+            padding-bottom: 5mm;
           }
           
           .print\\:max-w-full {
@@ -342,16 +405,74 @@ const InvoiceView = ({ saleId, onClose }) => {
             margin-right: 0 !important;
           }
           
-          .print\\:m-0 {
-            margin: 0 !important;
+          .print\\:p-3 {
+            padding: 0.75rem !important;
           }
           
-          .print\\:p-0 {
-            padding: 0 !important;
+          .print\\:mb-2 {
+            margin-bottom: 0.5rem !important;
+          }
+          
+          .print\\:pb-2 {
+            padding-bottom: 0.5rem !important;
+          }
+          
+          .print\\:text-base {
+            font-size: 1rem !important;
+          }
+          
+          .print\\:text-xs {
+            font-size: 0.75rem !important;
+          }
+          
+          .print\\:text-\\[10px\\] {
+            font-size: 10px !important;
+          }
+          
+          .print\\:text-\\[9px\\] {
+            font-size: 9px !important;
+          }
+          
+          .print\\:text-\\[8px\\] {
+            font-size: 8px !important;
+          }
+          
+          .print\\:px-1 {
+            padding-left: 0.25rem !important;
+            padding-right: 0.25rem !important;
+          }
+          
+          .print\\:py-0\\.5 {
+            padding-top: 0.125rem !important;
+            padding-bottom: 0.125rem !important;
+          }
+          
+          .print\\:mb-0\\.5 {
+            margin-bottom: 0.125rem !important;
           }
           
           .print\\:space-y-0 > * + * {
-            margin-top: 0.2cm !important;
+            margin-top: 0 !important;
+          }
+          
+          .print\\:space-y-2 > * + * {
+            margin-top: 0.5rem !important;
+          }
+          
+          .print\\:pt-0\\.5 {
+            padding-top: 0.125rem !important;
+          }
+          
+          .print\\:pt-1 {
+            padding-top: 0.25rem !important;
+          }
+          
+          .print\\:mb-1 {
+            margin-bottom: 0.25rem !important;
+          }
+          
+          .print\\:mt-0 {
+            margin-top: 0 !important;
           }
         }
         

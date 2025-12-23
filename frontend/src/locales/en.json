@@ -59,7 +59,12 @@
     "noData": "No data found",
     "revenue": "Revenue",
     "salesCount": "Sales Count",
-    "quantitySold": "Quantity Sold"
+    "quantitySold": "Quantity Sold",
+    "recentSales": "Recent Sales",
+    "noRecentSales": "No recent sales found",
+    "totalAmount": "Total Amount",
+    "totalQuantity": "Items Sold",
+    "items": "items"
   },
   "branches": {
     "title": "Branch Management",
@@ -182,6 +187,9 @@
     "normal": "Normal",
     "adjust": "Adjust",
     "transfer": "Stock Transfer",
+    "transferButton": "Transfer",
+    "editButton": "Edit",
+    "adjustButton": "Adjust",
     "lowStockAlert": "Low Stock Alert",
     "lowStockCount": "products below minimum stock level",
     "allBranches": "All Branches",
@@ -378,6 +386,12 @@
     "payment": "Payment",
     "create": "Create New Customer",
     "edit": "Edit Customer",
+    "editTitle": "Edit Customer",
+    "createTitle": "Create New Customer",
+    "transactionHistoryTitle": "Transaction History",
+    "statisticsTitle": "Statistics",
+    "purchaseHistoryTitle": "Purchase History",
+    "invoiceTitle": "Invoice",
     "deleteConfirm": "Are you sure you want to delete customer",
     "searchPlaceholder": "Search by customer name, phone or email...",
     "noCustomers": "No customers found",
@@ -421,7 +435,7 @@
       "ADJUSTMENT": "Adjustment"
     },
     "status": "Status",
-    "actions": "Actions"
+    "actions": "Actions",
     "form": {
       "nameRequired": "Customer name is required",
       "invalidEmail": "Please enter a valid email address",
@@ -507,19 +521,6 @@
     "cancelError": "An error occurred during cancel process",
     "loadError": "An error occurred while loading sales"
   },
-  "errors": {
-    "loadSales": "An error occurred while loading sales history",
-    "deleteUser": "An error occurred while deleting user",
-    "deleteCustomer": "An error occurred while deleting customer",
-    "deleteProduct": "An error occurred while deleting product",
-    "loadUsers": "An error occurred while loading users",
-    "loadCustomers": "An error occurred while loading customers",
-    "loadProducts": "An error occurred while loading products",
-    "loadInventory": "An error occurred while loading inventory information",
-    "savePayment": "An error occurred while saving payment",
-    "createdAt": "Created At"
-  }
-}
   "reports": {
     "title": "Reports",
     "subtitle": "View sales, cash register and stock reports",
@@ -541,7 +542,6 @@
     "reportDate": "Report Date:",
     "receivedBy": "Received By:",
     "totalRefund": "Total Refund",
-    "totalCash": "Total Cash",
     "detailedSummary": "Detailed Summary",
     "totalSales": "Total Sales:",
     "cashSales": "Cash Sales:",
@@ -552,7 +552,21 @@
     "netCash": "Net Cash:",
     "printError": "Print operation could not be started. Please check your browser's print settings.",
     "month": "Month",
-    "branch": "Branch"
+    "branch": "Branch",
+    "selectMonthLabel": "Select Month",
+    "companyName": "Vidalita"
+  },
+  "errors": {
+    "loadSales": "An error occurred while loading sales history",
+    "deleteUser": "An error occurred while deleting user",
+    "deleteCustomer": "An error occurred while deleting customer",
+    "deleteProduct": "An error occurred while deleting product",
+    "loadUsers": "An error occurred while loading users",
+    "loadCustomers": "An error occurred while loading customers",
+    "loadProducts": "An error occurred while loading products",
+    "loadInventory": "An error occurred while loading inventory information",
+    "savePayment": "An error occurred while saving payment",
+    "createdAt": "Created At"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -580,6 +594,23 @@
     "managePermissions": "Manage Permissions",
     "noUsers": "No users found",
     "searchPlaceholder": "Search by username, email or full name...",
+    "search": "Search",
+    "role": "Role",
+    "status": "Status",
+    "allRoles": "All Roles",
+    "allStatuses": "All Statuses",
+    "fullName": "Full Name",
+    "createdAt": "Created At",
+    "actions": "Actions",
+    "editButton": "Edit",
+    "permissionsButton": "Permissions",
+    "permissionsTooltip": "Permission Management",
+    "deleteButton": "Delete",
+    "paginationTotal": "Total {{total}} users, Page {{page}} / {{totalPages}}",
+    "previous": "Previous",
+    "next": "Next",
+    "active": "Active",
+    "inactive": "Inactive",
     "roles": {
       "ADMIN": "Administrator",
       "MANAGER": "Manager",
@@ -616,6 +647,19 @@
       "loadError": "An error occurred while loading permissions",
       "userLoadError": "An error occurred while loading user permissions",
       "updateError": "An error occurred while updating permissions",
+      "loading": "Loading...",
+      "description": "Select permissions to assign to the user. You can select all permissions by module or select permissions individually.",
+      "searchLabel": "Search",
+      "searchPlaceholder": "Search by permission name, description or code...",
+      "filterLabel": "Filter by Module",
+      "selectedCountLabel": "Selected Permissions Count",
+      "selectAll": "Select All",
+      "noResults": "No permissions found matching search criteria",
+      "noPermissionsFound": "No permissions found",
+      "adminNote": "Note: You must have ADMIN permissions to view permissions.",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
       "modules": {
         "users": "User Management",
         "branches": "Branch Management",
@@ -634,7 +678,8 @@
         "delete": "Delete",
         "manage_permissions": "Manage Permissions",
         "use": "Use",
-        "refund": "Refund"
+        "refund": "Refund",
+        "view_invoice": "View Invoice"
       },
       "cancel": "Cancel"
     }
@@ -670,20 +715,37 @@
     "barcode": "Barcode"
   },
   "customerStatistics": {
-    "loadError": "An error occurred while loading statistics"
+    "loadError": "An error occurred while loading statistics",
+    "loading": "Loading statistics...",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "clear": "Clear",
+    "refresh": "Refresh",
+    "totalSales": "Total Sales",
+    "totalRevenue": "Total Revenue",
+    "averageSale": "Average",
+    "totalItems": "Total Items",
+    "totalDiscount": "Discount",
+    "currentDebt": "Current Debt",
+    "monthlyBreakdown": "Monthly Summary",
+    "month": "Month",
+    "salesCount": "Sales Count",
+    "revenue": "Revenue",
+    "items": "Items",
+    "topProducts": "Top Purchased Products",
+    "product": "Product",
+    "quantity": "Quantity",
+    "sales": "Sales Count",
+    "branchBreakdown": "Branch Summary",
+    "branch": "Branch",
+    "branchName": "Branch Name",
+    "recentSales": "Recent Sales",
+    "receiptNumber": "Receipt No",
+    "date": "Date",
+    "amount": "Amount",
+    "itemsCount": "Items Count"
   },
   "customerPurchaseHistory": {
     "loadError": "An error occurred while loading purchase history"
-  },
-  "errors": {
-    "deleteUser": "An error occurred while deleting user",
-    "deleteCustomer": "An error occurred while deleting customer",
-    "deleteProduct": "An error occurred while deleting product",
-    "loadUsers": "An error occurred while loading users",
-    "loadCustomers": "An error occurred while loading customers",
-    "loadProducts": "An error occurred while loading products",
-    "loadInventory": "An error occurred while loading inventory",
-    "savePayment": "An error occurred while saving payment",
-    "createdAt": "Created At"
   }
 }

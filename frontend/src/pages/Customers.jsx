@@ -97,7 +97,7 @@ const Customers = () => {
         data: paymentData,
       });
       handleClose();
-      alert('Ödeme başarıyla kaydedildi');
+      alert(t('common.success'));
     } catch (error) {
       alert(error.response?.data?.message || t('errors.savePayment'));
     }
@@ -123,7 +123,7 @@ const Customers = () => {
         <Modal
           isOpen={isFormModalOpen}
           onClose={handleClose}
-          title={editingCustomer ? 'Müşteri Düzenle' : 'Yeni Müşteri Oluştur'}
+          title={editingCustomer ? t('customers.editTitle') : t('customers.createTitle')}
           size="lg"
         >
           <CustomerForm
@@ -138,7 +138,7 @@ const Customers = () => {
         <Modal
           isOpen={isTransactionModalOpen}
           onClose={handleClose}
-          title={`${selectedCustomer?.name} - Cari Hareketler`}
+          title={`${selectedCustomer?.name} - ${t('customers.transactionHistoryTitle')}`}
           size="xl"
         >
           {selectedCustomer && (
@@ -167,7 +167,7 @@ const Customers = () => {
         <Modal
           isOpen={isStatisticsModalOpen}
           onClose={handleClose}
-          title={`${selectedCustomer?.name} - İstatistikler`}
+          title={`${selectedCustomer?.name} - ${t('customers.statisticsTitle')}`}
           size="xl"
         >
           {selectedCustomer && (
@@ -179,7 +179,7 @@ const Customers = () => {
         <Modal
           isOpen={isPurchaseHistoryModalOpen}
           onClose={handleClose}
-          title={`${selectedCustomer?.name} - Satın Alma Geçmişi`}
+          title={`${selectedCustomer?.name} - ${t('customers.purchaseHistoryTitle')}`}
           size="xl"
         >
           {selectedCustomer && (
@@ -194,7 +194,7 @@ const Customers = () => {
         <Modal
           isOpen={isInvoiceModalOpen}
           onClose={handleClose}
-          title="Fatura"
+          title={t('customers.invoiceTitle')}
           size="xl"
         >
           {selectedSaleId && (

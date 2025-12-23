@@ -1,18 +1,34 @@
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
-import { useDashboardOverview, useTopProducts, useSalesSummary } from '../hooks/useReports';
+import { useDashboardOverview, useSalesSummary } from '../hooks/useReports';
+import { useSales } from '../hooks/useSales';
 import StatCard from '../components/dashboard/StatCard';
 import SalesChart from '../components/dashboard/SalesChart';
-import TopProductsChart from '../components/dashboard/TopProductsChart';
 import PageLayout from '../components/layout/PageLayout';
 import { formatCurrency } from '../utils/currency';
 
 const Dashboard = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    const localeMap = {
+      'tr': 'tr-TR',
+      'en': 'en-US',
+      'ru': 'ru-RU',
+      'uz': 'uz-UZ'
+    };
+    const locale = localeMap[i18n.language] || 'tr-TR';
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   const { data: overviewData, isLoading: overviewLoading } = useDashboardOverview();
-  const { data: topProductsData, isLoading: topProductsLoading } = useTopProducts({ limit: 5 });
   
   // Get last 7 days for sales chart
   const endDate = new Date().toISOString().split('T')[0];
@@ -21,18 +37,20 @@ const Dashboard = () => {
   const startDateStr = startDate.toISOString().split('T')[0];
   
   const { data: salesSummaryData } = useSalesSummary({ startDate: startDateStr, endDate });
+  
+  // Get last 5 sales without filters
+  const { data: recentSalesData, isLoading: recentSalesLoading } = useSales({
+    page: 1,
+    limit: 5,
+    status: 'COMPLETED',
+  });
 
   const overview = overviewData?.data || {};
   const sales = overview.sales || {};
   const inventory = overview.inventory || {};
   const customers = overview.customers || {};
-  const topProducts = topProductsData?.data || [];
   const salesChartData = salesSummaryData?.data?.dailyBreakdown || [];
-
-  // Calculate trends
-  const revenueTrend = sales.yesterday?.revenue > 0
-    ? (((sales.today?.revenue || 0) - sales.yesterday.revenue) / sales.yesterday.revenue * 100).toFixed(1)
-    : null;
+  const recentSales = recentSalesData?.data?.sales || [];
 
   return (
     <PageLayout
@@ -53,8 +71,6 @@ const Dashboard = () => {
                 value={formatCurrency(sales.today?.revenue || 0, 'UZS')}
                 subtitle={`${sales.today?.count || 0} ${t('dashboard.sales')}`}
                 color="green"
-                trend={revenueTrend && parseFloat(revenueTrend) > 0 ? 'up' : revenueTrend && parseFloat(revenueTrend) < 0 ? 'down' : null}
-                trendValue={revenueTrend ? `${Math.abs(parseFloat(revenueTrend))}%` : null}
               />
               <StatCard
                 title={t('dashboard.last7Days')}
@@ -90,15 +106,64 @@ const Dashboard = () => {
                 )}
               </div>
 
-              {/* Top Products Chart */}
+              {/* Recent Sales */}
               <div className="card p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('dashboard.topProducts')}</h3>
-                {topProductsLoading ? (
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{t('dashboard.recentSales')}</h3>
+                {recentSalesLoading ? (
                   <div className="flex items-center justify-center h-64 text-gray-500">
                     {t('common.loading')}
                   </div>
+                ) : recentSales.length === 0 ? (
+                  <div className="flex items-center justify-center h-64 text-gray-500">
+                    {t('dashboard.noRecentSales')}
+                  </div>
                 ) : (
-                  <TopProductsChart data={topProducts} />
+                  <div className="space-y-3">
+                    {recentSales.map((sale) => {
+                      const saleCurrency = sale.items && sale.items.length > 0
+                        ? sale.items[0]?.product?.currency || 'UZS'
+                        : 'UZS';
+                      
+                      // Calculate total quantity of items sold
+                      const totalQuantity = sale.items?.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0) || 0;
+
+                      return (
+                        <div
+                          key={sale.id}
+                          className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1 min-w-0">
+                              <div className="mb-1">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {t('sales.saleNumber')}: {sale.saleNumber}
+                                </span>
+                              </div>
+                              <div className="text-xs text-gray-500 mb-1">
+                                {formatDate(sale.createdAt)}
+                              </div>
+                              {sale.customer && (
+                                <div className="text-xs text-gray-600 mb-1">
+                                  {t('sales.customer')}: {sale.customer.name || t('pos.customerSelector.anonymous')}
+                                </div>
+                              )}
+                              <div className="text-xs text-gray-600">
+                                {t('dashboard.totalQuantity')}: {totalQuantity} {t('dashboard.items')}
+                              </div>
+                            </div>
+                            <div className="text-right ml-4">
+                              <div className="text-xs text-gray-500 mb-1">
+                                {t('dashboard.totalAmount')}
+                              </div>
+                              <div className="text-lg font-semibold text-gray-900">
+                                {formatCurrency(parseFloat(sale.total || 0), saleCurrency)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             </div>

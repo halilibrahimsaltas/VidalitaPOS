@@ -8,7 +8,7 @@ import Button from '../common/Button';
 import { formatCurrency } from '../../utils/currency';
 
 const CashRegisterReport = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { data: branchesData } = useBranches({ limit: 100, isActive: true });
   const branches = branchesData?.data?.branches || [];
@@ -25,8 +25,18 @@ const CashRegisterReport = () => {
   // Default to UZS for reports (reports aggregate multiple currencies)
   const reportCurrency = 'UZS';
 
+  const getLocale = () => {
+    const localeMap = {
+      'tr': 'tr-TR',
+      'en': 'en-US',
+      'ru': 'ru-RU',
+      'uz': 'uz-UZ'
+    };
+    return localeMap[i18n.language] || 'tr-TR';
+  };
+
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('tr-TR', {
+    return new Date(dateString).toLocaleDateString(getLocale(), {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -133,7 +143,20 @@ const CashRegisterReport = () => {
         {/* Report Header */}
         <div className="border-b border-gray-200 pb-4 mb-6">
           <div className="text-center mb-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Vidalita</h1>
+            <div className="mb-2">
+              <img 
+                src="/uploads/logo/vidalita_logo.webp" 
+                alt="Vidalita" 
+                className="h-16 mx-auto object-contain print:h-12"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  if (e.target.nextSibling) {
+                    e.target.nextSibling.style.display = 'block';
+                  }
+                }}
+              />
+              <h1 className="text-2xl font-bold text-gray-900 mb-2 hidden">{t('reports.companyName')}</h1>
+            </div>
             <h2 className="text-lg font-semibold text-gray-700">{t('reports.endOfDayTitle')}</h2>
           </div>
           <div className="text-sm text-gray-600 space-y-1">
@@ -141,33 +164,10 @@ const CashRegisterReport = () => {
             {report.period?.branch && (
               <p><strong>{t('reports.branch')}:</strong> {report.period.branch.name}</p>
             )}
-            <p><strong>{t('reports.reportDate')}</strong> {new Date().toLocaleString('tr-TR')}</p>
+            <p><strong>{t('reports.reportDate')}</strong> {new Date().toLocaleString(getLocale())}</p>
             {user && (
               <p><strong>{t('reports.receivedBy')}</strong> {user.fullName || user.username}</p>
             )}
-          </div>
-        </div>
-
-        {/* Simple Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white border border-gray-300 rounded-lg p-4">
-            <div className="text-sm font-medium text-gray-600 mb-1">{t('reports.cashReceived')}</div>
-            <div className="text-2xl font-bold text-gray-900">{formatCurrency(totalCash, reportCurrency)}</div>
-          </div>
-
-          <div className="bg-white border border-gray-300 rounded-lg p-4">
-            <div className="text-sm font-medium text-gray-600 mb-1">{t('reports.cardReceived')}</div>
-            <div className="text-2xl font-bold text-gray-900">{formatCurrency(totalCard, reportCurrency)}</div>
-          </div>
-
-          <div className="bg-white border border-gray-300 rounded-lg p-4">
-            <div className="text-sm font-medium text-gray-600 mb-1">{t('reports.totalRefund')}</div>
-            <div className="text-2xl font-bold text-gray-900">{formatCurrency(refundTotal, reportCurrency)}</div>
-          </div>
-
-          <div className="bg-white border border-gray-300 rounded-lg p-4">
-            <div className="text-sm font-medium text-gray-600 mb-1">{t('reports.totalCash')}</div>
-            <div className="text-2xl font-bold text-gray-900">{formatCurrency(netTotal, reportCurrency)}</div>
           </div>
         </div>
 

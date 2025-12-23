@@ -62,7 +62,7 @@ const InventoryList = ({ onEdit, onTransfer, onAdjust }) => {
           <option value="true">{t('inventory.lowStock')}</option>
         </select>
         <Button onClick={onTransfer} variant="primary">
-          {t('inventory.transfer')}
+          {t('inventory.transferButton')}
         </Button>
       </div>
 
@@ -136,15 +136,17 @@ const InventoryList = ({ onEdit, onTransfer, onAdjust }) => {
                           <button
                             onClick={() => onEdit(item)}
                             className="text-primary-600 hover:text-primary-900"
+                            title={t('common.edit')}
                           >
-                            {t('common.edit')}
+                            {t('inventory.editButton')}
                           </button>
                           {onAdjust && (
                             <button
                               onClick={() => onAdjust(item)}
                               className="text-orange-600 hover:text-orange-900"
+                              title={t('inventory.adjust')}
                             >
-                              {t('inventory.adjust')}
+                              {t('inventory.adjustButton')}
                             </button>
                           )}
                         </div>

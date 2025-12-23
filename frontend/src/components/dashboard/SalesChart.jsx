@@ -18,10 +18,30 @@ const SalesChart = ({ data }) => {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
         <YAxis />
-        <Tooltip />
+        <Tooltip 
+          formatter={(value) => {
+            // Format revenue values with currency
+            if (typeof value === 'number' && value > 1000) {
+              return new Intl.NumberFormat('tr-TR', {
+                style: 'currency',
+                currency: 'UZS',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }).format(value);
+            }
+            return value;
+          }}
+        />
         <Legend />
-        <Line type="monotone" dataKey="revenue" stroke="#0ea5e9" strokeWidth={2} name={t('dashboard.revenue')} />
-        <Line type="monotone" dataKey="sales" stroke="#10b981" strokeWidth={2} name={t('dashboard.salesCount')} />
+        <Line 
+          type="monotone" 
+          dataKey="revenue" 
+          stroke="#0ea5e9" 
+          strokeWidth={2} 
+          name={t('dashboard.revenue')}
+          dot={{ r: 4 }}
+          activeDot={{ r: 6 }}
+        />
       </LineChart>
     </ResponsiveContainer>
   );

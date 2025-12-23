@@ -47,7 +47,28 @@ const POSNavbar = () => {
     <div className="bg-white border-b border-gray-200 shadow-sm">
       <div className="px-4 py-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-1 overflow-x-auto">
+          <div className="flex items-center space-x-3 mr-4 flex-shrink-0">
+            <Link to="/dashboard" className="flex items-center space-x-2">
+              <div className="flex items-center justify-center w-8 h-8 bg-white rounded-lg flex-shrink-0 border border-gray-200">
+                <img 
+                  src="/uploads/logo/logo_v.png" 
+                  alt="V" 
+                  className="w-6 h-6 object-contain"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    if (e.target.nextSibling) {
+                      e.target.nextSibling.style.display = 'block';
+                    }
+                  }}
+                />
+                <span className="text-blue-600 font-bold text-sm hidden">V</span>
+              </div>
+              <span className="text-sm font-semibold text-gray-900 hidden sm:block">
+                Vidalita
+              </span>
+            </Link>
+          </div>
+          <div className="flex items-center space-x-1 overflow-x-auto flex-1">
             {quickActions.map((action) => {
               const IconComponent = action.icon;
               return (

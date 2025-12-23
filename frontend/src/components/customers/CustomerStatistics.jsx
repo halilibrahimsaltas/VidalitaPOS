@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCustomerStatistics } from '../../hooks/useCustomers';
 import StatCard from '../dashboard/StatCard';
 import { formatCurrency } from '../../utils/currency';
 
 const CustomerStatistics = ({ customerId }) => {
+  const { t } = useTranslation();
   const [dateRange, setDateRange] = useState({
     startDate: '',
     endDate: '',
@@ -37,7 +39,7 @@ const CustomerStatistics = ({ customerId }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-500">İstatistikler yükleniyor...</div>
+        <div className="text-gray-500">{t('customerStatistics.loading')}</div>
       </div>
     );
   }
@@ -60,7 +62,7 @@ const CustomerStatistics = ({ customerId }) => {
       <div className="card p-4">
         <div className="flex flex-col sm:flex-row gap-4 items-end">
           <div className="flex-1 w-full sm:w-auto">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Başlangıç Tarihi</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('customerStatistics.startDate')}</label>
             <input
               type="date"
               value={dateRange.startDate}
@@ -69,7 +71,7 @@ const CustomerStatistics = ({ customerId }) => {
             />
           </div>
           <div className="flex-1 w-full sm:w-auto">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bitiş Tarihi</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('customerStatistics.endDate')}</label>
             <input
               type="date"
               value={dateRange.endDate}
@@ -82,13 +84,13 @@ const CustomerStatistics = ({ customerId }) => {
               onClick={clearFilters}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
             >
-              Temizle
+              {t('customerStatistics.clear')}
             </button>
             <button
               onClick={() => refetch()}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
             >
-              Yenile
+              {t('customerStatistics.refresh')}
             </button>
           </div>
         </div>
@@ -97,25 +99,25 @@ const CustomerStatistics = ({ customerId }) => {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
-          title="Toplam Satış"
+          title={t('customerStatistics.totalSales')}
           value={statistics.summary.totalSales}
           subtitle={formatCurrency(statistics.summary.totalRevenue, statsCurrency)}
           color="primary"
         />
         <StatCard
-          title="Toplam Ciro"
+          title={t('customerStatistics.totalRevenue')}
           value={formatCurrency(statistics.summary.totalRevenue, statsCurrency)}
-          subtitle={`Ortalama: ${formatCurrency(statistics.summary.averageSale, statsCurrency)}`}
+          subtitle={`${t('customerStatistics.averageSale')}: ${formatCurrency(statistics.summary.averageSale, statsCurrency)}`}
           color="green"
         />
         <StatCard
-          title="Toplam Ürün"
+          title={t('customerStatistics.totalItems')}
           value={statistics.summary.totalItems}
-          subtitle={`İndirim: ${formatCurrency(statistics.summary.totalDiscount, statsCurrency)}`}
+          subtitle={`${t('customerStatistics.totalDiscount')}: ${formatCurrency(statistics.summary.totalDiscount, statsCurrency)}`}
           color="gray"
         />
         <StatCard
-          title="Mevcut Borç"
+          title={t('customerStatistics.currentDebt')}
           value={formatCurrency(statistics.summary.currentDebt, statsCurrency)}
           color={statistics.summary.currentDebt > 0 ? 'red' : 'green'}
         />
@@ -124,15 +126,15 @@ const CustomerStatistics = ({ customerId }) => {
       {/* Monthly Breakdown */}
       {statistics.monthlyBreakdown && statistics.monthlyBreakdown.length > 0 && (
         <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Aylık Özet</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('customerStatistics.monthlyBreakdown')}</h3>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ay</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Satış Sayısı</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ciro</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ürün Adedi</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.month')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.salesCount')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.revenue')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.items')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -161,15 +163,15 @@ const CustomerStatistics = ({ customerId }) => {
       {/* Top Products */}
       {statistics.topProducts && statistics.topProducts.length > 0 && (
         <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">En Çok Alınan Ürünler</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('customerStatistics.topProducts')}</h3>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ürün</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Adet</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ciro</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Satış Sayısı</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.product')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.quantity')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.revenue')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.sales')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -196,18 +198,18 @@ const CustomerStatistics = ({ customerId }) => {
       {/* Branch Breakdown */}
       {statistics.branchBreakdown && statistics.branchBreakdown.length > 0 && (
         <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Şube Bazında Özet</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('customerStatistics.branchBreakdown')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {statistics.branchBreakdown.map((branch, index) => (
               <div key={index} className="border border-gray-200 rounded-md p-4">
                 <h4 className="font-semibold text-gray-900 mb-2">{branch.branchName}</h4>
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Satış Sayısı:</span>
+                    <span className="text-gray-600">{t('customerStatistics.salesCount')}:</span>
                     <span className="font-medium text-gray-900">{branch.sales}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Ciro:</span>
+                    <span className="text-gray-600">{t('customerStatistics.revenue')}:</span>
                     <span className="font-semibold text-gray-900">{formatCurrency(branch.revenue, statsCurrency)}</span>
                   </div>
                 </div>
@@ -220,16 +222,16 @@ const CustomerStatistics = ({ customerId }) => {
       {/* Recent Sales */}
       {statistics.recentSales && statistics.recentSales.length > 0 && (
         <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Son Satışlar</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('customerStatistics.recentSales')}</h3>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fiş No</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tarih</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Şube</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tutar</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ürün Sayısı</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.receiptNumber')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.date')}</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.branch')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.amount')}</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('customerStatistics.itemsCount')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
