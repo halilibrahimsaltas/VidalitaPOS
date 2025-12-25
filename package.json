@@ -2,6 +2,7 @@
   "name": "vidalita-pos",
   "version": "1.0.0",
   "description": "Vidalita POS Desktop Application",
+  "author": "Vidalita",
   "main": "electron/main.js",
   "type": "module",
   "scripts": {
@@ -21,11 +22,23 @@
     "directories": {
       "output": "dist"
     },
+    "forceCodeSigning": false,
+    "win": {
+      "target": "nsis",
+      "sign": null,
+      "signDlls": false,
+      "verifyUpdateCodeSignature": false,
+      "signingHashAlgorithms": null,
+      "requestedExecutionLevel": "asInvoker"
+    },
     "files": [
       "electron/**/*",
       "backend/**/*",
       "frontend/dist/**/*",
-      "!backend/node_modules/**/*",
+      "!backend/node_modules/.bin/**/*",
+      "!backend/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!backend/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!backend/node_modules/*.d.ts",
       "!frontend/node_modules/**/*",
       "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
       "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
@@ -43,27 +56,36 @@
       "!frontend/vercel.json",
       "!frontend/.env.production.example"
     ],
-    "win": {
-      "target": [
-        {
-          "target": "portable",
-          "arch": ["x64"]
-        }
-      ],
-      "icon": "electron/icon.ico"
-    },
-    "portable": {
-      "artifactName": "${productName}-${version}-portable.exe"
-    },
     "extraResources": [
       {
         "from": "backend/prisma",
         "to": "prisma"
+      },
+      {
+        "from": "backend",
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!node_modules/.bin/**/*",
+          "!node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+          "!node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+          "!node_modules/*.d.ts",
+          "!logs/**/*",
+          "!uploads/**/*"
+        ]
       }
     ],
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Vidalita POS",
+      "artifactName": "${productName}-${version}-Setup.exe",
+      "installerIcon": null,
+      "uninstallerIcon": null,
+      "installerHeaderIcon": null,
+      "deleteAppDataOnUninstall": false
     }
   },
   "devDependencies": {

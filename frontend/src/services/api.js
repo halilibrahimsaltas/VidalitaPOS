@@ -14,9 +14,9 @@ const getBaseURL = () => {
       port = window.electronAPI.getBackendPort();
     }
     
-    // Port yoksa veya 3000 ise, default 3000 döndür (interceptor'da retry yapılacak)
-    // Hata fırlatmak yerine default döndürüyoruz çünkü interceptor'da retry mekanizması var
-    if (!port || port === 3000) {
+    // Port yoksa, backend henüz başlamadı demektir
+    // Bu durumda default 3000 döndür ama interceptor'da retry yapılacak
+    if (!port) {
       console.warn('⚠️ Backend port not ready yet, using default 3000 (will retry)');
       return 'http://localhost:3000/api'; // Temporary, interceptor will update
     }
@@ -57,8 +57,8 @@ api.interceptors.request.use(
         port = window.electronAPI.getBackendPort();
       }
       
-      // Port hazırsa kullan, değilse retry için delay ekle
-      if (port && port !== 3000) {
+      // Port hazırsa kullan
+      if (port) {
         config.baseURL = `http://localhost:${port}/api`;
         
         // Debug: İlk request'te port bilgisini logla
@@ -67,12 +67,13 @@ api.interceptors.request.use(
           config._portLogged = true;
         }
       } else {
-        // Port henüz hazır değil, default kullan ama retry için işaretle
-        config.baseURL = 'http://localhost:3000/api';
+        // Port henüz hazır değil - backend başlamadı, request'i ertele
+        // Bu durumda request'i iptal et ve retry yap
+        config.baseURL = 'http://localhost:3000/api'; // Fallback (backend başlamadıysa)
         config._portNotReady = true;
         
         if (!config._portWarningLogged) {
-          console.warn('⚠️ Port not ready, using default 3000 (request may fail, will retry)');
+          console.warn('⚠️ Backend port not available yet, request may fail');
           config._portWarningLogged = true;
         }
       }

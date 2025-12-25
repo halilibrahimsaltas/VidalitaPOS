@@ -26,9 +26,9 @@ function waitForBackendPort() {
       return;
     }
     
-    // Port zaten hazırsa hemen resolve et
+    // Port zaten hazırsa hemen resolve et (herhangi bir port kabul et)
     const port = getPort();
-    if (port && port !== 3000) {
+    if (port) {
       console.log('✅ Backend port ready:', port);
       resolve();
       return;
@@ -60,7 +60,7 @@ function waitForBackendPort() {
     // Polling ile kontrol et (her 50ms)
     let checkInterval = setInterval(() => {
       const currentPort = getPort();
-      if (currentPort && currentPort !== 3000) {
+      if (currentPort) {
         console.log('✅ Backend port ready (polling):', currentPort);
         cleanup();
         resolve();
@@ -71,10 +71,10 @@ function waitForBackendPort() {
     let timeoutId = setTimeout(() => {
       cleanup();
       const finalPort = getPort();
-      if (finalPort && finalPort !== 3000) {
+      if (finalPort) {
         console.log('✅ Backend port ready (timeout):', finalPort);
       } else {
-        console.warn('⚠️ Port timeout, but continuing anyway');
+        console.warn('⚠️ Port timeout, but continuing anyway (will use default 3000)');
       }
       resolve();
     }, 3000);

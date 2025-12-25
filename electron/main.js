@@ -1,9 +1,10 @@
 import { app, BrowserWindow } from 'electron';
-import { spawn } from 'child_process';
+import { spawn, execSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { createServer } from 'net';
+import http from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -63,9 +64,59 @@ function checkPort(port, maxAttempts = 50) {
 
 // Backend'i başlat
 async function startBackend() {
-  const backendPath = isDev 
-    ? join(__dirname, '..', 'backend', 'src', 'server.js')
-    : join(process.resourcesPath, 'backend', 'src', 'server.js');
+  // Production build'de backend dosyaları app.asar içinde veya extraResources'ta
+  let backendPath;
+  let backendDir;
+  
+  if (isDev) {
+    backendPath = join(__dirname, '..', 'backend', 'src', 'server.js');
+    backendDir = join(__dirname, '..', 'backend');
+  } else {
+    // Packaged app'te backend path'ini bul
+    // Önce extraResources'ta ara (en güvenilir yol)
+    const resourcesBackendPath = join(process.resourcesPath, 'backend', 'src', 'server.js');
+    const resourcesBackendDir = join(process.resourcesPath, 'backend');
+    
+    // Sonra app.asar içinde ara
+    const appPathBackend = join(app.getAppPath(), 'backend', 'src', 'server.js');
+    const appPathBackendDir = join(app.getAppPath(), 'backend');
+    
+    // Debug: Tüm olası path'leri logla
+    console.log('🔍 Searching for backend files...');
+    console.log('   resourcesPath:', process.resourcesPath);
+    console.log('   app.getAppPath():', app.getAppPath());
+    console.log('   process.execPath:', process.execPath);
+    console.log('   Checking resourcesBackendPath:', resourcesBackendPath, existsSync(resourcesBackendPath));
+    console.log('   Checking appPathBackend:', appPathBackend, existsSync(appPathBackend));
+    
+    if (existsSync(resourcesBackendPath)) {
+      backendPath = resourcesBackendPath;
+      backendDir = resourcesBackendDir;
+      console.log('✅ Found backend in extraResources');
+    } else if (existsSync(appPathBackend)) {
+      backendPath = appPathBackend;
+      backendDir = appPathBackendDir;
+      console.log('✅ Found backend in app.asar');
+    } else {
+      // Fallback: executable'ın yanında ara
+      const exeDir = dirname(process.execPath);
+      const exeBackendPath = join(exeDir, 'resources', 'app.asar', 'backend', 'src', 'server.js');
+      const exeBackendDir = join(exeDir, 'resources', 'app.asar', 'backend');
+      
+      console.log('   Checking exeBackendPath:', exeBackendPath, existsSync(exeBackendPath));
+      
+      if (existsSync(exeBackendPath)) {
+        backendPath = exeBackendPath;
+        backendDir = exeBackendDir;
+        console.log('✅ Found backend next to executable');
+      } else {
+        // Son çare: resourcesPath kullan (hata verebilir ama deneyelim)
+        backendPath = resourcesBackendPath;
+        backendDir = resourcesBackendDir;
+        console.warn('⚠️  Backend not found in any location, using resourcesPath as fallback');
+      }
+    }
+  }
 
   // Electron'un node.exe'sini kullan
   const nodePath = process.execPath.replace('electron.exe', 'node.exe');
@@ -93,57 +144,316 @@ async function startBackend() {
   // Environment variables
   // Local development için NODE_ENV'i development yap
   // Production build'de app.isPackaged kontrolü ile otomatik ayarlanır
+  
+  // Backend .env dosyasını oku (varsa)
+  let backendEnvVars = {};
+  if (!isDev) {
+    // Production build'de .env dosyasını extraResources'tan oku
+    const envPath = join(process.resourcesPath, 'backend', '.env');
+    if (existsSync(envPath)) {
+      try {
+        const envContent = readFileSync(envPath, 'utf-8');
+        envContent.split('\n').forEach(line => {
+          const trimmed = line.trim();
+          if (trimmed && !trimmed.startsWith('#')) {
+            const [key, ...valueParts] = trimmed.split('=');
+            if (key && valueParts.length > 0) {
+              backendEnvVars[key.trim()] = valueParts.join('=').trim();
+            }
+          }
+        });
+        console.log('✅ Loaded backend .env file from:', envPath);
+      } catch (error) {
+        console.warn('⚠️  Could not read backend .env file:', error.message);
+      }
+    } else {
+      console.warn('⚠️  Backend .env file not found at:', envPath);
+    }
+  }
+  
   const env = {
     ...process.env,
+    ...backendEnvVars, // Backend .env değerlerini önce ekle
     NODE_ENV: isDev ? 'development' : 'production',
     PORT: portString,
-    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:1234@localhost:5432/vidalita_retail?schema=public'
+    // DATABASE_URL'i backendEnvVars'tan al, yoksa default kullan
+    DATABASE_URL: backendEnvVars.DATABASE_URL || process.env.DATABASE_URL || 'postgresql://postgres:1234@localhost:5432/vidalita_retail?schema=public',
+    // JWT secrets'ları backendEnvVars'tan al, yoksa default kullan
+    JWT_SECRET: backendEnvVars.JWT_SECRET || process.env.JWT_SECRET || 'dev_jwt_secret_change_in_production',
+    JWT_REFRESH_SECRET: backendEnvVars.JWT_REFRESH_SECRET || process.env.JWT_REFRESH_SECRET || 'dev_refresh_secret_change_in_production',
+    JWT_ACCESS_EXPIRATION: backendEnvVars.JWT_ACCESS_EXPIRATION || process.env.JWT_ACCESS_EXPIRATION || '15m',
+    JWT_REFRESH_EXPIRATION: backendEnvVars.JWT_REFRESH_EXPIRATION || process.env.JWT_REFRESH_EXPIRATION || '7d',
+    FRONTEND_URL: backendEnvVars.FRONTEND_URL || process.env.FRONTEND_URL || 'http://localhost:5173'
   };
 
-  // Backend'in çalışacağı dizin
-  const backendDir = isDev
-    ? join(__dirname, '..', 'backend')
-    : join(process.resourcesPath, 'backend');
+  // backendDir yukarıda zaten set edildi
 
-  console.log('Starting backend from:', backendPath);
-  console.log('Backend directory:', backendDir);
-  console.log('Node executable:', nodeExecutable);
-  console.log('Using port:', portString);
+  // Backend path'ini doğrula
+  if (!existsSync(backendPath)) {
+    console.error('❌ Backend file not found at:', backendPath);
+    console.error('   Please check the build configuration.');
+    throw new Error(`Backend file not found: ${backendPath}`);
+  }
+  
+  // Backend directory'yi doğrula
+  if (!existsSync(backendDir)) {
+    console.error('❌ Backend directory not found at:', backendDir);
+    console.error('   Please check the build configuration.');
+    throw new Error(`Backend directory not found: ${backendDir}`);
+  }
+  
+  console.log('✅ Starting backend from:', backendPath);
+  console.log('✅ Backend directory:', backendDir);
+  console.log('✅ Node executable:', nodeExecutable);
+  console.log('✅ Using port:', portString);
   if (availablePort !== 3000) {
     console.warn(`⚠️  Port 3000 is in use, using port ${availablePort} instead`);
   }
+  
+  // Prisma schema path'ini kontrol et
+  const prismaSchemaPath = join(backendDir, 'prisma', 'schema.prisma');
+  if (!existsSync(prismaSchemaPath)) {
+    console.warn('⚠️  Prisma schema not found at:', prismaSchemaPath);
+    console.warn('   Database operations may fail.');
+  } else {
+    console.log('✅ Prisma schema found at:', prismaSchemaPath);
+  }
+  
+  // Prisma client'ın generate edilip edilmediğini kontrol et
+  const prismaClientPath = join(backendDir, 'node_modules', '.prisma', 'client', 'index.js');
+  if (!existsSync(prismaClientPath) && !isDev) {
+    console.warn('⚠️  Prisma Client not generated. Generating now...');
+    try {
+      execSync('npx prisma generate', {
+        cwd: backendDir,
+        env: { ...env, PATH: process.env.PATH },
+        stdio: 'pipe',
+        timeout: 60000 // 60 saniye timeout
+      });
+      console.log('✅ Prisma Client generated successfully');
+    } catch (error) {
+      console.error('❌ Failed to generate Prisma Client:', error.message);
+      console.error('   Backend may not work correctly.');
+      // Prisma generate başarısız olsa bile backend'i başlatmayı dene
+    }
+  } else if (existsSync(prismaClientPath)) {
+    console.log('✅ Prisma Client already generated');
+  }
 
-  backendProcess = spawn(nodeExecutable, [backendPath], {
-    env,
-    cwd: backendDir,
-    stdio: 'pipe',
-    shell: true
+  console.log('🚀 Spawning backend process...');
+  console.log('   Command:', nodeExecutable, backendPath);
+  console.log('   Working directory:', backendDir);
+  console.log('   Environment:', {
+    NODE_ENV: env.NODE_ENV,
+    PORT: env.PORT,
+    DATABASE_URL: env.DATABASE_URL ? '***' : 'NOT SET',
+    JWT_SECRET: env.JWT_SECRET ? '***' : 'NOT SET'
   });
+  
+  try {
+    backendProcess = spawn(nodeExecutable, [backendPath], {
+      env,
+      cwd: backendDir,
+      stdio: 'pipe',
+      shell: true
+    });
+    console.log('✅ Backend process spawned, PID:', backendProcess.pid);
+  } catch (error) {
+    console.error('❌ Failed to spawn backend process:', error);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('backend-error', {
+        message: `Failed to spawn backend: ${error.message}`,
+        nodeExecutable,
+        backendPath,
+        backendDir
+      });
+    }
+    throw error;
+  }
+
+  // Backend'in başarıyla başladığını kontrol et
+  let backendStarted = false;
+  const backendStartTimeout = setTimeout(() => {
+    if (!backendStarted) {
+      console.error('❌ Backend did not start within 30 seconds!');
+      console.error('   Check the error messages above for details.');
+      console.error('   Backend path:', backendPath);
+      console.error('   Backend directory:', backendDir);
+      console.error('   Node executable:', nodeExecutable);
+      console.error('   Environment variables:', {
+        NODE_ENV: env.NODE_ENV,
+        PORT: env.PORT,
+        DATABASE_URL: env.DATABASE_URL ? 'SET' : 'NOT SET',
+        JWT_SECRET: env.JWT_SECRET ? 'SET' : 'NOT SET'
+      });
+      
+      // Frontend'e hata gönder
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('backend-error', {
+          message: 'Backend did not start within 30 seconds',
+          type: 'STARTUP_TIMEOUT',
+          backendPath,
+          backendDir,
+          nodeExecutable
+        });
+      }
+    }
+  }, 30000);
 
   backendProcess.stdout.on('data', (data) => {
-    console.log(`Backend: ${data}`);
+    const output = data.toString();
+    console.log(`Backend stdout: ${output}`);
+    
+    // Frontend'e de log gönder (debug için)
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('backend-log', { type: 'stdout', message: output });
+    }
+    
+    // Backend'in gerçek portunu parse et (örnek: "Server running on http://localhost:3011")
+    const portMatch = output.match(/localhost:(\d+)/) || output.match(/port\s+(\d+)/i) || output.match(/:(\d+)/);
+    if (portMatch && portMatch[1]) {
+      const actualPort = parseInt(portMatch[1], 10);
+      if (actualPort !== backendPort) {
+        console.log(`🔄 Backend using different port: ${actualPort} (expected: ${backendPort})`);
+        backendPort = actualPort; // Port'u güncelle
+        portString = actualPort.toString();
+        
+        // Frontend'e gerçek port'u gönder
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('backend-port', actualPort);
+          console.log(`✅ Updated frontend with actual backend port: ${actualPort}`);
+        }
+      }
+    }
+    
+    // Backend başarıyla başladı mı kontrol et
+    if (output.includes('Server running on') || output.includes('🚀 Server running')) {
+      backendStarted = true;
+      clearTimeout(backendStartTimeout);
+      console.log('✅ Backend started successfully on port', backendPort);
+      
+      // Frontend'e backend'in hazır olduğunu bildir (gerçek port ile)
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('backend-ready', { port: backendPort });
+        // Port'u da güncelle (gerçek port ile)
+        mainWindow.webContents.send('backend-port', backendPort);
+        
+        // Window'a da inject et
+        mainWindow.webContents.executeJavaScript(`
+          window.__BACKEND_PORT__ = ${backendPort};
+          console.log('🔌 Backend port updated to:', ${backendPort});
+        `).catch(() => {});
+      }
+      
+      // Backend'in gerçekten çalıştığını doğrula (health check)
+      setTimeout(() => {
+        const healthCheckUrl = `http://localhost:${portString}/health`;
+        const req = http.get(healthCheckUrl, (res) => {
+          let data = '';
+          res.on('data', (chunk) => { data += chunk; });
+          res.on('end', () => {
+            if (res.statusCode === 200) {
+              console.log('✅ Backend health check passed');
+            } else {
+              console.warn('⚠️  Backend health check returned status:', res.statusCode);
+            }
+          });
+        });
+        
+        req.on('error', (err) => {
+          console.warn('⚠️  Backend health check failed:', err.message);
+          console.warn('   Backend may still be starting up or there may be an issue.');
+        });
+        
+        req.setTimeout(5000, () => {
+          req.destroy();
+          console.warn('⚠️  Backend health check timeout');
+        });
+      }, 2000); // 2 saniye bekle
+    }
   });
 
   backendProcess.stderr.on('data', (data) => {
     const errorMsg = data.toString();
-    console.error(`Backend Error: ${errorMsg}`);
+    console.error(`Backend stderr: ${errorMsg}`);
+    
+    // Frontend'e de error gönder
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('backend-log', { type: 'stderr', message: errorMsg });
+    }
     
     // EADDRINUSE hatası durumunda kullanıcıya bilgi ver
     if (errorMsg.includes('EADDRINUSE')) {
       console.error('⚠️  Port is still in use. Please close the process using this port.');
       console.error('   You can find it with: Get-NetTCPConnection -LocalPort ' + portString);
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('backend-error', {
+          message: `Port ${portString} is already in use`,
+          type: 'EADDRINUSE'
+        });
+      }
+    }
+    
+    // Database bağlantı hatası
+    if (errorMsg.includes('Can\'t reach database server') || 
+        errorMsg.includes('P1001') || 
+        errorMsg.includes('ECONNREFUSED') ||
+        errorMsg.includes('ENOTFOUND') ||
+        errorMsg.includes('P1000')) {
+      console.error('❌ Database connection error!');
+      console.error('   Please ensure PostgreSQL is running and DATABASE_URL is correct.');
+      console.error('   DATABASE_URL:', env.DATABASE_URL);
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('backend-error', {
+          message: 'Database connection failed. Please ensure PostgreSQL is running.',
+          type: 'DATABASE_ERROR',
+          databaseUrl: env.DATABASE_URL
+        });
+      }
+    }
+    
+    // Prisma client hatası
+    if (errorMsg.includes('PrismaClient') || errorMsg.includes('@prisma/client') || errorMsg.includes('Cannot find module')) {
+      console.error('❌ Prisma Client error!');
+      console.error('   Run: npx prisma generate in the backend directory');
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('backend-error', {
+          message: 'Prisma Client not found. Please run: npx prisma generate',
+          type: 'PRISMA_ERROR'
+        });
+      }
     }
   });
 
   backendProcess.on('close', (code) => {
     console.log(`Backend process exited with code ${code}`);
     if (code !== 0 && code !== null) {
-      console.error('Backend process crashed!');
+      console.error('❌ Backend process crashed with exit code:', code);
+      console.error('   Check the error messages above for details.');
+      
+      // Kullanıcıya hata göster
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('backend-crashed', { exitCode: code });
+      }
     }
   });
 
   backendProcess.on('error', (error) => {
-    console.error('Failed to start backend:', error);
+    console.error('❌ Failed to start backend:', error);
+    console.error('   Error details:', error.message);
+    console.error('   Node executable:', nodeExecutable);
+    console.error('   Backend path:', backendPath);
+    console.error('   Backend directory:', backendDir);
+    
+    // Kullanıcıya hata göster
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('backend-error', {
+        message: error.message,
+        nodeExecutable,
+        backendPath,
+        backendDir
+      });
+    }
   });
 }
 
@@ -170,10 +480,17 @@ function createWindow() {
       allowRunningInsecureContent: useFileProtocol, // Sadece file:// için true
       // SSL hatalarını suppress et
       experimentalFeatures: false,
+      // DevTools'u açık tut (debug için)
+      devTools: true,
     },
     icon: join(__dirname, 'icon.ico'),
     show: false
   });
+  
+  // DevTools'u otomatik aç (debug için)
+  if (isDev || process.env.DEBUG === 'true') {
+    mainWindow.webContents.openDevTools();
+  }
   
   // Port'u window oluşturulduktan hemen sonra inject et
   // (preload script çalışmadan önce, sayfa yüklenmeden önce)
@@ -392,10 +709,29 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
 });
 
 app.whenReady().then(async () => {
-  await startBackend();
+  try {
+    console.log('🚀 Starting backend...');
+    await startBackend();
+    console.log('✅ Backend start process completed');
+  } catch (error) {
+    console.error('❌ Failed to start backend:', error);
+    console.error('   Error details:', error.message);
+    console.error('   Stack:', error.stack);
+  }
+  
   // Backend port'unu frontend'e iletmek için biraz bekle
   setTimeout(() => {
     createWindow();
+    
+    // Eğer backend başlatılamadıysa, frontend'e bildir
+    if (!backendProcess || backendProcess.killed) {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('backend-error', {
+          message: 'Backend failed to start. Check console for details.',
+          type: 'STARTUP_ERROR'
+        });
+      }
+    }
   }, 500);
 
   app.on('activate', () => {
