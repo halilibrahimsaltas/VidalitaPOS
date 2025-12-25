@@ -17,15 +17,18 @@ const app = express();
 // CORS configuration - allow multiple origins for production and development
 const allowedOrigins = [
   'http://localhost:5173', // Local development
+  'http://localhost:3000', // Electron file:// protocol fallback
   process.env.FRONTEND_URL, // Production frontend URL
 ].filter(Boolean); // Remove undefined values
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps, curl requests, or Electron file:// protocol)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+    // Electron içinde çalışırken file:// protokolü kullanılabilir, origin null olur
+    // Bu durumda localhost isteklerini kabul et
+    if (process.env.NODE_ENV === 'development' || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));

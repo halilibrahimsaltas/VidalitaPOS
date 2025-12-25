@@ -1,53 +1,29 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
-import { statSync, createReadStream } from 'fs'
-
-// Simple mime type detection
-const getMimeType = (filePath) => {
-  const ext = filePath.split('.').pop()?.toLowerCase()
-  const mimeTypes = {
-    'png': 'image/png',
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'gif': 'image/gif',
-    'webp': 'image/webp',
-    'svg': 'image/svg+xml',
-    'pdf': 'application/pdf',
-  }
-  return mimeTypes[ext] || 'application/octet-stream'
-}
 
 export default defineConfig({
-  plugins: [
-    react(),
-    // Custom plugin to serve uploads folder as static files
-    {
-      name: 'serve-uploads',
-      configureServer(server) {
-        server.middlewares.use('/uploads', (req, res, next) => {
-          const urlPath = req.url.replace(/^\/uploads/, '').replace(/^\//, '')
-          const filePath = resolve(__dirname, 'uploads', urlPath)
-          
-          try {
-            const stats = statSync(filePath)
-            if (stats.isFile()) {
-              const mimeType = getMimeType(filePath)
-              res.setHeader('Content-Type', mimeType)
-              res.setHeader('Content-Length', stats.size)
-              createReadStream(filePath).pipe(res)
-              return
-            }
-          } catch (error) {
-            // File doesn't exist, return 404
-            res.statusCode = 404
-            res.end('File not found')
-            return
+  base: (process.env.ELECTRON === 'true' || process.env.ELECTRON === true) ? './' : '/',
+  build: {
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        // Electron için asset path'lerini düzelt
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name.split('.');
+          const ext = info[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+            return `assets/images/[name]-[hash][extname]`;
           }
-          next()
-        })
+          if (/css/i.test(ext)) {
+            return `assets/css/[name]-[hash][extname]`;
+          }
+          return `assets/[name]-[hash][extname]`;
+        },
       },
     },
+  },
+  plugins: [
+    react(),
   ],
   server: {
     port: 5173,
@@ -56,11 +32,11 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true,
       },
-    },
-    // Allow serving files from uploads directory
-    fs: {
-      strict: false,
-      allow: ['..'],
+      // Proxy uploads to backend
+      '/uploads': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
     },
   },
   // Make uploads folder accessible as static files

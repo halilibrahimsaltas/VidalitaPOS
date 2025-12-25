@@ -1,0 +1,102 @@
+# Windows PowerShell Terminal Komutları Kuralları
+
+## Önemli: Bu proje Windows PowerShell kullanıyor!
+
+Terminal komutları yazarken **MUTLAKA** Windows PowerShell syntax'ını kullan. Bash/Linux komutları kullanma.
+
+### Temel Kurallar:
+
+1. **Komut Birleştirme:**
+   - ❌ `&&` kullanma (bash syntax)
+   - ✅ `;` veya `-and` kullan
+   - ❌ `||` kullanma
+   - ✅ `-or` kullan
+   - ❌ `&` kullanma (PowerShell'de background job anlamına gelir)
+   - ✅ Komutları ayrı satırlarda yaz veya `;` ile birleştir
+
+2. **Dosya İşlemleri:**
+   - ❌ `cp file1 file2` (bash)
+   - ✅ `Copy-Item file1 file2` veya `Copy-Item -Path file1 -Destination file2`
+   - ❌ `rm file` (bash)
+   - ✅ `Remove-Item file` veya `Remove-Item -Path file`
+   - ❌ `mkdir dir` (bash)
+   - ✅ `New-Item -ItemType Directory -Path dir` veya `New-Item -ItemType Directory -Name dir`
+   - ❌ `mv file1 file2` (bash)
+   - ✅ `Move-Item file1 file2` veya `Move-Item -Path file1 -Destination file2`
+
+3. **Environment Variables:**
+   - ❌ `$VARIABLE` (bash)
+   - ✅ `$env:VARIABLE` (PowerShell)
+
+4. **Path Separator:**
+   - ✅ `\` veya `/` kullanılabilir ama `\` tercih edilir
+   - ✅ Path'lerde boşluk varsa tırnak içine al: `"C:\Program Files\..."`
+
+5. **npm ve npx Komutları:**
+   - ✅ `npm install` - doğrudan çalışır
+   - ✅ `npx prisma generate` - doğrudan çalışır
+   - ⚠️ Eğer "cannot be loaded because running scripts is disabled" hatası alırsan:
+     ```powershell
+     Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+     ```
+   - ℹ️ "policy is overridden" mesajı bir hata değildir, policy zaten çalışıyor demektir
+
+6. **Komut Örnekleri:**
+
+   **YANLIŞ (Bash):**
+   ```bash
+   cd backend && npm install && npm run dev
+   cp .env.example .env
+   ```
+
+   **DOĞRU (PowerShell):**
+   ```powershell
+   cd backend; npm install; npm run dev
+   Copy-Item .env.example .env
+   ```
+
+   **VEYA ayrı satırlarda:**
+   ```powershell
+   cd backend
+   npm install
+   npm run dev
+   ```
+
+7. **Dokümantasyon Yazarken:**
+   - Windows PowerShell komutlarını önce yaz
+   - Linux/Mac alternatiflerini yorum satırı olarak ekle
+   - Her iki platform için örnek ver
+
+8. **Execution Policy Sorunları:**
+   - Eğer npm komutları çalışmıyorsa, önce şunu çalıştır:
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   ```
+   - ⚠️ **NOT**: Eğer "policy is overridden" mesajı görürsen, bu bir hata değildir! 
+   - Execution policy zaten "Bypass" olarak ayarlı ve çalışıyor demektir.
+   - npm komutları normal şekilde çalışmalıdır. Eğer çalışmıyorsa, mevcut policy'yi kontrol et:
+   ```powershell
+   Get-ExecutionPolicy -List
+   ```
+
+### Örnek Terminal Komutları Formatı:
+
+```powershell
+# Windows PowerShell komutları
+cd backend
+npm install
+Copy-Item .env.example .env
+npx prisma generate
+npm run dev
+```
+
+**VEYA tek satırda (noktalı virgül ile):**
+
+```powershell
+cd backend; npm install; Copy-Item .env.example .env; npx prisma generate; npm run dev
+```
+
+### Asla Kullanma:
+- `&&`, `||`, `&` (komut birleştirme için)
+- `cp`, `rm`, `mv`, `mkdir` (bash komutları)
+- `$VARIABLE` (PowerShell'de `$env:VARIABLE` olmalı)

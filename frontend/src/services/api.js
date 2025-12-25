@@ -1,7 +1,17 @@
 import axios from 'axios';
 
+// Electron içinde çalışıyorsa localhost:3000 kullan
+const getBaseURL = () => {
+  // Electron ortamında mı kontrol et
+  if (window.electronAPI && window.electronAPI.isElectron) {
+    return 'http://localhost:3000/api';
+  }
+  // Normal web ortamında
+  return import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -40,8 +50,11 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
           // Use axios directly to avoid circular dependency
+          const refreshURL = window.electronAPI && window.electronAPI.isElectron
+            ? 'http://localhost:3000/api/auth/refresh'
+            : `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/refresh`;
           const response = await axios.post(
-            `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/refresh`,
+            refreshURL,
             { refreshToken },
             {
               headers: {
