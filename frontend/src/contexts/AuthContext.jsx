@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🔐 AuthProvider: Checking authentication...');
     // Check if user is already logged in
     const accessToken = localStorage.getItem('accessToken');
     const userData = localStorage.getItem('user');
@@ -29,15 +30,19 @@ export const AuthProvider = ({ children }) => {
           parsedUser.permissions = JSON.parse(storedPermissions);
         }
         setUser(parsedUser);
+        console.log('✅ AuthProvider: User found in localStorage', { username: parsedUser.username, role: parsedUser.role });
       } catch (error) {
-        console.error('Error parsing user data:', error);
+        console.error('❌ AuthProvider: Error parsing user data:', error);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         localStorage.removeItem('permissions');
       }
+    } else {
+      console.log('ℹ️ AuthProvider: No user found, redirecting to login');
     }
     setLoading(false);
+    console.log('🔐 AuthProvider: Loading complete', { isAuthenticated: !!user, loading: false });
   }, []);
 
   const login = async (username, password) => {

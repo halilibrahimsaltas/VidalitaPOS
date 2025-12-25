@@ -24,24 +24,36 @@ app.commandLine.appendSwitch('disable-features', 'VizDisplayCompositor');
 app.commandLine.appendSwitch('log-level', '3'); // 0=verbose, 1=info, 2=warning, 3=error
 
 // Port kontrolü - port kullanılıyorsa boş port bul
-function checkPort(port, maxAttempts = 10) {
+function checkPort(port, maxAttempts = 50) {
   return new Promise((resolve, reject) => {
     if (maxAttempts <= 0) {
-      reject(new Error('Could not find available port'));
+      reject(new Error(`Could not find available port after 50 attempts (starting from ${port - 50})`));
       return;
     }
 
     const server = createServer();
+    
+    // Timeout ekle (5 saniye)
+    const timeout = setTimeout(() => {
+      server.close();
+      reject(new Error(`Port check timeout for port ${port}`));
+    }, 5000);
+    
     server.listen(port, () => {
+      clearTimeout(timeout);
       const { port: actualPort } = server.address();
       server.close(() => {
         resolve(actualPort);
       });
     });
+    
     server.on('error', (err) => {
+      clearTimeout(timeout);
       if (err.code === 'EADDRINUSE') {
-        // Port kullanılıyor, bir sonraki portu dene
-        resolve(checkPort(port + 1, maxAttempts - 1));
+        // Port kullanılıyor, bir sonraki portu dene (recursive)
+        checkPort(port + 1, maxAttempts - 1)
+          .then(resolve)
+          .catch(reject);
       } else {
         reject(err);
       }
@@ -65,9 +77,18 @@ async function startBackend() {
   }
 
   // Port kontrolü - 3000 kullanılıyorsa boş port bul
-  const availablePort = await checkPort(3000);
+  let availablePort;
+  try {
+    availablePort = await checkPort(3000);
+    backendPort = availablePort; // Port'u sakla
+  } catch (error) {
+    console.error('❌ Port kontrolü başarısız:', error.message);
+    // Fallback: 3000'i zorla kullan (hata riski var ama çalışabilir)
+    console.warn('⚠️  Fallback: Port 3000 kullanılıyor (çakışma riski var)');
+    availablePort = 3000;
+    backendPort = 3000;
+  }
   const portString = availablePort.toString();
-  backendPort = availablePort; // Port'u sakla
 
   // Environment variables
   // Local development için NODE_ENV'i development yap
@@ -153,6 +174,20 @@ function createWindow() {
     icon: join(__dirname, 'icon.ico'),
     show: false
   });
+  
+  // Port'u window oluşturulduktan hemen sonra inject et
+  // (preload script çalışmadan önce, sayfa yüklenmeden önce)
+  // did-start-loading çok erken, bu yüzden dom-ready kullanıyoruz
+  mainWindow.webContents.once('dom-ready', () => {
+    // IPC ile preload script'e port gönder
+    mainWindow.webContents.send('backend-port', backendPort);
+    
+    // Ayrıca hemen window.__BACKEND_PORT__ olarak da set et
+    mainWindow.webContents.executeJavaScript(`
+      window.__BACKEND_PORT__ = ${backendPort};
+      console.log('🔌 Backend port injected (dom-ready, immediate):', ${backendPort});
+    `).catch(() => {});
+  });
 
   // Content Security Policy ekle (güvenlik için)
   // Not: file:// protokolü için CSP HTTP header'ları çalışmaz, bu yüzden sadece http:// için ekliyoruz
@@ -181,15 +216,49 @@ function createWindow() {
     console.log('   these warnings will not appear.');
   }
 
-  // Pencere hazır olduğunda göster ve backend port'unu frontend'e ilet
-  mainWindow.once('ready-to-show', () => {
-    // Backend port'unu frontend'e ilet
+  // Backend port'unu frontend'e ilet (mümkün olduğunca erken)
+  // dom-ready event'inde IPC ile preload script'e gönder
+  mainWindow.webContents.once('dom-ready', () => {
+    // IPC ile preload script'e port gönder (preload script hazır olduğunda)
+    mainWindow.webContents.send('backend-port', backendPort);
+    
+    // Ayrıca window.__BACKEND_PORT__ olarak da inject et (fallback)
+    mainWindow.webContents.executeJavaScript(`
+      window.__BACKEND_PORT__ = ${backendPort};
+      console.log('🔌 Backend port injected (dom-ready):', ${backendPort});
+    `).catch(() => {});
+  });
+  
+  // did-start-loading event'inde de erken inject et (sayfa yüklenmeye başladığında)
+  mainWindow.webContents.once('did-start-loading', () => {
+    mainWindow.webContents.executeJavaScript(`
+      window.__BACKEND_PORT__ = ${backendPort};
+      console.log('🔌 Backend port injected (early):', ${backendPort});
+    `).catch(() => {});
+  });
+  
+  // did-finish-load event'inde de tekrar inject et (güvenlik için)
+  mainWindow.webContents.once('did-finish-load', () => {
     mainWindow.webContents.executeJavaScript(`
       window.__BACKEND_PORT__ = ${backendPort};
       if (window.electronAPI) {
         window.electronAPI.backendPort = ${backendPort};
       }
-    `).catch(err => console.error('Failed to set backend port:', err));
+      console.log('🔌 Backend port injected (final):', ${backendPort});
+      // Port değiştiğinde event dispatch et
+      window.dispatchEvent(new CustomEvent('backendPortReady', { detail: { port: ${backendPort} } }));
+    `).catch(() => {});
+  });
+  
+  // Console hatalarını logla (debug için)
+  mainWindow.webContents.on('console-message', (event, level, message) => {
+    if (level >= 2) { // Warning ve Error
+      console.log(`[Renderer ${level === 2 ? 'WARN' : 'ERROR'}]`, message);
+    }
+  });
+
+  // Pencere hazır olduğunda göster
+  mainWindow.once('ready-to-show', () => {
     mainWindow.show();
   });
 
@@ -207,6 +276,16 @@ function createWindow() {
           ? `file:///${normalizedPath}` 
           : `file://${normalizedPath}`;
         console.log('Loading from:', fileUrl);
+        
+        // Port'u frontend yüklenmeden ÖNCE inject et
+        // will-navigate event'inde inject et (sayfa yüklenmeye başlamadan önce)
+        mainWindow.webContents.once('will-navigate', () => {
+          mainWindow.webContents.executeJavaScript(`
+            window.__BACKEND_PORT__ = ${backendPort};
+            console.log('🔌 Backend port injected (will-navigate):', ${backendPort});
+          `).catch(() => {});
+        });
+        
         mainWindow.loadURL(fileUrl);
         mainWindow.webContents.openDevTools();
       } else {

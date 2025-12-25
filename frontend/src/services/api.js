@@ -6,7 +6,21 @@ const getBaseURL = () => {
   // Electron ortamında mı kontrol et
   if (window.electronAPI && window.electronAPI.isElectron) {
     // Backend port'unu al (Electron'dan inject edilir)
-    const port = window.electronAPI.getBackendPort ? window.electronAPI.getBackendPort() : (window.__BACKEND_PORT__ || 3000);
+    // Önce window.__BACKEND_PORT__ kontrol et (en güncel)
+    let port = null;
+    if (typeof window !== 'undefined' && window.__BACKEND_PORT__) {
+      port = window.__BACKEND_PORT__;
+    } else if (window.electronAPI && window.electronAPI.getBackendPort) {
+      port = window.electronAPI.getBackendPort();
+    }
+    
+    // Port yoksa veya 3000 ise, default 3000 döndür (interceptor'da retry yapılacak)
+    // Hata fırlatmak yerine default döndürüyoruz çünkü interceptor'da retry mekanizması var
+    if (!port || port === 3000) {
+      console.warn('⚠️ Backend port not ready yet, using default 3000 (will retry)');
+      return 'http://localhost:3000/api'; // Temporary, interceptor will update
+    }
+    
     return `http://localhost:${port}/api`;
   }
   // Normal web ortamında - HTTPS değil, HTTP kullan!
@@ -20,8 +34,9 @@ const getBaseURL = () => {
 };
 
 // ✅ Axios config - withCredentials: false (SSL + cookie zorlamaz)
+// Not: baseURL'i interceptor'da set ediyoruz, burada default değer
 const api = axios.create({
-  baseURL: getBaseURL(), // İlk değer, her request'te güncellenecek
+  baseURL: 'http://localhost:3000/api', // Default, interceptor'da güncellenecek
   timeout: 10000,
   withCredentials: false, // ❌ SSL + cookie zorlamaz
   headers: {
@@ -32,8 +47,39 @@ const api = axios.create({
 // ✅ Her request'te baseURL'i runtime'da güncelle + auth token ekle
 api.interceptors.request.use(
   (config) => {
-    // BaseURL'i her request'te runtime'da hesapla (port değişikliklerini yakala)
-    config.baseURL = getBaseURL();
+    // Electron ortamında port kontrolü yap
+    if (window.electronAPI && window.electronAPI.isElectron) {
+      // Port'u al
+      let port = null;
+      if (typeof window !== 'undefined' && window.__BACKEND_PORT__) {
+        port = window.__BACKEND_PORT__;
+      } else if (window.electronAPI && window.electronAPI.getBackendPort) {
+        port = window.electronAPI.getBackendPort();
+      }
+      
+      // Port hazırsa kullan, değilse retry için delay ekle
+      if (port && port !== 3000) {
+        config.baseURL = `http://localhost:${port}/api`;
+        
+        // Debug: İlk request'te port bilgisini logla
+        if (!config._portLogged) {
+          console.log('🌐 API BaseURL:', config.baseURL, '(Port:', port + ')');
+          config._portLogged = true;
+        }
+      } else {
+        // Port henüz hazır değil, default kullan ama retry için işaretle
+        config.baseURL = 'http://localhost:3000/api';
+        config._portNotReady = true;
+        
+        if (!config._portWarningLogged) {
+          console.warn('⚠️ Port not ready, using default 3000 (request may fail, will retry)');
+          config._portWarningLogged = true;
+        }
+      }
+    } else {
+      // Web ortamında normal baseURL kullan
+      config.baseURL = getBaseURL();
+    }
     
     // Auth token ekle
     const token = localStorage.getItem('accessToken');
@@ -53,11 +99,36 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor - Handle token refresh
+// Response interceptor - Handle errors and retry with correct port
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    
+    // Electron ortamında port hatası varsa retry yap
+    if (window.electronAPI && window.electronAPI.isElectron) {
+      // Connection refused veya port hatası varsa ve port henüz hazır değilse retry
+      if (
+        (error.code === 'ECONNREFUSED' || error.message?.includes('ERR_CONNECTION_REFUSED') || error.message?.includes('Failed to fetch')) &&
+        originalRequest._portNotReady &&
+        !originalRequest._retriedPort
+      ) {
+        // Port'u tekrar kontrol et
+        let port = null;
+        if (typeof window !== 'undefined' && window.__BACKEND_PORT__) {
+          port = window.__BACKEND_PORT__;
+        } else if (window.electronAPI && window.electronAPI.getBackendPort) {
+          port = window.electronAPI.getBackendPort();
+        }
+        
+        if (port && port !== 3000) {
+          console.log('🔄 Retrying request with correct port:', port);
+          originalRequest._retriedPort = true;
+          originalRequest.baseURL = `http://localhost:${port}/api`;
+          return api(originalRequest);
+        }
+      }
+    }
 
     // Don't retry if it's already a retry or if it's a login/register request
     if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/')) {
@@ -69,7 +140,16 @@ api.interceptors.response.use(
           // Use axios directly to avoid circular dependency
           let refreshURL;
           if (window.electronAPI && window.electronAPI.isElectron) {
-            const port = window.electronAPI.getBackendPort ? window.electronAPI.getBackendPort() : (window.__BACKEND_PORT__ || 3000);
+            // Port'u al (getBaseURL mantığı ile aynı)
+            let port = null;
+            if (typeof window !== 'undefined' && window.__BACKEND_PORT__) {
+              port = window.__BACKEND_PORT__;
+            } else if (window.electronAPI && window.electronAPI.getBackendPort) {
+              port = window.electronAPI.getBackendPort();
+            }
+            if (!port || port === 3000) {
+              throw new Error('Backend port not ready for token refresh');
+            }
             refreshURL = `http://localhost:${port}/api/auth/refresh`;
           } else {
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';

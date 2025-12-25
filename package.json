@@ -10,7 +10,7 @@
     "electron:build": "electron-builder",
     "electron:build:win": "electron-builder --win",
     "build:frontend": "cd frontend && npm run build",
-    "build:frontend:electron": "cd frontend && $env:ELECTRON='true'; npm run build",
+    "build:frontend:electron": "cd frontend; $env:ELECTRON='true'; npm run build",
     "build:backend": "cd backend && npm run build",
     "build:all": "npm run build:frontend:electron && npm run build:backend && npm run electron:build:win",
     "postinstall": "cd backend && npm install && cd ../frontend && npm install"
@@ -39,7 +39,9 @@
       "!**/{appveyor.yml,.travis.yml,circle.yml}",
       "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}",
       "!backend/logs/**/*",
-      "!backend/uploads/**/*"
+      "!backend/uploads/**/*",
+      "!frontend/vercel.json",
+      "!frontend/.env.production.example"
     ],
     "win": {
       "target": [

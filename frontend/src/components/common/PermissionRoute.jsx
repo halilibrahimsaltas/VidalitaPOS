@@ -4,7 +4,10 @@ import { useAuth } from '../../contexts/AuthContext';
 const PermissionRoute = ({ children, permission, requireAdmin = false, fallback = '/dashboard' }) => {
   const { isAuthenticated, loading, hasPermission, user } = useAuth();
 
+  console.log('🔒 PermissionRoute:', { permission, requireAdmin, isAuthenticated, loading, hasPermission: permission ? hasPermission(permission) : 'N/A' });
+
   if (loading) {
+    console.log('⏳ PermissionRoute: Loading...');
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">Loading...</div>
@@ -13,6 +16,7 @@ const PermissionRoute = ({ children, permission, requireAdmin = false, fallback 
   }
 
   if (!isAuthenticated) {
+    console.log('🚫 PermissionRoute: Not authenticated, redirecting to /login');
     return <Navigate to="/login" replace />;
   }
 

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import Login from './pages/Login';
@@ -24,6 +24,8 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  console.log('📱 App component rendered');
+  
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -107,7 +109,8 @@ function App() {
                 </PermissionRoute>
               }
             />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Router>
       </AuthProvider>

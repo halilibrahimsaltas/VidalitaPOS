@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// Electron için optimize edilmiş config
+// Not: Bu proje sadece Electron için kullanılıyor, web deployment yok
 export default defineConfig({
-  base: (process.env.ELECTRON === 'true' || process.env.ELECTRON === true) ? './' : '/',
+  base: './', // Electron için her zaman relative path (file:// protokolü için gerekli)
   build: {
     assetsDir: 'assets',
     rollupOptions: {
