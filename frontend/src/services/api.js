@@ -1,25 +1,41 @@
 import axios from 'axios';
 
-// Electron içinde çalışıyorsa localhost:3000 kullan
+// ✅ RUNTIME API URL - Build-time sabitlenmez!
+// Electron içinde çalışıyorsa dinamik port kullan
 const getBaseURL = () => {
   // Electron ortamında mı kontrol et
   if (window.electronAPI && window.electronAPI.isElectron) {
-    return 'http://localhost:3000/api';
+    // Backend port'unu al (Electron'dan inject edilir)
+    const port = window.electronAPI.getBackendPort ? window.electronAPI.getBackendPort() : (window.__BACKEND_PORT__ || 3000);
+    return `http://localhost:${port}/api`;
   }
-  // Normal web ortamında
-  return import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  // Normal web ortamında - HTTPS değil, HTTP kullan!
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  // HTTPS kullanılıyorsa HTTP'ye çevir (local development için)
+  if (apiUrl.startsWith('https://localhost') || apiUrl.startsWith('https://127.0.0.1')) {
+    console.warn('⚠️ HTTPS detected for localhost, converting to HTTP');
+    return apiUrl.replace('https://', 'http://');
+  }
+  return apiUrl;
 };
 
+// ✅ Axios config - withCredentials: false (SSL + cookie zorlamaz)
 const api = axios.create({
-  baseURL: getBaseURL(),
+  baseURL: getBaseURL(), // İlk değer, her request'te güncellenecek
+  timeout: 10000,
+  withCredentials: false, // ❌ SSL + cookie zorlamaz
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor - Add auth token
+// ✅ Her request'te baseURL'i runtime'da güncelle + auth token ekle
 api.interceptors.request.use(
   (config) => {
+    // BaseURL'i her request'te runtime'da hesapla (port değişikliklerini yakala)
+    config.baseURL = getBaseURL();
+    
+    // Auth token ekle
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -29,6 +45,7 @@ api.interceptors.request.use(
         console.warn('⚠️ No access token found for request:', config.url);
       }
     }
+    
     return config;
   },
   (error) => {
@@ -50,9 +67,18 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
           // Use axios directly to avoid circular dependency
-          const refreshURL = window.electronAPI && window.electronAPI.isElectron
-            ? 'http://localhost:3000/api/auth/refresh'
-            : `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/refresh`;
+          let refreshURL;
+          if (window.electronAPI && window.electronAPI.isElectron) {
+            const port = window.electronAPI.getBackendPort ? window.electronAPI.getBackendPort() : (window.__BACKEND_PORT__ || 3000);
+            refreshURL = `http://localhost:${port}/api/auth/refresh`;
+          } else {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+            // HTTPS kullanılıyorsa HTTP'ye çevir
+            const baseUrl = apiUrl.startsWith('https://localhost') || apiUrl.startsWith('https://127.0.0.1')
+              ? apiUrl.replace('https://', 'http://')
+              : apiUrl;
+            refreshURL = `${baseUrl}/auth/refresh`;
+          }
           const response = await axios.post(
             refreshURL,
             { refreshToken },

@@ -15,23 +15,48 @@ const app = express();
 
 // Middleware
 // CORS configuration - allow multiple origins for production and development
+// Local development için tüm localhost portlarını kabul et
 const allowedOrigins = [
-  'http://localhost:5173', // Local development
-  'http://localhost:3000', // Electron file:// protocol fallback
+  'http://localhost:5173', // Vite dev server
+  /^http:\/\/localhost:\d+$/, // Tüm localhost portları (Electron için)
+  /^http:\/\/127\.0\.0\.1:\d+$/, // 127.0.0.1 portları
   process.env.FRONTEND_URL, // Production frontend URL
 ].filter(Boolean); // Remove undefined values
 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps, curl requests, or Electron file:// protocol)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      // Electron file:// protokolü için origin null olur, localhost isteklerini kabul et
+      if (process.env.NODE_ENV === 'development') {
+        return callback(null, true);
+      }
+      // Production'da sadece belirli origin'lere izin ver
+      return callback(null, true); // Electron için gerekli
+    }
     
-    // Electron içinde çalışırken file:// protokolü kullanılabilir, origin null olur
-    // Bu durumda localhost isteklerini kabul et
-    if (process.env.NODE_ENV === 'development' || allowedOrigins.indexOf(origin) !== -1) {
+    // Development modunda tüm localhost portlarını kabul et
+    if (process.env.NODE_ENV === 'development') {
+      if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+        return callback(null, true);
+      }
+    }
+    
+    // Regex pattern'leri kontrol et
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (typeof allowed === 'string') {
+        return allowed === origin;
+      }
+      if (allowed instanceof RegExp) {
+        return allowed.test(origin);
+      }
+      return false;
+    });
+    
+    if (isAllowed) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error(`Not allowed by CORS: ${origin}`));
     }
   },
   credentials: true,

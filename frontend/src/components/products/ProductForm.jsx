@@ -16,7 +16,18 @@ const getImageUrl = (url) => {
   if (url.startsWith('http')) return url; // Already a full URL
   
   // All uploads are served from backend
-  const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  let apiBaseUrl;
+  if (window.electronAPI && window.electronAPI.isElectron) {
+    // Electron ortamında dinamik port kullan
+    const port = window.electronAPI.getBackendPort ? window.electronAPI.getBackendPort() : (window.__BACKEND_PORT__ || 3000);
+    apiBaseUrl = `http://localhost:${port}`;
+  } else {
+    apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    // HTTPS kullanılıyorsa HTTP'ye çevir (local development için)
+    if (apiBaseUrl.startsWith('https://localhost') || apiBaseUrl.startsWith('https://127.0.0.1')) {
+      apiBaseUrl = apiBaseUrl.replace('https://', 'http://');
+    }
+  }
   return url.startsWith('/') ? `${apiBaseUrl}${url}` : `${apiBaseUrl}/${url}`;
 };
 

@@ -4,10 +4,12 @@
 
 const { contextBridge } = require('electron');
 
-// Electron API'lerini window objesine ekle
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Gerekirse API'ler eklenebilir
   platform: process.platform,
-  isElectron: true
+  isElectron: true,
+  // Backend port'unu al (window.__BACKEND_PORT__ üzerinden)
+  getBackendPort: () => {
+    return window.__BACKEND_PORT__ || 3000; // Default 3000, main.js'den inject edilir
+  }
 });
 

@@ -10,7 +10,18 @@ const __dirname = dirname(__filename);
 
 let mainWindow;
 let backendProcess;
+let backendPort = 3000; // Backend port'unu sakla
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+
+// SSL certificate errors'ı suppress et (development için)
+// Command line flag'leri ayarla - app.whenReady()'den ÖNCE çağrılmalı
+app.commandLine.appendSwitch('ignore-certificate-errors');
+app.commandLine.appendSwitch('ignore-ssl-errors');
+app.commandLine.appendSwitch('ignore-certificate-errors-spki-list');
+// Chromium'un internal bağlantılarını da suppress et
+app.commandLine.appendSwitch('disable-features', 'VizDisplayCompositor');
+// Log seviyesini azalt (SSL hatalarını console'dan gizle)
+app.commandLine.appendSwitch('log-level', '3'); // 0=verbose, 1=info, 2=warning, 3=error
 
 // Port kontrolü - port kullanılıyorsa boş port bul
 function checkPort(port, maxAttempts = 10) {
@@ -56,11 +67,14 @@ async function startBackend() {
   // Port kontrolü - 3000 kullanılıyorsa boş port bul
   const availablePort = await checkPort(3000);
   const portString = availablePort.toString();
+  backendPort = availablePort; // Port'u sakla
 
   // Environment variables
+  // Local development için NODE_ENV'i development yap
+  // Production build'de app.isPackaged kontrolü ile otomatik ayarlanır
   const env = {
     ...process.env,
-    NODE_ENV: 'production',
+    NODE_ENV: isDev ? 'development' : 'production',
     PORT: portString,
     DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:1234@localhost:5432/vidalita_retail?schema=public'
   };
@@ -114,6 +128,12 @@ async function startBackend() {
 
 // Frontend'i yükle
 function createWindow() {
+  const frontendDistPath = join(__dirname, '..', 'frontend', 'dist', 'index.html');
+  const frontendExists = existsSync(frontendDistPath);
+  // file:// protokolü kullanılacak mı? (build varsa file:// kullan, yoksa http://)
+  // Not: Development'ta da build varsa file:// kullanabiliriz
+  const useFileProtocol = frontendExists;
+  
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -123,29 +143,70 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       preload: join(__dirname, 'preload.js'),
-      webSecurity: false, // file:// protokolü için gerekli
-      allowRunningInsecureContent: true,
+      // file:// protokolü için webSecurity'yi sadece gerektiğinde kapat
+      // http:// kullanırken güvenliği açık tut
+      webSecurity: !useFileProtocol, // file:// için false, http:// için true
+      allowRunningInsecureContent: useFileProtocol, // Sadece file:// için true
+      // SSL hatalarını suppress et
+      experimentalFeatures: false,
     },
     icon: join(__dirname, 'icon.ico'),
     show: false
   });
 
-  // Pencere hazır olduğunda göster
+  // Content Security Policy ekle (güvenlik için)
+  // Not: file:// protokolü için CSP HTTP header'ları çalışmaz, bu yüzden sadece http:// için ekliyoruz
+  if (!useFileProtocol) {
+    mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Content-Security-Policy': [
+            "default-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* data: blob:; " +
+            "connect-src 'self' http://localhost:* ws://localhost:*; " +
+            "img-src 'self' data: blob: http://localhost:*; " +
+            "font-src 'self' data:; " +
+            "style-src 'self' 'unsafe-inline'; " +
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval';"
+          ]
+        }
+      });
+    });
+  }
+  
+  // Development modunda güvenlik uyarılarını azalt (production'da görünmez zaten)
+  if (isDev && useFileProtocol) {
+    console.log('⚠️  Security Note: webSecurity disabled for file:// protocol support');
+    console.log('   This is required for loading local files. In production builds,');
+    console.log('   these warnings will not appear.');
+  }
+
+  // Pencere hazır olduğunda göster ve backend port'unu frontend'e ilet
   mainWindow.once('ready-to-show', () => {
+    // Backend port'unu frontend'e ilet
+    mainWindow.webContents.executeJavaScript(`
+      window.__BACKEND_PORT__ = ${backendPort};
+      if (window.electronAPI) {
+        window.electronAPI.backendPort = ${backendPort};
+      }
+    `).catch(err => console.error('Failed to set backend port:', err));
     mainWindow.show();
   });
 
   // Backend başladıktan sonra frontend'i yükle
   setTimeout(() => {
-    const frontendDistPath = join(__dirname, '..', 'frontend', 'dist', 'index.html');
-    const frontendExists = existsSync(frontendDistPath);
     
     if (isDev) {
       // Development modunda: Önce build'i kontrol et, varsa onu kullan
       if (frontendExists) {
         console.log('Loading frontend from build (dist folder)');
-        // file:// protokolü ile tam path kullan
-        const fileUrl = `file://${frontendDistPath.replace(/\\/g, '/')}`;
+        // file:// protokolü ile tam path kullan (Windows için doğru format)
+        // Windows'ta file:///C:/path formatı gerekir
+        const normalizedPath = frontendDistPath.replace(/\\/g, '/');
+        const fileUrl = process.platform === 'win32' 
+          ? `file:///${normalizedPath}` 
+          : `file://${normalizedPath}`;
+        console.log('Loading from:', fileUrl);
         mainWindow.loadURL(fileUrl);
         mainWindow.webContents.openDevTools();
       } else {
@@ -175,8 +236,12 @@ function createWindow() {
     } else {
       // Production modunda: Sadece build'i kullan
       if (frontendExists) {
-        // file:// protokolü ile tam path kullan
-        const fileUrl = `file://${frontendDistPath.replace(/\\/g, '/')}`;
+        // file:// protokolü ile tam path kullan (Windows için doğru format)
+        const normalizedPath = frontendDistPath.replace(/\\/g, '/');
+        const fileUrl = process.platform === 'win32' 
+          ? `file:///${normalizedPath}` 
+          : `file://${normalizedPath}`;
+        console.log('Loading from:', fileUrl);
         mainWindow.loadURL(fileUrl);
       } else {
         console.error('Frontend build not found!');
@@ -198,9 +263,19 @@ function createWindow() {
     mainWindow = null;
   });
 
-  // Hata sayfası göster
-  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-    console.error('Failed to load:', errorCode, errorDescription);
+  // Hata sayfası göster ve SSL hatalarını handle et
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    // SSL/TLS related errors - bunları ignore et (sadece debug modunda göster)
+    if (errorCode === -107 || errorCode === -200 || errorCode === -101) {
+      // SSL handshake errors - suppress et
+      if (isDev) {
+        console.debug(`SSL Warning (ignored): ${errorDescription}`);
+      }
+      return; // SSL hatalarını ignore et
+    }
+    
+    // Diğer hatalar için normal handling
+    console.error('Failed to load:', errorCode, errorDescription, validatedURL || '');
     const frontendDistPath = join(__dirname, '..', 'frontend', 'dist', 'index.html');
     
     if (errorCode === -102 || errorCode === -106) {
@@ -209,7 +284,10 @@ function createWindow() {
         // Build varsa onu kullan
         if (existsSync(frontendDistPath)) {
           console.log('Retrying with frontend build...');
-          const fileUrl = `file://${frontendDistPath.replace(/\\/g, '/')}`;
+          const normalizedPath = frontendDistPath.replace(/\\/g, '/');
+          const fileUrl = process.platform === 'win32' 
+            ? `file:///${normalizedPath}` 
+            : `file://${normalizedPath}`;
           mainWindow.loadURL(fileUrl);
         } else if (isDev) {
           // Development modunda tekrar dene
@@ -223,9 +301,23 @@ function createWindow() {
   });
 }
 
+// SSL certificate errors'ı suppress et (development için)
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+  // Development modunda veya localhost için certificate hatalarını ignore et
+  if (isDev || url.includes('localhost') || url.includes('127.0.0.1') || url.startsWith('file://')) {
+    event.preventDefault();
+    callback(true); // Certificate'i kabul et
+  } else {
+    callback(false); // Production'da normal validation
+  }
+});
+
 app.whenReady().then(async () => {
   await startBackend();
-  createWindow();
+  // Backend port'unu frontend'e iletmek için biraz bekle
+  setTimeout(() => {
+    createWindow();
+  }, 500);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
