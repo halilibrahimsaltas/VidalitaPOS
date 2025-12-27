@@ -8,6 +8,7 @@ import { useRootCategories, useCreateCategory } from '../../hooks/useCategories'
 import { useBranches } from '../../hooks/useBranches';
 import { useInventoryByProduct } from '../../hooks/useInventory';
 import { useProductByBarcode } from '../../hooks/useProducts';
+import { usePriceLists, useProductPrices } from '../../hooks/usePriceLists';
 import { productService } from '../../services/product.service';
 
 // Helper function to get full image URL
@@ -40,6 +41,10 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
   const branches = branchesData?.data?.branches || [];
   const { data: inventoryData } = useInventoryByProduct(product?.id);
   const inventory = inventoryData?.data || [];
+  const { data: priceListsData } = usePriceLists({ includeInactive: false });
+  const priceLists = priceListsData?.data || [];
+  const { data: productPricesData } = useProductPrices(product?.id);
+  const productPrices = productPricesData?.data || [];
 
   const [formData, setFormData] = useState({
     name: '',
@@ -48,7 +53,6 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
     sku: '',
     categoryId: '',
     price: '',
-    costPrice: '',
     currency: 'UZS',
     imageUrl: '',
     isActive: true,
@@ -57,6 +61,8 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
     quantity: '',
     minStockLevel: '',
     maxStockLevel: '',
+    // Price list prices
+    priceListPrices: {},
   });
 
   const [errors, setErrors] = useState({});
@@ -102,6 +108,20 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
 
   useEffect(() => {
     if (product) {
+      // Map product prices to priceListPrices format
+      const priceListPricesMap = {};
+      if (product.productPrices && Array.isArray(product.productPrices)) {
+        product.productPrices.forEach((pp) => {
+          priceListPricesMap[pp.priceListId] = parseFloat(pp.price).toFixed(2);
+        });
+      }
+      // Also check productPrices from hook
+      if (productPrices && Array.isArray(productPrices)) {
+        productPrices.forEach((pp) => {
+          priceListPricesMap[pp.priceListId] = parseFloat(pp.price).toFixed(2);
+        });
+      }
+
       setFormData({
         name: product.name || '',
         description: product.description || '',
@@ -109,7 +129,6 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
         sku: product.sku || '',
         categoryId: product.categoryId || '',
         price: product.price ? parseFloat(product.price).toFixed(2) : '',
-        costPrice: product.costPrice ? parseFloat(product.costPrice).toFixed(2) : '',
         currency: product.currency || 'UZS',
         imageUrl: product.imageUrl || '',
         isActive: product.isActive !== undefined ? product.isActive : true,
@@ -118,10 +137,12 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
         quantity: inventory.length > 0 ? inventory[0].quantity?.toString() : '',
         minStockLevel: inventory.length > 0 ? inventory[0].minStockLevel?.toString() : '',
         maxStockLevel: inventory.length > 0 ? inventory[0].maxStockLevel?.toString() : '',
+        // Price list prices
+        priceListPrices: priceListPricesMap,
       });
       setImagePreview(getImageUrl(product.imageUrl || ''));
     }
-  }, [product, inventory]);
+  }, [product, inventory, productPrices]);
 
   // Load available images on component mount
   useEffect(() => {
@@ -253,8 +274,19 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
       newErrors.price = 'Geçerli bir fiyat girin';
     }
 
-    if (formData.costPrice && parseFloat(formData.costPrice) < 0) {
-      newErrors.costPrice = 'Maliyet fiyatı negatif olamaz';
+    // Validate price list prices - ilk 2 liste zorunlu
+    if (priceLists.length >= 2) {
+      const firstListPrice = formData.priceListPrices?.[priceLists[0].id];
+      const secondListPrice = formData.priceListPrices?.[priceLists[1].id];
+      if (!firstListPrice || parseFloat(firstListPrice) <= 0) {
+        newErrors[`priceList_${priceLists[0].id}`] = '1. Liste fiyatı gereklidir';
+      }
+      if (!secondListPrice || parseFloat(secondListPrice) <= 0) {
+        newErrors[`priceList_${priceLists[1].id}`] = '2. Liste fiyatı gereklidir';
+      }
+    } else {
+      // Eğer fiyat listeleri yoksa hata ver
+      newErrors.priceList = 'En az 2 fiyat listesi oluşturulmalıdır';
     }
 
     if (formData.barcode && formData.barcode.trim().length > 0) {
@@ -270,16 +302,33 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handlePriceListPriceChange = (priceListId, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      priceListPrices: {
+        ...prev.priceListPrices,
+        [priceListId]: value,
+      },
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validate()) {
-      // Separate inventory fields from product fields
-      const { branchId, quantity, minStockLevel, maxStockLevel, ...productFields } = formData;
+      // Separate inventory and price list fields from product fields
+      const { branchId, quantity, minStockLevel, maxStockLevel, priceListPrices, ...productFields } = formData;
       
+      // Convert priceListPrices object to array format
+      const priceListPricesArray = Object.entries(priceListPrices || {})
+        .filter(([_, price]) => price !== '' && price !== null && price !== undefined)
+        .map(([priceListId, price]) => ({
+          priceListId,
+          price: parseFloat(price),
+        }));
+
       const submitData = {
         ...productFields,
         price: parseFloat(productFields.price),
-        costPrice: productFields.costPrice ? parseFloat(productFields.costPrice) : null,
         categoryId: productFields.categoryId || null,
         barcode: productFields.barcode || null,
         sku: productFields.sku || null,
@@ -290,6 +339,8 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
           minStockLevel: minStockLevel ? parseInt(minStockLevel) : 0,
           maxStockLevel: maxStockLevel ? parseInt(maxStockLevel) : null,
         } : undefined,
+        // Include price list prices
+        priceListPrices: priceListPricesArray.length > 0 ? priceListPricesArray : undefined,
       };
       onSubmit(submitData);
     }
@@ -383,20 +434,6 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
             error={errors.price}
             required
             placeholder={t('products.form.pricePlaceholder')}
-          />
-        </div>
-
-        <div>
-          <Input
-            label={t('products.costPrice')}
-            name="costPrice"
-            type="number"
-            step="0.01"
-            min="0"
-            value={formData.costPrice}
-            onChange={handleChange}
-            error={errors.costPrice}
-            placeholder={t('products.form.costPricePlaceholder')}
           />
         </div>
       </div>
@@ -495,6 +532,73 @@ const ProductForm = ({ product, onSubmit, onCancel, isLoading }) => {
           error={errors.imageUrl}
           placeholder={t('products.form.imageUrlPlaceholder')}
         />
+      </div>
+
+      {/* Price List Prices - 1. Liste ve 2. Liste */}
+      <div className="border-t pt-4 mt-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Fiyat Listesi Fiyatları</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {priceLists.length >= 2 ? (
+            <>
+              <Input
+                key={priceLists[0].id}
+                label="1. Liste Fiyatı"
+                name={`priceList_${priceLists[0].id}`}
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.priceListPrices?.[priceLists[0].id] || ''}
+                onChange={(e) => handlePriceListPriceChange(priceLists[0].id, e.target.value)}
+                placeholder="1. Liste fiyatını girin"
+                error={errors[`priceList_${priceLists[0].id}`]}
+                required
+              />
+              <Input
+                key={priceLists[1].id}
+                label="2. Liste Fiyatı"
+                name={`priceList_${priceLists[1].id}`}
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.priceListPrices?.[priceLists[1].id] || ''}
+                onChange={(e) => handlePriceListPriceChange(priceLists[1].id, e.target.value)}
+                placeholder="2. Liste fiyatını girin"
+                error={errors[`priceList_${priceLists[1].id}`]}
+                required
+              />
+            </>
+          ) : (
+            <>
+              <Input
+                label="1. Liste Fiyatı"
+                name="priceList_1"
+                type="number"
+                step="0.01"
+                min="0"
+                value=""
+                disabled
+                placeholder="Fiyat listesi oluşturulmalı"
+                error={priceLists.length < 2 ? 'Önce fiyat listelerini oluşturun' : undefined}
+              />
+              <Input
+                label="2. Liste Fiyatı"
+                name="priceList_2"
+                type="number"
+                step="0.01"
+                min="0"
+                value=""
+                disabled
+                placeholder="Fiyat listesi oluşturulmalı"
+                error={priceLists.length < 2 ? 'Önce fiyat listelerini oluşturun' : undefined}
+              />
+            </>
+          )}
+        </div>
+        {priceLists.length < 2 && (
+          <p className="text-sm text-yellow-600 mt-2">
+            ⚠️ En az 2 fiyat listesi oluşturmanız gerekiyor. Lütfen önce fiyat listelerini oluşturun.
+          </p>
+        )}
       </div>
 
       {/* Stock Information */}

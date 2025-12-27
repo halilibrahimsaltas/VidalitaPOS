@@ -44,8 +44,27 @@ try {
   // Backend crash durumunu dinle
   ipcRenderer.on('backend-crashed', (event, data) => {
     console.error('❌ Backend crashed with exit code:', data.exitCode);
+    if (data.output) {
+      console.error('Backend output before crash:');
+      console.error(data.output);
+    }
+    if (data.backendPath) {
+      console.error('Backend path:', data.backendPath);
+    }
+    if (data.nodeExecutable) {
+      console.error('Node executable:', data.nodeExecutable);
+    }
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('backend-crashed', { detail: data }));
+    }
+  });
+  
+  // Backend log'larını dinle (debug için)
+  ipcRenderer.on('backend-log', (event, log) => {
+    if (log.type === 'stderr') {
+      console.error('[Backend]', log.message);
+    } else {
+      console.log('[Backend]', log.message);
     }
   });
 } catch (e) {

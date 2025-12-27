@@ -33,6 +33,7 @@ const POS = () => {
         ...paymentData,
         discount: paymentData.discount || 0,
         customerId: paymentData.customerId || null,
+        priceListId: checkoutData?.priceListId || null,
       };
 
       const result = await createSale.mutateAsync(saleData);
@@ -52,6 +53,7 @@ const POS = () => {
         ...paymentData,
         discount: paymentData.discount || 0,
         customerId: paymentData.customerId || null,
+        priceListId: checkoutData?.priceListId || null,
         notes: paymentData.splitPayments 
           ? `Parçalı ödeme: ${paymentData.splitPayments.map(p => `${p.method} ${formatCurrency(p.amount, checkoutData?.currency || 'UZS')}`).join(', ')}`
           : null,

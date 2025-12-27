@@ -66,6 +66,13 @@ export const saleRepository = {
               fullName: true,
             },
           },
+          priceList: {
+            select: {
+              id: true,
+              name: true,
+              code: true,
+            },
+          },
           items: {
             include: {
               product: {

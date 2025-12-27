@@ -2,6 +2,7 @@ import { productRepository } from '../repositories/product.repository.js';
 import { generateBarcode, validateBarcode } from '../utils/barcode.js';
 import { ApiError } from '../utils/ApiError.js';
 import { uploadToLocal, deleteLocalFile, UPLOAD_DIR, UPLOAD_URL } from '../config/s3.js';
+import { prisma } from '../config/database.js';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -70,12 +71,9 @@ const productService = {
       }
     }
 
-    // Convert price and costPrice to Decimal
+    // Convert price to Decimal
     if (productData.price) {
       productData.price = parseFloat(productData.price);
-    }
-    if (productData.costPrice) {
-      productData.costPrice = parseFloat(productData.costPrice);
     }
 
     // Set default currency if not provided
@@ -88,8 +86,8 @@ const productService = {
       productData.imageUrl = productData.imageUrl.url;
     }
 
-    // Extract inventory data if provided
-    const { inventory, ...productFields } = productData;
+    // Extract inventory and price list data if provided
+    const { inventory, priceListPrices, ...productFields } = productData;
 
     // Create product
     const product = await productRepository.create(productFields);
@@ -111,7 +109,25 @@ const productService = {
       }
     }
 
-    return product;
+    // Create price list prices if provided
+    // priceListPrices should be an array of { priceListId, price }
+    if (priceListPrices && Array.isArray(priceListPrices)) {
+      const { productPriceRepository } = await import('../repositories/priceList.repository.js');
+      for (const { priceListId, price } of priceListPrices) {
+        if (priceListId && price !== undefined && price !== null) {
+          try {
+            await productPriceRepository.upsert(product.id, priceListId, parseFloat(price));
+          } catch (error) {
+            console.error(`Error setting price for price list ${priceListId}:`, error);
+            // Continue even if price setting fails
+          }
+        }
+      }
+    }
+
+    // Fetch product with price list prices
+    const productWithPrices = await productRepository.findById(product.id);
+    return productWithPrices;
   },
 
   updateProduct: async (id, productData) => {
@@ -164,12 +180,9 @@ const productService = {
       }
     }
 
-    // Convert price and costPrice to Decimal
+    // Convert price to Decimal
     if (productData.price !== undefined) {
       productData.price = parseFloat(productData.price);
-    }
-    if (productData.costPrice !== undefined) {
-      productData.costPrice = parseFloat(productData.costPrice);
     }
 
     // Handle imageUrl - if it's a file upload result, use the URL
@@ -186,8 +199,8 @@ const productService = {
       }
     }
 
-    // Extract inventory data if provided
-    const { inventory, ...productFields } = productData;
+    // Extract inventory and price list data if provided
+    const { inventory, priceListPrices, ...productFields } = productData;
 
     // Update product
     const updatedProduct = await productRepository.update(id, productFields);
@@ -212,13 +225,63 @@ const productService = {
       }
     }
 
-    return updatedProduct;
+    // Update price list prices if provided
+    // priceListPrices should be an array of { priceListId, price }
+    if (priceListPrices && Array.isArray(priceListPrices)) {
+      const { productPriceRepository } = await import('../repositories/priceList.repository.js');
+      for (const { priceListId, price } of priceListPrices) {
+        if (priceListId && price !== undefined && price !== null) {
+          try {
+            await productPriceRepository.upsert(updatedProduct.id, priceListId, parseFloat(price));
+          } catch (error) {
+            console.error(`Error setting price for price list ${priceListId}:`, error);
+            // Continue even if price setting fails
+          }
+        }
+      }
+    }
+
+    // Fetch product with price list prices
+    const productWithPrices = await productRepository.findById(updatedProduct.id);
+    return productWithPrices;
   },
 
   deleteProduct: async (id) => {
     const product = await productRepository.findById(id);
     if (!product) {
       throw new ApiError(404, 'Product not found');
+    }
+
+    // Check if product has sale items
+    const saleItems = await prisma.saleItem.findFirst({
+      where: { productId: id },
+    });
+    if (saleItems) {
+      throw new ApiError(400, 'Ürün satış kayıtlarında kullanılıyor. Ürün silinemez.');
+    }
+
+    // Delete inventory records (cascade delete)
+    const { inventoryRepository } = await import('../repositories/inventory.repository.js');
+    try {
+      const inventory = await inventoryRepository.findByProduct(id);
+      if (inventory && inventory.length > 0) {
+        // Delete all inventory records for this product
+        await prisma.inventory.deleteMany({
+          where: { productId: id },
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting inventory records:', error);
+      // Continue even if inventory deletion fails
+    }
+
+    // Delete product prices
+    const { productPriceRepository } = await import('../repositories/priceList.repository.js');
+    try {
+      await productPriceRepository.deleteByProduct(id);
+    } catch (error) {
+      console.error('Error deleting product prices:', error);
+      // Continue even if price deletion fails
     }
 
     // Delete image from local storage if exists

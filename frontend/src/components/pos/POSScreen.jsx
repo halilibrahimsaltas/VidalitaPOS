@@ -2,16 +2,22 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProductByBarcode, useProducts } from '../../hooks/useProducts';
 import { useBranches } from '../../hooks/useBranches';
+import { usePriceLists, useDefaultPriceList } from '../../hooks/usePriceLists';
 import { useAuth } from '../../contexts/AuthContext';
 import { productService } from '../../services/product.service';
 import CustomerSelector from './CustomerSelector';
 import { HiShoppingCart, HiPlus, HiMinus, HiTrash } from 'react-icons/hi2';
 import { HiX } from 'react-icons/hi';
 import { formatCurrency, getCurrencySymbol } from '../../utils/currency';
+import Select from '../common/Select';
 
 const POSScreen = ({ onCheckout, onSplitPayment }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { data: priceListsData } = usePriceLists({ includeInactive: false });
+  const priceLists = priceListsData?.data || [];
+  const { data: defaultPriceListData } = useDefaultPriceList();
+  const defaultPriceList = defaultPriceListData?.data;
   const [barcodeInput, setBarcodeInput] = useState('');
   const [cart, setCart] = useState(() => {
     // Load cart from localStorage on mount
@@ -46,6 +52,11 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
       console.error('Error loading customer from localStorage:', error);
     }
     return null;
+  });
+  const [selectedPriceList, setSelectedPriceList] = useState(() => {
+    // Load selected price list from localStorage
+    const saved = localStorage.getItem('pos_selectedPriceList');
+    return saved || '';
   });
   const [productSearch, setProductSearch] = useState('');
   const [productPage, setProductPage] = useState(1);
@@ -128,18 +139,33 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
     }
   }, [selectedCustomer]);
 
-  // Save selected customer to localStorage
+  // Set default price list on mount
   useEffect(() => {
-    if (selectedCustomer) {
-      localStorage.setItem('pos_selectedCustomer', JSON.stringify(selectedCustomer));
-    } else {
-      localStorage.removeItem('pos_selectedCustomer');
+    if (!selectedPriceList && defaultPriceList) {
+      setSelectedPriceList(defaultPriceList.id);
+      localStorage.setItem('pos_selectedPriceList', defaultPriceList.id);
     }
-  }, [selectedCustomer]);
+  }, [defaultPriceList, selectedPriceList]);
+
+  // Save selected price list to localStorage
+  useEffect(() => {
+    if (selectedPriceList) {
+      localStorage.setItem('pos_selectedPriceList', selectedPriceList);
+    }
+  }, [selectedPriceList]);
 
   const addToCart = useCallback((product) => {
     setCart((prevCart) => {
       const existingItemIndex = prevCart.findIndex((item) => item.product.id === product.id);
+
+      // Determine unit price based on selected price list
+      let unitPrice = parseFloat(product.price);
+      if (selectedPriceList && product.productPrices && Array.isArray(product.productPrices)) {
+        const priceListPrice = product.productPrices.find(pp => pp.priceListId === selectedPriceList);
+        if (priceListPrice) {
+          unitPrice = parseFloat(priceListPrice.price);
+        }
+      }
 
       if (existingItemIndex >= 0) {
         const newCart = [...prevCart];
@@ -147,7 +173,6 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
         newCart[existingItemIndex].total = newCart[existingItemIndex].quantity * newCart[existingItemIndex].unitPrice - (newCart[existingItemIndex].discount || 0);
         return newCart;
       } else {
-        const unitPrice = parseFloat(product.price);
         return [
           ...prevCart,
           {
@@ -160,7 +185,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
         ];
       }
     });
-  }, []);
+  }, [selectedPriceList]);
 
   // Handle product found by barcode
   useEffect(() => {
@@ -235,6 +260,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
       items,
       customerId: selectedCustomer?.id || null,
       customer: selectedCustomer || null,
+      priceListId: selectedPriceList || null,
       currency: cartCurrency,
     });
   };
@@ -262,6 +288,7 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
       items,
       customerId: selectedCustomer?.id || null,
       customer: selectedCustomer || null,
+      priceListId: selectedPriceList || null,
       currency: cartCurrency,
     });
   };
@@ -308,6 +335,25 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
               ))}
             </select>
           </div>
+
+          {/* Price List Selection */}
+          {priceLists.length > 0 && (
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Fiyat Listesi</label>
+              <select
+                value={selectedPriceList}
+                onChange={(e) => setSelectedPriceList(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="">Varsayılan</option>
+                {priceLists.map((priceList) => (
+                  <option key={priceList.id} value={priceList.id}>
+                    {priceList.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Customer Selection */}
           <CustomerSelector
@@ -417,7 +463,17 @@ const POSScreen = ({ onCheckout, onSplitPayment }) => {
                       <p className="text-xs text-gray-500 font-mono">{product.barcode}</p>
                     )}
                     <p className="text-lg font-bold text-gray-900">
-                      {formatCurrency(parseFloat(product.price), product.currency || 'UZS')}
+                      {(() => {
+                        // Determine price based on selected price list
+                        let displayPrice = parseFloat(product.price);
+                        if (selectedPriceList && product.productPrices && Array.isArray(product.productPrices)) {
+                          const priceListPrice = product.productPrices.find(pp => pp.priceListId === selectedPriceList);
+                          if (priceListPrice) {
+                            displayPrice = parseFloat(priceListPrice.price);
+                          }
+                        }
+                        return formatCurrency(displayPrice, product.currency || 'UZS');
+                      })()}
                     </p>
                   </div>
                 </button>

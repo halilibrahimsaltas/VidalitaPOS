@@ -568,10 +568,23 @@ async function startBackend() {
     if (code !== 0 && code !== null) {
       console.error('❌ Backend process crashed with exit code:', code);
       console.error('   Check the error messages above for details.');
+      console.error('   Backend output before crash:');
+      console.error('   ---');
+      console.error(backendOutput);
+      console.error('   ---');
+      console.error('   Backend path:', backendPath);
+      console.error('   Backend directory:', backendDir);
+      console.error('   Node executable:', nodeExecutable);
       
-      // Kullanıcıya hata göster
+      // Kullanıcıya hata göster (tüm output ile birlikte)
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('backend-crashed', { exitCode: code });
+        mainWindow.webContents.send('backend-crashed', { 
+          exitCode: code,
+          output: backendOutput,
+          backendPath,
+          backendDir,
+          nodeExecutable
+        });
       }
     }
   });

@@ -11,6 +11,7 @@ import customerRoutes from './customer.routes.js';
 import reportRoutes from './report.routes.js';
 import userRoutes from './user.routes.js';
 import permissionRoutes from './permission.routes.js';
+import priceListRoutes from './priceList.routes.js';
 
 const router = express.Router();
 
@@ -26,6 +27,7 @@ router.use('/customers', customerRoutes);
 router.use('/reports', reportRoutes);
 router.use('/users', userRoutes);
 router.use('/permissions', permissionRoutes);
+router.use('/price-lists', priceListRoutes);
 
 export default router;
 

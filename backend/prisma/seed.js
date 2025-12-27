@@ -243,6 +243,30 @@ async function main() {
   }
   console.log('✅ Created user:', user.username);
 
+  // Create default price lists
+  console.log('💰 Creating default price lists...');
+  const priceList1 = await prisma.priceList.upsert({
+    where: { code: 'LISTE_1' },
+    update: {},
+    create: {
+      name: '1. Liste',
+      code: 'LISTE_1',
+      isDefault: true,
+    },
+  });
+  console.log('✅ Created price list:', priceList1.name);
+
+  const priceList2 = await prisma.priceList.upsert({
+    where: { code: 'LISTE_2' },
+    update: {},
+    create: {
+      name: '2. Liste',
+      code: 'LISTE_2',
+      isDefault: false,
+    },
+  });
+  console.log('✅ Created price list:', priceList2.name);
+
   console.log('📝 Default credentials:');
   console.log('   Admin - Username: admin, Password: admin123');
   console.log('   Manager - Username: manager, Password: manager123');

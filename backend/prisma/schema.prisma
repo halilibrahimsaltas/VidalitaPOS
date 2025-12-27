@@ -103,6 +103,7 @@ model Product {
   stockTransferItems StockTransferItem[]
   stockAdjustments  StockAdjustment[]
   saleItems         SaleItem[]
+  productPrices     ProductPrice[]
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -239,6 +240,8 @@ model Sale {
   customer            Customer?             @relation(fields: [customerId], references: [id])
   cashierId           String
   cashier             User                  @relation("SaleCashier", fields: [cashierId], references: [id])
+  priceListId         String?
+  priceList           PriceList?             @relation(fields: [priceListId], references: [id])
   paymentMethod       PaymentMethod
   status              SaleStatus            @default(COMPLETED)
   subtotal            Decimal               @db.Decimal(10, 2)
@@ -322,5 +325,34 @@ model CashRegisterTransaction {
   createdAt     DateTime                      @default(now())
 
   @@map("cash_register_transactions")
+}
+
+model PriceList {
+  id          String         @id @default(uuid())
+  name        String
+  code        String         @unique
+  description String?
+  isDefault   Boolean        @default(false)
+  isActive    Boolean        @default(true)
+  productPrices ProductPrice[]
+  sales       Sale[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("price_lists")
+}
+
+model ProductPrice {
+  id          String     @id @default(uuid())
+  productId   String
+  product     Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  priceListId String
+  priceList   PriceList  @relation(fields: [priceListId], references: [id], onDelete: Cascade)
+  price       Decimal    @db.Decimal(10, 2)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([productId, priceListId])
+  @@map("product_prices")
 }
 

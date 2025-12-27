@@ -27,7 +27,7 @@ const saleService = {
   },
 
   createSale: async (saleData, cashierId) => {
-    const { branchId, items, customerId, paymentMethod, discount = 0, notes } = saleData;
+    const { branchId, items, customerId, paymentMethod, discount = 0, notes, priceListId } = saleData;
 
     // Verify branch exists
     const branch = await prisma.branch.findUnique({ where: { id: branchId } });
@@ -43,17 +43,54 @@ const saleService = {
       }
     }
 
+    // Verify price list if provided
+    let priceList = null;
+    if (priceListId) {
+      priceList = await prisma.priceList.findUnique({ where: { id: priceListId } });
+      if (!priceList) {
+        throw new ApiError(404, 'Price list not found');
+      }
+      if (!priceList.isActive) {
+        throw new ApiError(400, 'Price list is not active');
+      }
+    }
+
     // Validate and process items - Sadece fatura kaydı, stok kontrolü yok
     let subtotal = 0;
     const processedItems = [];
 
     for (const item of items) {
-      const product = await prisma.product.findUnique({ where: { id: item.productId } });
+      const product = await prisma.product.findUnique({ 
+        where: { id: item.productId },
+        include: {
+          productPrices: {
+            where: priceListId ? { priceListId } : undefined,
+            include: {
+              priceList: {
+                select: {
+                  id: true,
+                  name: true,
+                  code: true,
+                },
+              },
+            },
+          },
+        },
+      });
       if (!product) {
         throw new ApiError(404, `Product ${item.productId} not found`);
       }
 
-      const unitPrice = parseFloat(item.unitPrice || product.price);
+      // Determine unit price: use price list price if available, otherwise use product default price
+      let unitPrice = parseFloat(product.price);
+      if (priceListId && product.productPrices && product.productPrices.length > 0) {
+        // Use price from price list
+        unitPrice = parseFloat(product.productPrices[0].price);
+      } else if (item.unitPrice) {
+        // Use provided unit price (manual override)
+        unitPrice = parseFloat(item.unitPrice);
+      }
+
       const itemDiscount = parseFloat(item.discount || 0);
       const itemTotal = (unitPrice * item.quantity) - itemDiscount;
 
@@ -135,6 +172,7 @@ const saleService = {
       branchId,
       customerId: customerId || null,
       cashierId,
+      priceListId: priceListId || null,
       paymentMethod,
       subtotal,
       discount: finalDiscount,

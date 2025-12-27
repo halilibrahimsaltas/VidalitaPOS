@@ -37,6 +37,23 @@ export const productRepository = {
               slug: true,
             },
           },
+          productPrices: {
+            include: {
+              priceList: {
+                select: {
+                  id: true,
+                  name: true,
+                  code: true,
+                  isDefault: true,
+                },
+              },
+            },
+            orderBy: {
+              priceList: {
+                isDefault: 'desc',
+              },
+            },
+          },
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -65,12 +82,29 @@ export const productRepository = {
             slug: true,
           },
         },
+        productPrices: {
+          include: {
+            priceList: {
+              select: {
+                id: true,
+                name: true,
+                code: true,
+                isDefault: true,
+              },
+            },
+          },
+          orderBy: {
+            priceList: {
+              isDefault: 'desc',
+            },
+          },
+        },
       },
     });
   },
 
-  findByBarcode: async (barcode) => {
-    return prisma.product.findUnique({
+  findByBarcode: async (barcode, priceListId = null) => {
+    const product = await prisma.product.findUnique({
       where: { barcode },
       include: {
         category: {
@@ -80,8 +114,35 @@ export const productRepository = {
             slug: true,
           },
         },
+        productPrices: {
+          include: {
+            priceList: {
+              select: {
+                id: true,
+                name: true,
+                code: true,
+                isDefault: true,
+              },
+            },
+          },
+          orderBy: {
+            priceList: {
+              isDefault: 'desc',
+            },
+          },
+        },
       },
     });
+
+    // If priceListId is provided, add the price for that list
+    if (product && priceListId) {
+      const priceForList = product.productPrices.find(pp => pp.priceListId === priceListId);
+      if (priceForList) {
+        product.priceListPrice = priceForList.price;
+      }
+    }
+
+    return product;
   },
 
   findBySku: async (sku) => {

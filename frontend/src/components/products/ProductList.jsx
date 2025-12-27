@@ -15,10 +15,6 @@ const ProductList = ({ onEdit }) => {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [isActiveFilter, setIsActiveFilter] = useState('');
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [importFile, setImportFile] = useState(null);
-  const [isImporting, setIsImporting] = useState(false);
-  const [importResult, setImportResult] = useState(null);
 
   const { data: categoriesData } = useRootCategories();
   const categories = categoriesData?.data || [];
@@ -119,11 +115,6 @@ const ProductList = ({ onEdit }) => {
             <option value="true">{t('common.active')}</option>
             <option value="false">{t('common.inactive')}</option>
           </select>
-          <div>
-            <Button onClick={() => setIsImportModalOpen(true)} variant="outline">
-              📥 {t('products.import')}
-            </Button>
-          </div>
         </div>
       </div>
 
@@ -181,6 +172,15 @@ const ProductList = ({ onEdit }) => {
                       <div className="text-sm font-medium text-gray-900">
                         {formatCurrency(parseFloat(product.price), product.currency || 'UZS')}
                       </div>
+                      {product.productPrices && product.productPrices.length > 0 && (
+                        <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+                          {product.productPrices.slice(0, 2).map((pp) => (
+                            <div key={pp.id}>
+                              {pp.priceList?.name || 'Liste'}: {formatCurrency(parseFloat(pp.price), product.currency || 'UZS')}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -242,147 +242,6 @@ const ProductList = ({ onEdit }) => {
           </div>
         </div>
       )}
-
-      {/* Import Modal */}
-      <Modal
-        isOpen={isImportModalOpen}
-        onClose={() => {
-          setIsImportModalOpen(false);
-          setImportFile(null);
-          setImportResult(null);
-        }}
-        title={t('products.importTitle')}
-        size="lg"
-      >
-        <div className="space-y-4">
-          {!importResult ? (
-            <>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h3 className="font-semibold text-blue-800 mb-2">{t('products.importCSVFormat')}</h3>
-                <p className="text-sm text-blue-700 mb-2">
-                  {t('products.importCSVColumns')}
-                </p>
-                <ul className="text-sm text-blue-700 list-disc list-inside">
-                  <li><strong>{t('products.importColumnName')}</strong></li>
-                  <li><strong>{t('products.importColumnPrice')}</strong></li>
-                  <li><strong>{t('products.importColumnDescription')}</strong></li>
-                  <li><strong>{t('products.importColumnBarcode')}</strong></li>
-                  <li><strong>{t('products.importColumnSku')}</strong></li>
-                  <li><strong>{t('products.importColumnCategoryId')}</strong></li>
-                  <li><strong>{t('products.importColumnCostPrice')}</strong></li>
-                  <li><strong>{t('products.importColumnIsActive')}</strong></li>
-                </ul>
-                <Button
-                  onClick={async () => {
-                    try {
-                      await productService.downloadTemplate();
-                    } catch (error) {
-                      alert(t('products.importTemplateError') + ': ' + (error.response?.data?.message || error.message));
-                    }
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                >
-                  {t('products.importTemplateDownload')}
-                </Button>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('products.importFileSelect')}
-                </label>
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={(e) => setImportFile(e.target.files[0])}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4">
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    setIsImportModalOpen(false);
-                    setImportFile(null);
-                  }}
-                  disabled={isImporting}
-                >
-                  {t('common.cancel')}
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={async () => {
-                    if (!importFile) {
-                      alert(t('products.importFileRequired'));
-                      return;
-                    }
-
-                    setIsImporting(true);
-                    try {
-                      const result = await productService.importProducts(importFile);
-                      setImportResult(result.data);
-                      refetch(); // Refresh product list
-                    } catch (error) {
-                      alert(t('products.importFailed') + ': ' + (error.response?.data?.message || error.message));
-                    } finally {
-                      setIsImporting(false);
-                    }
-                  }}
-                  disabled={!importFile || isImporting}
-                >
-                  {isImporting ? t('products.importing') : t('products.import')}
-                </Button>
-              </div>
-            </>
-          ) : (
-            <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h3 className="font-semibold text-green-800 mb-2">{t('products.importCompleted')}</h3>
-                <div className="text-sm text-green-700 space-y-1">
-                  <p>{t('products.importTotal')}: {importResult.total} {t('products.name')}</p>
-                  <p>{t('products.importSuccess')}: {importResult.success} {t('products.name')}</p>
-                  {importResult.failed > 0 && (
-                    <p className="text-red-700">{t('products.importFailedCount')}: {importResult.failed} {t('products.name')}</p>
-                  )}
-                </div>
-              </div>
-
-              {importResult.errors && importResult.errors.length > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-h-60 overflow-y-auto">
-                  <h4 className="font-semibold text-red-800 mb-2">{t('products.importErrors')}</h4>
-                  <ul className="text-sm text-red-700 space-y-1">
-                    {importResult.errors.slice(0, 10).map((error, index) => (
-                      <li key={index}>
-                        <strong>{error.product}:</strong> {error.error}
-                      </li>
-                    ))}
-                    {importResult.errors.length > 10 && (
-                      <li className="text-gray-600">
-                        {t('products.importMoreErrors', { count: importResult.errors.length - 10 })}
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              )}
-
-              <div className="flex justify-end">
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    setIsImportModalOpen(false);
-                    setImportFile(null);
-                    setImportResult(null);
-                  }}
-                >
-                  {t('common.close')}
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      </Modal>
     </div>
   );
 };
