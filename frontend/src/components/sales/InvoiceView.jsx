@@ -6,6 +6,7 @@ import { HiPrinter } from 'react-icons/hi2';
 import { HiDownload } from 'react-icons/hi';
 import Button from '../common/Button';
 import { formatCurrency } from '../../utils/currency';
+import { getImageUrl } from '../../utils/imageUrl';
 import InvoicePrint from './InvoicePrint';
 
 const InvoiceView = ({ saleId, onClose }) => {
@@ -90,7 +91,7 @@ const InvoiceView = ({ saleId, onClose }) => {
         <div className="text-center border-b-2 border-gray-300 pb-3 mb-3">
           <div className="mb-2">
             <img 
-              src="/uploads/logo/vidalita_logo.webp" 
+              src={getImageUrl('/uploads/logo/vidalita_logo.webp')} 
               alt="Vidalita" 
               className="h-12 mx-auto object-contain"
               onError={(e) => {

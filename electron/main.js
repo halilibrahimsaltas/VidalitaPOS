@@ -118,13 +118,38 @@ async function startBackend() {
     }
   }
 
-  // Electron'un node.exe'sini kullan
-  const nodePath = process.execPath.replace('electron.exe', 'node.exe');
+  // Node executable'ını bul
+  // Paketlenmiş uygulamada sistem PATH'inden node kullan
+  let nodeExecutable = 'node';
   
-  // Eğer node.exe bulunamazsa, sistem PATH'inden node'u kullan
-  let nodeExecutable = nodePath;
-  if (!existsSync(nodeExecutable)) {
-    nodeExecutable = 'node';
+  // Development modunda Electron'un node'unu kullanmayı dene
+  if (isDev) {
+    // Electron'un node'unu bul (development için)
+    const electronNodePath = process.execPath.replace(/electron\.exe$/i, 'node.exe');
+    if (existsSync(electronNodePath)) {
+      nodeExecutable = electronNodePath;
+      console.log('✅ Using Electron bundled Node.js:', nodeExecutable);
+    } else {
+      console.log('⚠️  Electron Node.js not found, using system Node.js from PATH');
+    }
+  } else {
+    // Production'da sistem PATH'inden node kullan
+    // Windows'ta node genellikle PATH'te olmalı
+    console.log('✅ Using system Node.js from PATH (production mode)');
+  }
+  
+  // Node'un çalışıp çalışmadığını test et
+  try {
+    const nodeVersion = execSync(`"${nodeExecutable}" --version`, { 
+      encoding: 'utf-8',
+      timeout: 5000,
+      shell: true 
+    }).trim();
+    console.log(`✅ Node.js version: ${nodeVersion}`);
+  } catch (error) {
+    console.error('❌ Node.js test failed:', error.message);
+    console.error('   Make sure Node.js is installed and in your PATH');
+    throw new Error('Node.js not found or not executable');
   }
 
   // Port kontrolü - 3000 kullanılıyorsa boş port bul
@@ -168,6 +193,28 @@ async function startBackend() {
       }
     } else {
       console.warn('⚠️  Backend .env file not found at:', envPath);
+      console.warn('   Using default environment variables.');
+      console.warn('   NOTE: Make sure to include .env file in the build!');
+    }
+  } else {
+    // Development modunda backend dizininden oku
+    const devEnvPath = join(backendDir, '.env');
+    if (existsSync(devEnvPath)) {
+      try {
+        const envContent = readFileSync(devEnvPath, 'utf-8');
+        envContent.split('\n').forEach(line => {
+          const trimmed = line.trim();
+          if (trimmed && !trimmed.startsWith('#')) {
+            const [key, ...valueParts] = trimmed.split('=');
+            if (key && valueParts.length > 0) {
+              backendEnvVars[key.trim()] = valueParts.join('=').trim();
+            }
+          }
+        });
+        console.log('✅ Loaded backend .env file from:', devEnvPath);
+      } catch (error) {
+        console.warn('⚠️  Could not read backend .env file:', error.message);
+      }
     }
   }
   
@@ -221,23 +268,51 @@ async function startBackend() {
   
   // Prisma client'ın generate edilip edilmediğini kontrol et
   const prismaClientPath = join(backendDir, 'node_modules', '.prisma', 'client', 'index.js');
-  if (!existsSync(prismaClientPath) && !isDev) {
+  if (!existsSync(prismaClientPath)) {
     console.warn('⚠️  Prisma Client not generated. Generating now...');
     try {
-      execSync('npx prisma generate', {
+      // npx yerine doğrudan node ile prisma'yı çalıştır
+      const prismaCliPath = join(backendDir, 'node_modules', '.bin', 'prisma');
+      const prismaCmd = process.platform === 'win32' 
+        ? `"${prismaCliPath}.cmd" generate`
+        : `"${prismaCliPath}" generate`;
+      
+      console.log('   Running:', prismaCmd);
+      execSync(prismaCmd, {
         cwd: backendDir,
         env: { ...env, PATH: process.env.PATH },
-        stdio: 'pipe',
-        timeout: 60000 // 60 saniye timeout
+        stdio: 'inherit', // Output'u göster
+        timeout: 120000, // 120 saniye timeout (Prisma generate uzun sürebilir)
+        shell: true
       });
       console.log('✅ Prisma Client generated successfully');
     } catch (error) {
       console.error('❌ Failed to generate Prisma Client:', error.message);
-      console.error('   Backend may not work correctly.');
+      console.error('   Error details:', error);
       // Prisma generate başarısız olsa bile backend'i başlatmayı dene
+      // (belki zaten generate edilmiştir ama path yanlıştır)
     }
-  } else if (existsSync(prismaClientPath)) {
+  } else {
     console.log('✅ Prisma Client already generated');
+  }
+
+  // Backend node_modules'ının varlığını kontrol et
+  const backendNodeModules = join(backendDir, 'node_modules');
+  if (!existsSync(backendNodeModules)) {
+    console.error('❌ Backend node_modules not found at:', backendNodeModules);
+    console.error('   Backend dependencies are not installed!');
+    throw new Error(`Backend node_modules not found: ${backendNodeModules}`);
+  } else {
+    console.log('✅ Backend node_modules found');
+  }
+  
+  // Backend'in package.json'ını kontrol et
+  const backendPackageJson = join(backendDir, 'package.json');
+  if (!existsSync(backendPackageJson)) {
+    console.error('❌ Backend package.json not found at:', backendPackageJson);
+    throw new Error(`Backend package.json not found: ${backendPackageJson}`);
+  } else {
+    console.log('✅ Backend package.json found');
   }
 
   console.log('🚀 Spawning backend process...');
@@ -251,15 +326,50 @@ async function startBackend() {
   });
   
   try {
-    backendProcess = spawn(nodeExecutable, [backendPath], {
-      env,
-      cwd: backendDir,
-      stdio: 'pipe',
-      shell: true
-    });
+    // Windows'ta path'lerde boşluk varsa tırnak içine al
+    // shell: true kullanırken, path'i tırnak içine almak gerekir
+    if (process.platform === 'win32') {
+      // Windows'ta path'i tırnak içine al ve shell: true ile string olarak geçir
+      // Path'lerdeki tırnakları escape et
+      const escapedBackendPath = backendPath.replace(/"/g, '""');
+      const escapedNodeExecutable = nodeExecutable.includes(' ') 
+        ? `"${nodeExecutable.replace(/"/g, '""')}"` 
+        : nodeExecutable;
+      const escapedBackendPathQuoted = `"${escapedBackendPath}"`;
+      const command = `${escapedNodeExecutable} ${escapedBackendPathQuoted}`;
+      
+      console.log('   Executing command (Windows):', command);
+      
+      // Windows'ta shell: true ile komutu string olarak geçir
+      backendProcess = spawn(command, {
+        env,
+        cwd: backendDir,
+        stdio: 'pipe',
+        shell: true
+      });
+    } else {
+      // Unix/Linux'ta normal spawn (path'lerde boşluk olsa bile çalışır)
+      console.log('   Executing command (Unix):', nodeExecutable, backendPath);
+      backendProcess = spawn(nodeExecutable, [backendPath], {
+        env,
+        cwd: backendDir,
+        stdio: 'pipe',
+        shell: false
+      });
+    }
+    
     console.log('✅ Backend process spawned, PID:', backendProcess.pid);
+    
+    // Process'in başlatıldığını doğrula
+    if (!backendProcess.pid) {
+      throw new Error('Backend process PID is null - process may not have started');
+    }
   } catch (error) {
     console.error('❌ Failed to spawn backend process:', error);
+    console.error('   Node executable:', nodeExecutable);
+    console.error('   Backend path:', backendPath);
+    console.error('   Backend directory:', backendDir);
+    console.error('   Error details:', error.message);
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('backend-error', {
         message: `Failed to spawn backend: ${error.message}`,
@@ -273,9 +383,10 @@ async function startBackend() {
 
   // Backend'in başarıyla başladığını kontrol et
   let backendStarted = false;
+  let backendOutput = ''; // Backend output'unu biriktir (debug için)
   const backendStartTimeout = setTimeout(() => {
     if (!backendStarted) {
-      console.error('❌ Backend did not start within 30 seconds!');
+      console.error('❌ Backend did not start within 60 seconds!');
       console.error('   Check the error messages above for details.');
       console.error('   Backend path:', backendPath);
       console.error('   Backend directory:', backendDir);
@@ -286,23 +397,43 @@ async function startBackend() {
         DATABASE_URL: env.DATABASE_URL ? 'SET' : 'NOT SET',
         JWT_SECRET: env.JWT_SECRET ? 'SET' : 'NOT SET'
       });
+      console.error('   Backend output so far:');
+      console.error('   ---');
+      console.error(backendOutput);
+      console.error('   ---');
+      
+      // Process durumunu kontrol et
+      if (backendProcess) {
+        console.error('   Process PID:', backendProcess.pid);
+        console.error('   Process killed:', backendProcess.killed);
+        console.error('   Process exit code:', backendProcess.exitCode);
+        console.error('   Process signal:', backendProcess.signalCode);
+      }
       
       // Frontend'e hata gönder
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('backend-error', {
-          message: 'Backend did not start within 30 seconds',
+          message: 'Backend did not start within 60 seconds',
           type: 'STARTUP_TIMEOUT',
           backendPath,
           backendDir,
-          nodeExecutable
+          nodeExecutable,
+          output: backendOutput
         });
       }
     }
-  }, 30000);
+  }, 60000); // 60 saniye timeout (production'da daha uzun sürebilir)
 
   backendProcess.stdout.on('data', (data) => {
     const output = data.toString();
-    console.log(`Backend stdout: ${output}`);
+    backendOutput += output; // Output'u biriktir
+    
+    // Her satırı ayrı logla (daha okunabilir)
+    output.split('\n').forEach(line => {
+      if (line.trim()) {
+        console.log(`[Backend] ${line}`);
+      }
+    });
     
     // Frontend'e de log gönder (debug için)
     if (mainWindow && !mainWindow.isDestroyed()) {
@@ -375,7 +506,14 @@ async function startBackend() {
 
   backendProcess.stderr.on('data', (data) => {
     const errorMsg = data.toString();
-    console.error(`Backend stderr: ${errorMsg}`);
+    backendOutput += errorMsg; // Error output'unu da biriktir
+    
+    // Her satırı ayrı logla (daha okunabilir)
+    errorMsg.split('\n').forEach(line => {
+      if (line.trim()) {
+        console.error(`[Backend ERROR] ${line}`);
+      }
+    });
     
     // Frontend'e de error gönder
     if (mainWindow && !mainWindow.isDestroyed()) {

@@ -13,7 +13,8 @@
     "build:frontend": "cd frontend && npm run build",
     "build:frontend:electron": "cd frontend; $env:ELECTRON='true'; npm run build",
     "build:backend": "cd backend && npm run build",
-    "build:all": "npm run build:frontend:electron && npm run build:backend && npm run electron:build:win",
+    "prebuild:electron": "node -e \"const fs = require('fs'); const path = require('path'); if (!fs.existsSync('backend/.env')) { console.warn('⚠️  backend/.env not found. Creating from .env.production.example...'); if (fs.existsSync('backend/.env.production.example')) { fs.copyFileSync('backend/.env.production.example', 'backend/.env'); console.log('✅ Created backend/.env from .env.production.example'); } else { console.error('❌ backend/.env.production.example not found!'); process.exit(1); } }\"",
+    "build:all": "npm run build:frontend:electron && npm run build:backend && npm run prebuild:electron && npm run electron:build:win",
     "postinstall": "cd backend && npm install && cd ../frontend && npm install"
   },
   "build": {

@@ -6,6 +6,7 @@ import { useBranches } from '../../hooks/useBranches';
 import Select from '../common/Select';
 import Button from '../common/Button';
 import { formatCurrency } from '../../utils/currency';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const CashRegisterReport = () => {
   const { t, i18n } = useTranslation();
@@ -145,7 +146,7 @@ const CashRegisterReport = () => {
           <div className="text-center mb-4">
             <div className="mb-2">
               <img 
-                src="/uploads/logo/vidalita_logo.webp" 
+                src={getImageUrl('/uploads/logo/vidalita_logo.webp')} 
                 alt="Vidalita" 
                 className="h-16 mx-auto object-contain print:h-12"
                 onError={(e) => {

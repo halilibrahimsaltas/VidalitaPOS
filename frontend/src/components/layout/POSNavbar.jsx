@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
+import { getImageUrl } from '../../utils/imageUrl';
 import { 
   HiHome, 
   HiShoppingCart, 
@@ -51,7 +52,7 @@ const POSNavbar = () => {
             <Link to="/dashboard" className="flex items-center space-x-2">
               <div className="flex items-center justify-center w-8 h-8 bg-white rounded-lg flex-shrink-0 border border-gray-200">
                 <img 
-                  src="/uploads/logo/logo_v.png" 
+                  src={getImageUrl('/uploads/logo/logo_v.png')} 
                   alt="V" 
                   className="w-6 h-6 object-contain"
                   onError={(e) => {
