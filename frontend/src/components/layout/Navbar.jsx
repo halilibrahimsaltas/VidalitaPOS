@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../common/LanguageSwitcher';
-import { LOGO_URL } from '../../config/logo';
+import { FAVICON_URL } from '../../config/logo';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -16,12 +16,14 @@ const Navbar = () => {
             <Link to="/dashboard" className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-10 h-10 bg-white rounded-lg flex-shrink-0 border border-gray-200">
                 <img 
-                  src={LOGO_URL} 
-                  alt="V" 
+                  src={FAVICON_URL} 
+                  alt="Vidalita" 
                   className="w-8 h-8 object-contain"
                   onError={(e) => {
                     e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'block';
+                    if (e.target.nextSibling) {
+                      e.target.nextSibling.style.display = 'block';
+                    }
                   }}
                 />
                 <span className="text-blue-600 font-bold text-lg hidden">V</span>

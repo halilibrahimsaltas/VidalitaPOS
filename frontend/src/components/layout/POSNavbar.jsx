@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
-import { LOGO_URL } from '../../config/logo';
+import { FAVICON_URL } from '../../config/logo';
 import { 
   HiHome, 
   HiShoppingCart, 
@@ -52,8 +52,8 @@ const POSNavbar = () => {
             <Link to="/dashboard" className="flex items-center space-x-2">
               <div className="flex items-center justify-center w-8 h-8 bg-white rounded-lg flex-shrink-0 border border-gray-200">
                 <img 
-                  src={LOGO_URL} 
-                  alt="V" 
+                  src={FAVICON_URL} 
+                  alt="Vidalita" 
                   className="w-6 h-6 object-contain"
                   onError={(e) => {
                     e.target.style.display = 'none';
