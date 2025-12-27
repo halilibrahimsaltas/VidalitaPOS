@@ -6,7 +6,7 @@ import { useBranches } from '../../hooks/useBranches';
 import Select from '../common/Select';
 import Button from '../common/Button';
 import { formatCurrency } from '../../utils/currency';
-import { getImageUrl } from '../../utils/imageUrl';
+import { getLogoUrl } from '../../config/logo';
 
 const MonthlyReport = () => {
   const { t, i18n } = useTranslation();
@@ -172,7 +172,7 @@ const MonthlyReport = () => {
           <div className="text-center mb-4">
             <div className="mb-2">
               <img 
-                src={getImageUrl('/uploads/logo/vidalita_logo.webp')} 
+                src={getLogoUrl('report')} 
                 alt="Vidalita" 
                 className="h-16 mx-auto object-contain print:h-12"
                 onError={(e) => {

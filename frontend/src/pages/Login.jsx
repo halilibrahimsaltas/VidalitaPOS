@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LanguageSwitcher from '../components/common/LanguageSwitcher';
-import { getImageUrl } from '../utils/imageUrl';
+import { LOGO_URL } from '../config/logo';
 
 const Login = () => {
   const { t } = useTranslation();
@@ -99,7 +99,7 @@ const Login = () => {
             <div className="mb-6">
               {!logoError ? (
                 <img 
-                  src={getImageUrl('/uploads/logo/logo_v.png')} 
+                  src={LOGO_URL} 
                   alt="Vidalita" 
                   className="h-20 mx-auto object-contain"
                   onError={() => setLogoError(true)}

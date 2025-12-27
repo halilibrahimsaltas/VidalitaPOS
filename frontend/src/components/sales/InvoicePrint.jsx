@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { getImageUrl } from '../../utils/imageUrl';
+import { getLogoUrl } from '../../config/logo';
 
 const InvoicePrint = forwardRef(({ sale, t, formatCurrency, formatDate, saleCurrency }, ref) => {
   const subtotal = sale.items?.reduce((sum, item) => sum + parseFloat(item.total), 0) || 0;
@@ -13,7 +13,7 @@ const InvoicePrint = forwardRef(({ sale, t, formatCurrency, formatDate, saleCurr
       <div className="text-center border-b-2 border-gray-300 pb-3 mb-3">
         <div className="mb-2">
           <img 
-            src={getImageUrl('/uploads/logo/vidalita_logo.webp')} 
+            src={getLogoUrl('invoice')} 
             alt="Vidalita" 
             className="h-12 mx-auto object-contain"
             onError={(e) => {

@@ -4,12 +4,14 @@
 export const getImageUrl = (url) => {
   if (!url) return '';
   
-  // If already a full URL, return as is (with HTTPS to HTTP conversion for localhost)
-  if (url.startsWith('http')) {
+  // If already a full URL (http:// or https://), return as is
+  // CDN URL'leri ve external URL'ler direkt döndürülür
+  if (url.startsWith('http://') || url.startsWith('https://')) {
     // HTTPS localhost'u HTTP'ye çevir (local development için)
     if (url.startsWith('https://localhost') || url.startsWith('https://127.0.0.1')) {
       return url.replace('https://', 'http://');
     }
+    // Diğer tüm external URL'ler (CDN, Instagram, vb.) olduğu gibi döndürülür
     return url;
   }
   
